@@ -1,0 +1,7 @@
+redis
+docker
+sqlalchemy
+psycopg2-binary
+pydantic
+email-validator
+bcrypt==4.0.1
