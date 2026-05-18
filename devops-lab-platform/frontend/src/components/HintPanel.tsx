@@ -5,7 +5,25 @@ import { useLabStore } from '../store/labStore';
 export default function HintPanel({ sessionId }: { sessionId: string }) {
   const { hintsRevealed, revealHint } = useLabStore();
   const [hints, setHints] = useState<string[]>([]);
-  
+
+  React.useEffect(() => {
+    const fetchRevealedHints = async () => {
+      const loadedHints: string[] = [];
+      for (let i = 1; i <= hintsRevealed; i++) {
+        try {
+          const res = await api.post(`/sessions/${sessionId}/hints/${i}`);
+          loadedHints.push(res.data.hint);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+      setHints(loadedHints);
+    };
+    if (hintsRevealed > 0 && hints.length === 0) {
+      fetchRevealedHints();
+    }
+  }, [sessionId, hintsRevealed]);
+
   const handleReveal = async () => {
     if (hintsRevealed >= 3) return;
     if (!window.confirm(`Reveal Hint ${hintsRevealed + 1}? This will cost 2 points.`)) return;

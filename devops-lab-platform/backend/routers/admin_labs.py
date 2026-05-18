@@ -61,13 +61,24 @@ def sync_labs(db: Session = Depends(get_db), admin=Depends(require_admin)):
                     difficulty=meta.get("difficulty", "beginner"),
                     estimated_minutes=meta.get("estimated_minutes", 30),
                     points=meta.get("points", 10),
-                    category=meta.get("category", "linux")
+                    category=meta.get("category", "linux"),
+                    subcategory=meta.get("subcategory", ""),
+                    scenario=meta.get("scenario", ""),
+                    symptoms=json.dumps(meta.get("symptoms", [])),
+                    mission=meta.get("mission", ""),
+                    verification_command=meta.get("verification_command", ""),
+                    hints=json.dumps(meta.get("hints", [])),
+                    acceptance_criteria=json.dumps(meta.get("acceptance_criteria", []))
                 )
                 db.add(lab)
                 added += 1
             else:
-                if "title" in meta:
-                    lab.title = meta["title"]
+                for key in ["title", "module_number", "module_title", "difficulty", "estimated_minutes", "points", "category", "subcategory", "scenario", "mission", "verification_command"]:
+                    if key in meta:
+                        setattr(lab, key, meta[key])
+                if "symptoms" in meta: lab.symptoms = json.dumps(meta["symptoms"])
+                if "hints" in meta: lab.hints = json.dumps(meta["hints"])
+                if "acceptance_criteria" in meta: lab.acceptance_criteria = json.dumps(meta["acceptance_criteria"])
                 updated += 1
     db.commit()
     return {"added": added, "updated": updated}

@@ -42,6 +42,17 @@ def get_lab_detail(lab_id: str, db: Session = Depends(get_db), student=Depends(g
     if not gl: raise HTTPException(404, "Lab not visible")
     
     lab = gl.lab
+    import json
+    
+    symptoms = []
+    if lab.symptoms:
+        try:
+            symptoms = json.loads(lab.symptoms)
+        except:
+            symptoms = ["Various errors and misconfigurations."]
+    else:
+        symptoms = ["Various errors and misconfigurations."]
+
     return {
         "id": lab.id,
         "title": lab.title,
@@ -49,7 +60,7 @@ def get_lab_detail(lab_id: str, db: Session = Depends(get_db), student=Depends(g
         "difficulty": lab.difficulty,
         "estimated_minutes": lab.estimated_minutes,
         "points": lab.points,
-        "scenario": lab.description or "Resolve the issues as requested.",
-        "symptoms": "Various errors and misconfigurations.",
-        "mission": "Fix the environment and ensure the check script passes."
+        "scenario": lab.scenario or lab.description or "Resolve the issues as requested.",
+        "symptoms": symptoms,
+        "mission": lab.mission or "Fix the environment and ensure the check script passes."
     }

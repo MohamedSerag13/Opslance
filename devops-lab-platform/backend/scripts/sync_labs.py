@@ -1,65 +1,69 @@
 import os
-import sys
 import json
-
-# Add parent directory to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
+import argparse
+from sqlalchemy.orm import Session
 from database import SessionLocal, engine
-from models import Base, Lab
+import models
 
 def sync_labs():
-    Base.metadata.create_all(bind=engine)
     db = SessionLocal()
+    labs_dir = os.environ.get("LABS_HOST_PATH", "./labs-repo")
     
-    labs_dir = "/labs-repo"
-    if not os.path.exists(labs_dir):
-        print(f"Directory {labs_dir} does not exist. Is the volume mounted?")
-        db.close()
-        return
-
     added = 0
     updated = 0
-    for root_dir, _, files in os.walk(labs_dir):
+    skipped = 0
+
+    for root, dirs, files in os.walk(labs_dir):
         if "docker-compose.yml" in files:
-            meta = {}
-            if "metadata.json" in files:
-                meta_path = os.path.join(root_dir, "metadata.json")
-                try:
-                    with open(meta_path) as f:
-                        meta = json.load(f)
-                except Exception as e:
-                    print(f"Error parsing {meta_path}: {e}")
-            
-            item = os.path.basename(root_dir)
-            lab_id = meta.get("id", item)
-            lab = db.query(Lab).filter_by(id=lab_id).first()
-            
-            if not lab:
-                title = meta.get("title")
-                if not title:
-                    title = item.replace("-", " ").title()
+            if "metadata.json" not in files:
+                print(f"⚠️  No metadata.json in {root} — skipping")
+                skipped += 1
+                continue
+                
+            try:
+                with open(os.path.join(root, "metadata.json"), "r") as f:
+                    meta = json.load(f)
+                
+                lab_id = meta["id"]
+                existing_lab = db.query(models.Lab).filter_by(id=lab_id).first()
+                
+                lab_data = {
+                    "module_number": meta.get("module_number", 0),
+                    "module_title": meta.get("module_title", ""),
+                    "title": meta.get("title", ""),
+                    "difficulty": meta.get("difficulty", "beginner"),
+                    "estimated_minutes": meta.get("estimated_minutes", 15),
+                    "points": meta.get("points", 100),
+                    "category": meta.get("category", ""),
+                    "subcategory": meta.get("subcategory", ""),
+                    "scenario": meta.get("scenario", ""),
+                    "symptoms": json.dumps(meta.get("symptoms", [])),
+                    "mission": meta.get("mission", ""),
+                    "verification_command": meta.get("verification_command", ""),
+                    "hints": json.dumps(meta.get("hints", [])),
+                    "acceptance_criteria": json.dumps(meta.get("acceptance_criteria", []))
+                }
+                
+                if existing_lab:
+                    for key, value in lab_data.items():
+                        setattr(existing_lab, key, value)
+                    updated += 1
+                else:
+                    new_lab = models.Lab(id=lab_id, **lab_data)
+                    db.add(new_lab)
+                    added += 1
                     
-                lab = Lab(
-                    id=lab_id,
-                    module_number=meta.get("module_number", 0),
-                    module_title=meta.get("module_title", "Uncategorized"),
-                    title=title,
-                    difficulty=meta.get("difficulty", "beginner"),
-                    estimated_minutes=meta.get("estimated_minutes", 30),
-                    points=meta.get("points", 10),
-                    category=meta.get("category", "linux"),
-                    description=meta.get("description", "")
-                )
-                db.add(lab)
-                added += 1
-            else:
-                if "title" in meta:
-                    lab.title = meta["title"]
-                updated += 1
+            except Exception as e:
+                print(f"Error parsing metadata in {root}: {e}")
+                skipped += 1
+                
     db.commit()
     db.close()
-    print(f"Sync complete: {added} added, {updated} updated.")
+    
+    print("=== Sync Summary ===")
+    print(f"✅ Added:   {added}")
+    print(f"🔄 Updated: {updated}")
+    print(f"⏭ Skipped: {skipped}")
 
 if __name__ == "__main__":
     sync_labs()

@@ -1,0 +1,39 @@
+{
+  "id": "module-01-lab-03-what-is-my-system",
+  "module_number": 1,
+  "module_title": "Linux Fundamentals",
+  "title": "What is My System?",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "fundamentals",
+  "skills": ["whoami", "hostname", "uname", "cat", "pwd", "ls", "echo", "file redirection"],
+  "description": "Profile an unknown Linux server and create a system report file.",
+  "scenario": "You are a new intern joining the DevOps team. On your first day you are dropped onto an unfamiliar Linux server with no documentation. Your shell prompt is bare and you are not in your home directory. Before you can do any meaningful work you must figure out who you are, where you are, and what system you are on.",
+  "symptoms": "- Shell prompt shows only $ with no username or path\n- You do not know what directory you are in\n- You do not know what OS this server runs\n- There is no documentation on the system",
+  "mission": "Create a file at /home/intern/system-report.txt containing your username, the hostname, and the OS name.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Where to look",
+      "content": "Start with the two most basic commands: whoami tells you who you are, pwd tells you where you are. Run both."
+    },
+    {
+      "number": 2,
+      "title": "What to check",
+      "content": "The OS name is in /etc/os-release. Try: cat /etc/os-release. The hostname is shown by the hostname command."
+    },
+    {
+      "number": 3,
+      "title": "The fix",
+      "content": "Run these commands to build your report:\necho \"Username: $(whoami)\" > /home/intern/system-report.txt\necho \"Hostname: $(hostname)\" >> /home/intern/system-report.txt\ngrep PRETTY_NAME /etc/os-release >> /home/intern/system-report.txt"
+    }
+  ],
+  "acceptance_criteria": [
+    {"id": "check_1", "description": "system-report.txt exists and is not empty", "weight": 40},
+    {"id": "check_2", "description": "report contains username 'intern'", "weight": 30},
+    {"id": "check_3", "description": "report contains 'Ubuntu' (OS identified)", "weight": 30}
+  ]
+}

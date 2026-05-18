@@ -1,30 +1,36 @@
 import os
-import sys
+from database import SessionLocal, engine
+from models import Base, Group
 
-# Add parent directory to path so we can import from backend
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from database import engine, SessionLocal
-from models import Base, Group, Student
-
-def seed_admin():
-    # Initialize DB (create tables)
+def seed():
+    # 1. Create all tables including new columns
     Base.metadata.create_all(bind=engine)
-    print("Database tables created.")
-    
-    # We do not store the admin in the DB as requested,
-    # but we can initialize a default group if needed.
-    # The admin credentials are in the .env file.
-    
     db = SessionLocal()
-    # Ensure there is at least one group
-    if db.query(Group).count() == 0:
-        db.add(Group(name="Default Group", description="Automatically created group"))
+    
+    # 2. Confirm env vars
+    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_password = os.getenv("ADMIN_PASSWORD")
+    
+    if not admin_email or not admin_password:
+        print("ERROR: ADMIN_EMAIL or ADMIN_PASSWORD environment variable is missing.")
+        db.close()
+        exit(1)
+        
+    print(f"Admin credentials configured successfully for: {admin_email}")
+    
+    # 3. Create Default Group
+    default_group = db.query(Group).filter_by(name="Default Group").first()
+    if not default_group:
+        default_group = Group(name="Default Group")
+        db.add(default_group)
         db.commit()
         print("Created 'Default Group'.")
+    else:
+        print("'Default Group' already exists.")
+        
     db.close()
-    
-    print("Seeding complete. Admin credentials are read from environment variables.")
+    print("\\n✅ Database seeded successfully.")
+    print("You can now log in at http://localhost with your admin credentials.")
 
 if __name__ == "__main__":
-    seed_admin()
+    seed()

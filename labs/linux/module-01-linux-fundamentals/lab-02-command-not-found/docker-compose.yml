@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-01-command-not-found:
+    build: .
+    container_name: lab-02-command-not-found
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 01"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Command Not Found"
+      - "lab.id=module-01-lab-02-command-not-found"
+    volumes:
+      - ./solution:/solution:ro

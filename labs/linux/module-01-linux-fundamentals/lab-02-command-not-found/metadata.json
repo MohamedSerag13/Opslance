@@ -1,0 +1,43 @@
+{
+  "id": "module-01-lab-02-command-not-found",
+  "module_number": 1,
+  "module_title": "Linux Fundamentals",
+  "title": "Command Not Found",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "fundamentals",
+  "skills": ["PATH", "bashrc", "alias"],
+  "scenario": "A new server was provisioned by a colleague who customized it but then left the company. Several commands that the team relies on are not working. The PATH is broken, a useful alias is missing, and a custom script the team uses daily is installed but unreachable.",
+  "symptoms": [
+    "Custom scripts in /usr/local/bin return 'command not found'",
+    "The 'll' alias does not work",
+    "APP_ENV environment variable is missing"
+  ],
+  "mission": "Fix the .bashrc profile to include /usr/local/bin in PATH, set up the ll alias, and export APP_ENV=staging.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Where to look",
+      "content": "You will need to edit the `~/.bashrc` file to fix aliases and environment variables."
+    },
+    {
+      "number": 2,
+      "title": "What to check",
+      "content": "Check your current PATH using `echo $PATH`. Make sure to append `/usr/local/bin` using `export PATH=$PATH:/usr/local/bin`."
+    },
+    {
+      "number": 3,
+      "title": "The fix",
+      "content": "Run `echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc`, `echo 'alias ll=\\'ls -la\\'' >> ~/.bashrc`, and `echo 'export APP_ENV=staging' >> ~/.bashrc`. Finally, run `echo $PATH > ~/path-report.txt`."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {"id": "check_1", "description": "/usr/local/bin is in the student's PATH", "weight": 30},
+    {"id": "check_2", "description": "ll alias exists in .bashrc", "weight": 25},
+    {"id": "check_3", "description": "APP_ENV is exported in .bashrc with value staging", "weight": 25},
+    {"id": "check_4", "description": "path-report.txt contains 'local'", "weight": 20}
+  ]
+}

@@ -80,6 +80,8 @@ ADMIN_PASSWORD=admin
 LABS_HOST_PATH=/Users/yourname/Desktop/Opslance/labs
 ```
 
+> **CRITICAL NOTE ON DEPLOYMENT:** The `LABS_HOST_PATH` environment variable must be set to the **exact absolute path** of the `labs/` directory on the machine running Docker. If you clone this repository to a new server or another machine, you must update this path in your `.env` file, otherwise the lab manager will throw "lab not found" errors when trying to spin up containers.
+
 ### 3. Launching the Platform
 Spin up the entire stack using Docker Compose:
 

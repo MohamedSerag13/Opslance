@@ -26,7 +26,16 @@ async def websocket_terminal(websocket: WebSocket, session_id: str, token: str):
         return
 
     db = SessionLocal()
-    session = db.query(models.LabSession).filter_by(id=session_id).first()
+    try:
+        import uuid
+        valid_id = uuid.UUID(session_id)
+    except ValueError:
+        await websocket.send_text("Invalid session ID format.\r\n")
+        await websocket.close()
+        db.close()
+        return
+
+    session = db.query(models.LabSession).filter_by(id=valid_id).first()
     if not session or not session.container_name:
         await websocket.send_text("Session not found or container not assigned yet.\r\n")
         await websocket.close()

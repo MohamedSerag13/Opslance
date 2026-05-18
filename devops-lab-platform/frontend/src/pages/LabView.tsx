@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import Terminal from '../components/Terminal';
@@ -10,8 +10,26 @@ export default function LabView() {
   const navigate = useNavigate();
   const [lab, setLab] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
+  const [pendingSessionId, setPendingSessionId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [msgIdx, setMsgIdx] = useState(0);
+
+  const loadingMessages = [
+    "Preparing your secure Linux container...",
+    "Injecting lab scenarios and configurations...",
+    "Establishing isolated networking...",
+    "Running initialization scripts...",
+    "Almost ready..."
+  ];
+
+  useEffect(() => {
+    let interval: any;
+    if (loading && !session) {
+      interval = setInterval(() => setMsgIdx(i => (i + 1) % loadingMessages.length), 3000);
+    }
+    return () => clearInterval(interval);
+  }, [loading, session]);
 
   useEffect(() => {
     const fetchLab = async () => {
@@ -32,14 +50,16 @@ export default function LabView() {
     try {
       const res = await api.post('/sessions', { lab_id: id });
       const sessionId = res.data.session_id;
+      setPendingSessionId(sessionId);
       
       // Poll until container is ready
       const poll = setInterval(async () => {
         try {
           const sRes = await api.get(`/sessions/${sessionId}`);
-          if (sRes.data.status === 'running') {
+          if (sRes.data.status !== 'starting') {
             clearInterval(poll);
             setSession(sRes.data);
+            setPendingSessionId(null);
             setLoading(false);
           }
         } catch (e) {}
@@ -70,6 +90,38 @@ export default function LabView() {
     } catch (e) {}
   };
 
+  const handleCancelPending = async () => {
+    if (!pendingSessionId) return;
+    try {
+      await api.delete(`/sessions/${pendingSessionId}`);
+      setPendingSessionId(null);
+      setLoading(false);
+      window.location.reload();
+    } catch (e) {}
+  };
+
+  // Track the active ID in a ref so the unmount cleanup can access the latest value without causing re-runs
+  const activeSessionIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    activeSessionIdRef.current = session?.id || pendingSessionId;
+  }, [session?.id, pendingSessionId]);
+
+  useEffect(() => {
+    return () => {
+      const idToClean = activeSessionIdRef.current;
+      if (idToClean) {
+        const token = localStorage.getItem('auth-storage') ? JSON.parse(localStorage.getItem('auth-storage') as string).state?.token : null;
+        if (token) {
+          fetch(`/api/sessions/${idToClean}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+            keepalive: true
+          }).catch(() => {});
+        }
+      }
+    };
+  }, []);
+
   if (!lab) return <div className="p-8">Loading...</div>;
 
   return (
@@ -98,7 +150,13 @@ export default function LabView() {
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 border-b pb-1 mb-2">Symptoms</h3>
-              <p className="text-gray-700">{lab.symptoms}</p>
+              {Array.isArray(lab.symptoms) ? (
+                <ul className="list-disc pl-5 text-gray-700 space-y-1">
+                  {lab.symptoms.map((s: string, i: number) => <li key={i}>{s}</li>)}
+                </ul>
+              ) : (
+                <p className="text-gray-700">{lab.symptoms}</p>
+              )}
             </div>
             <div>
               <h3 className="font-semibold text-gray-900 border-b pb-1 mb-2">Mission</h3>
@@ -111,12 +169,20 @@ export default function LabView() {
         
         {/* Footer Actions */}
         <div className="p-4 border-t bg-gray-50">
-          {!session ? (
+          {!session && !loading ? (
             <button 
-              onClick={startSession} disabled={loading}
+              onClick={startSession}
               className="w-full py-3 bg-blue-600 text-white rounded-lg font-bold shadow-md hover:bg-blue-700 transition"
             >
-              {loading ? 'Starting Environment...' : 'Start Lab'}
+              Start Lab
+            </button>
+          ) : loading && !session ? (
+            <button 
+              onClick={handleCancelPending}
+              className="w-full py-3 bg-red-500 text-white rounded-lg font-bold shadow-md hover:bg-red-600 transition flex items-center justify-center gap-2"
+            >
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              Cancel Starting...
             </button>
           ) : (
             <div className="space-y-3">
@@ -139,9 +205,15 @@ export default function LabView() {
 
       {/* Right Pane - Terminal */}
       <div className="w-full md:w-2/3 h-full bg-[#1e1e1e] flex flex-col relative">
-        {!session ? (
+        {!session && !loading ? (
           <div className="flex-1 flex items-center justify-center text-gray-500">
             Click "Start Lab" to spawn your isolated environment.
+          </div>
+        ) : loading && !session ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-gray-400">
+            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-lg font-semibold text-gray-300">Spawning Isolated Environment...</p>
+            <p className="text-sm mt-2 transition-opacity duration-500 ease-in-out">{loadingMessages[msgIdx]}</p>
           </div>
         ) : (
           <Terminal sessionId={session.id} />

@@ -1,0 +1,29 @@
+{
+  "id": "module-01-lab-01-lost-in-the-filesystem",
+  "module_number": 1,
+  "module_title": "Linux Fundamentals",
+  "title": "Lost in the Filesystem",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "fundamentals",
+  "skills": ["pwd", "ls", "cd", "absolute paths", "relative paths"],
+  "scenario": "A junior developer was exploring the filesystem and got lost. They were somewhere deep in the directory tree and ran cd / by accident. Now they can't find their way back to their home directory where their work file mission.txt is waiting. They need to navigate back and read the file.",
+  "symptoms": [
+    "You don't know where you are",
+    "You need to find mission.txt somewhere in the intern's home directory"
+  ],
+  "mission": "Navigate the filesystem, read mission.txt, and complete the tasks inside it.",
+  "hints": [
+    {"number": 1, "title": "Where to look", "content": "The file is located in the user's home directory. You can go there using the ~ symbol or the absolute path /home/intern."},
+    {"number": 2, "title": "What to check", "content": "Once in the home directory, list all files to find mission.txt and read it."},
+    {"number": 3, "title": "The fix", "content": "Run `cd ~`, then `cat mission.txt`. Then create the required files."}
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {"id": "check_1", "description": "/home/intern/found.txt exists and contains target text", "weight": 35},
+    {"id": "check_2", "description": "/home/intern/etc-count.txt exists and is not empty", "weight": 35},
+    {"id": "check_3", "description": "/home/intern/projects/alpha/beta/gamma/visited.txt exists", "weight": 30}
+  ]
+}

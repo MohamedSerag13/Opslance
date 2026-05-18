@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  linux-module-01-copy-move-remove:
+    build: .
+    container_name: lab-04-copy-move-remove
+    restart: "no"
+    # PORT INJECTED BY LAB MANAGER
+    # Example for local testing:
+    ports:
+      - "2204:22"
+    labels:
+      - "lab.module=MODULE 01"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Copying, Moving, and Removing Files"
+    volumes:
+      - ./solution:/solution:ro

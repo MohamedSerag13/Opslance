@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-01-lost-in-the-filesystem:
+    build: .
+    container_name: lab-01-lost-in-the-filesystem
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 01"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Lost in the Filesystem"
+      - "lab.id=module-01-lab-01-lost-in-the-filesystem"
+    volumes:
+      - ./solution:/solution:ro

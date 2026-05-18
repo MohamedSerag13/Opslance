@@ -1,3 +1,4 @@
+import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
@@ -30,15 +31,21 @@ def create_group(data: GroupCreate, db: Session = Depends(get_db), admin=Depends
     db.refresh(g)
     return g
 
+def _valid_uuid(id_str: str):
+    try:
+        return uuid.UUID(id_str)
+    except ValueError:
+        raise HTTPException(404, "Invalid Group ID")
+
 @router.get("/{group_id}", response_model=GroupOut)
 def get_group(group_id: str, db: Session = Depends(get_db), admin=Depends(require_admin)):
-    g = db.query(models.Group).filter(models.Group.id == group_id).first()
+    g = db.query(models.Group).filter(models.Group.id == _valid_uuid(group_id)).first()
     if not g: raise HTTPException(404)
     return g
 
 @router.put("/{group_id}", response_model=GroupOut)
 def update_group(group_id: str, data: GroupUpdate, db: Session = Depends(get_db), admin=Depends(require_admin)):
-    g = db.query(models.Group).filter(models.Group.id == group_id).first()
+    g = db.query(models.Group).filter(models.Group.id == _valid_uuid(group_id)).first()
     if not g: raise HTTPException(404)
     g.name = data.name
     g.description = data.description
@@ -48,18 +55,19 @@ def update_group(group_id: str, data: GroupUpdate, db: Session = Depends(get_db)
 
 @router.delete("/{group_id}")
 def delete_group(group_id: str, db: Session = Depends(get_db), admin=Depends(require_admin)):
-    g = db.query(models.Group).filter(models.Group.id == group_id).first()
+    valid_id = _valid_uuid(group_id)
+    g = db.query(models.Group).filter(models.Group.id == valid_id).first()
     if not g: raise HTTPException(404)
-    # Move students to ungrouped
-    db.query(models.Student).filter(models.Student.group_id == group_id).update({models.Student.group_id: None})
+    db.query(models.Student).filter(models.Student.group_id == valid_id).update({models.Student.group_id: None})
     db.delete(g)
     db.commit()
     return {"message": "deleted"}
 
 @router.get("/{group_id}/labs")
 def get_group_labs(group_id: str, db: Session = Depends(get_db), admin=Depends(require_admin)):
+    valid_id = _valid_uuid(group_id)
     labs = db.query(models.Lab).all()
-    group_labs = db.query(models.GroupLab).filter(models.GroupLab.group_id == group_id).all()
+    group_labs = db.query(models.GroupLab).filter(models.GroupLab.group_id == valid_id).all()
     gl_map = {gl.lab_id: gl for gl in group_labs}
     
     res = []
@@ -77,9 +85,10 @@ def get_group_labs(group_id: str, db: Session = Depends(get_db), admin=Depends(r
 
 @router.put("/{group_id}/labs/{lab_id}")
 def toggle_lab_visibility(group_id: str, lab_id: str, data: dict, db: Session = Depends(get_db), admin=Depends(require_admin)):
-    gl = db.query(models.GroupLab).filter_by(group_id=group_id, lab_id=lab_id).first()
+    valid_id = _valid_uuid(group_id)
+    gl = db.query(models.GroupLab).filter_by(group_id=valid_id, lab_id=lab_id).first()
     if not gl:
-        gl = models.GroupLab(group_id=group_id, lab_id=lab_id, is_visible=data.get("is_visible", False), unlock_order=data.get("unlock_order", 9999))
+        gl = models.GroupLab(group_id=valid_id, lab_id=lab_id, is_visible=data.get("is_visible", False), unlock_order=data.get("unlock_order", 9999))
         db.add(gl)
     else:
         gl.is_visible = data.get("is_visible", gl.is_visible)
@@ -89,10 +98,11 @@ def toggle_lab_visibility(group_id: str, lab_id: str, data: dict, db: Session = 
 
 @router.post("/{group_id}/labs/reorder")
 def reorder_group_labs(group_id: str, data: ReorderLabs, db: Session = Depends(get_db), admin=Depends(require_admin)):
+    valid_id = _valid_uuid(group_id)
     for idx, lab_id in enumerate(data.lab_ids):
-        gl = db.query(models.GroupLab).filter_by(group_id=group_id, lab_id=lab_id).first()
+        gl = db.query(models.GroupLab).filter_by(group_id=valid_id, lab_id=lab_id).first()
         if not gl:
-            gl = models.GroupLab(group_id=group_id, lab_id=lab_id, is_visible=False, unlock_order=idx)
+            gl = models.GroupLab(group_id=valid_id, lab_id=lab_id, is_visible=False, unlock_order=idx)
             db.add(gl)
         else:
             gl.unlock_order = idx
@@ -101,11 +111,12 @@ def reorder_group_labs(group_id: str, data: ReorderLabs, db: Session = Depends(g
 
 @router.post("/{group_id}/labs/show-all")
 def show_all_labs(group_id: str, db: Session = Depends(get_db), admin=Depends(require_admin)):
+    valid_id = _valid_uuid(group_id)
     labs = db.query(models.Lab).all()
     for lab in labs:
-        gl = db.query(models.GroupLab).filter_by(group_id=group_id, lab_id=lab.id).first()
+        gl = db.query(models.GroupLab).filter_by(group_id=valid_id, lab_id=lab.id).first()
         if not gl:
-            db.add(models.GroupLab(group_id=group_id, lab_id=lab.id, is_visible=True, unlock_order=lab.module_number))
+            db.add(models.GroupLab(group_id=valid_id, lab_id=lab.id, is_visible=True, unlock_order=lab.module_number))
         else:
             gl.is_visible = True
     db.commit()
@@ -113,6 +124,7 @@ def show_all_labs(group_id: str, db: Session = Depends(get_db), admin=Depends(re
 
 @router.post("/{group_id}/labs/hide-all")
 def hide_all_labs(group_id: str, db: Session = Depends(get_db), admin=Depends(require_admin)):
-    db.query(models.GroupLab).filter_by(group_id=group_id).update({models.GroupLab.is_visible: False})
+    valid_id = _valid_uuid(group_id)
+    db.query(models.GroupLab).filter_by(group_id=valid_id).update({models.GroupLab.is_visible: False})
     db.commit()
     return {"status": "ok"}

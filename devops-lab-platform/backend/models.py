@@ -44,8 +44,17 @@ class Lab(Base):
     estimated_minutes = Column(Integer, nullable=False)
     points = Column(Integer, nullable=False)
     category = Column(String, nullable=False)
+    subcategory = Column(String, nullable=True)
     description = Column(Text, nullable=True)
     is_globally_active = Column(Boolean, default=True)
+
+    # New Fields for scoring
+    scenario = Column(Text, nullable=True)
+    symptoms = Column(Text, nullable=True)
+    mission = Column(Text, nullable=True)
+    verification_command = Column(String, nullable=True)
+    hints = Column(Text, nullable=True)
+    acceptance_criteria = Column(Text, nullable=True)
 
     group_labs = relationship("GroupLab", back_populates="lab", cascade="all, delete-orphan")
 
@@ -77,8 +86,8 @@ class LabSession(Base):
 
     student = relationship("Student", back_populates="sessions")
     lab = relationship("Lab")
-    submissions = relationship("Submission", back_populates="session")
-    commands = relationship("CommandHistory", back_populates="session")
+    submissions = relationship("Submission", back_populates="session", cascade="all, delete-orphan")
+    commands = relationship("CommandHistory", back_populates="session", cascade="all, delete-orphan")
 
 
 class Submission(Base):
@@ -95,6 +104,9 @@ class Submission(Base):
     score = Column(Integer, nullable=False, default=0)
     hints_used = Column(Integer, nullable=False, default=0)
     time_taken_minutes = Column(Integer, nullable=True)
+    
+    # New Field
+    score_breakdown = Column(Text, nullable=True)
 
     session = relationship("LabSession", back_populates="submissions")
     student = relationship("Student")

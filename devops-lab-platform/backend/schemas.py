@@ -9,7 +9,7 @@ class Token(BaseModel):
     refresh_token: str
 
 class LoginData(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 class RefreshData(BaseModel):
@@ -17,7 +17,7 @@ class RefreshData(BaseModel):
 
 class UserMe(BaseModel):
     id: UUID | str
-    email: EmailStr
+    email: str
     full_name: str
     role: str
     group_id: Optional[UUID] = None
@@ -45,7 +45,7 @@ class GroupListOut(GroupOut):
 
 class StudentBase(BaseModel):
     full_name: str
-    email: EmailStr
+    email: str
     group_id: Optional[UUID] = None
     is_active: bool = True
 

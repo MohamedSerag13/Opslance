@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  linux-module-01-what-is-my-system:
+    build: .
+    container_name: lab-03-what-is-my-system
+    restart: "no"
+    # PORT INJECTED BY LAB MANAGER
+    # Example for local testing:
+    ports:
+      - "2203:22"
+    labels:
+      - "lab.module=MODULE 01"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=What is My System?"
+    volumes:
+      - ./solution:/solution:ro
