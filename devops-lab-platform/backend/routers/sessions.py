@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 import models
-from dependencies import get_current_student
+from dependencies import get_current_student, rate_limit_student
 import uuid
 import json
 import redis
@@ -14,7 +14,7 @@ router = APIRouter()
 redis_client = redis.from_url(os.getenv("REDIS_URL", "redis://redis:6379/0"))
 
 @router.post("/")
-def create_session(data: dict, db: Session = Depends(get_db), student=Depends(get_current_student)):
+def create_session(data: dict, db: Session = Depends(get_db), student=Depends(rate_limit_student)):
     lab_id = data.get("lab_id")
     if not lab_id:
         raise HTTPException(400, "lab_id required")
@@ -40,8 +40,19 @@ def create_session(data: dict, db: Session = Depends(get_db), student=Depends(ge
     
     return {"session_id": session_id, "status": "starting"}
 
+@router.get("/active/{lab_id}")
+def get_active_session(lab_id: str, db: Session = Depends(get_db), student=Depends(rate_limit_student)):
+    s = db.query(models.LabSession).filter_by(student_id=student.id, lab_id=lab_id).first()
+    if not s:
+        raise HTTPException(404, "No active session")
+    return {
+        "id": s.id,
+        "status": s.status,
+        "container_name": s.container_name
+    }
+
 @router.get("/{session_id}")
-def get_session(session_id: str, db: Session = Depends(get_db), student=Depends(get_current_student)):
+def get_session(session_id: str, db: Session = Depends(get_db), student=Depends(rate_limit_student)):
     try:
         valid_id = uuid.UUID(session_id)
     except ValueError:
@@ -57,7 +68,7 @@ def get_session(session_id: str, db: Session = Depends(get_db), student=Depends(
     }
 
 @router.delete("/{session_id}")
-def stop_session(session_id: str, db: Session = Depends(get_db), student=Depends(get_current_student)):
+def stop_session(session_id: str, db: Session = Depends(get_db), student=Depends(rate_limit_student)):
     try:
         valid_id = uuid.UUID(session_id)
     except ValueError:
@@ -79,7 +90,7 @@ def stop_session(session_id: str, db: Session = Depends(get_db), student=Depends
     return {"message": "Session terminated"}
 
 @router.post("/{session_id}/submit")
-def submit_session(session_id: str, db: Session = Depends(get_db), student=Depends(get_current_student)):
+def submit_session(session_id: str, db: Session = Depends(get_db), student=Depends(rate_limit_student)):
     try:
         valid_id = uuid.UUID(session_id)
     except ValueError:
@@ -153,7 +164,7 @@ def submit_session(session_id: str, db: Session = Depends(get_db), student=Depen
     }
 
 @router.post("/{session_id}/hints/{n}")
-def reveal_hint(session_id: str, n: int, db: Session = Depends(get_db), student=Depends(get_current_student)):
+def reveal_hint(session_id: str, n: int, db: Session = Depends(get_db), student=Depends(rate_limit_student)):
     try:
         valid_id = uuid.UUID(session_id)
     except ValueError:

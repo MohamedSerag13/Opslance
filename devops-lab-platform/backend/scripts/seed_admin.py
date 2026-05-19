@@ -3,8 +3,6 @@ from database import SessionLocal, engine
 from models import Base, Group
 
 def seed():
-    # 1. Create all tables including new columns
-    Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     
     # 2. Confirm env vars

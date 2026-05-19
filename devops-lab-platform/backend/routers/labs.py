@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 import models
-from dependencies import get_current_student
+from dependencies import get_current_student, rate_limit_student
 
 router = APIRouter()
 
 @router.get("")
-def get_student_labs(db: Session = Depends(get_db), student=Depends(get_current_student)):
+def get_student_labs(db: Session = Depends(get_db), student=Depends(rate_limit_student)):
     if not student.group_id:
         return []
     
@@ -36,7 +36,7 @@ def get_student_labs(db: Session = Depends(get_db), student=Depends(get_current_
     return res
 
 @router.get("/{lab_id}")
-def get_lab_detail(lab_id: str, db: Session = Depends(get_db), student=Depends(get_current_student)):
+def get_lab_detail(lab_id: str, db: Session = Depends(get_db), student=Depends(rate_limit_student)):
     if not student.group_id: raise HTTPException(403)
     gl = db.query(models.GroupLab).filter_by(group_id=student.group_id, lab_id=lab_id, is_visible=True).first()
     if not gl: raise HTTPException(404, "Lab not visible")

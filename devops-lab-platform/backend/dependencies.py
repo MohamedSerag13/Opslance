@@ -35,3 +35,23 @@ def require_admin(user = Depends(get_current_user)):
     if type(user) == dict and user.get("role") == "admin":
         return user
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
+
+import redis
+import os
+import time
+
+redis_client = redis.from_url(os.getenv("REDIS_URL", "redis://redis:6379/0"))
+
+def rate_limit_student(student=Depends(get_current_student)):
+    # 60 requests per minute per student
+    key = f"rate_limit:{student.id}"
+    current = redis_client.get(key)
+    if current and int(current) >= 60:
+        raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
+    
+    pipe = redis_client.pipeline()
+    pipe.incr(key)
+    pipe.expire(key, 60)
+    pipe.execute()
+    
+    return student

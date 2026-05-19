@@ -30,19 +30,26 @@ def start_lab(data):
     
     # 1. Find correct lab files
     src = None
-    for root_dir, _, files in os.walk("/labs-repo"):
-        if "docker-compose.yml" in files:
-            current_lab_id = os.path.basename(root_dir)
-            if "metadata.json" in files:
-                try:
-                    with open(os.path.join(root_dir, "metadata.json")) as f:
-                        meta = json.load(f)
-                        current_lab_id = meta.get("id", current_lab_id)
-                except:
-                    pass
-            if current_lab_id == lab_id:
-                src = root_dir
-                break
+    cache_key = f"lab_src:{lab_id}"
+    cached_src = redis_client.get(cache_key)
+    
+    if cached_src:
+        src = cached_src.decode('utf-8')
+    else:
+        for root_dir, _, files in os.walk("/labs-repo"):
+            if "docker-compose.yml" in files:
+                current_lab_id = os.path.basename(root_dir)
+                if "metadata.json" in files:
+                    try:
+                        with open(os.path.join(root_dir, "metadata.json")) as f:
+                            meta = json.load(f)
+                            current_lab_id = meta.get("id", current_lab_id)
+                    except:
+                        pass
+                if current_lab_id == lab_id:
+                    src = root_dir
+                    redis_client.setex(cache_key, 3600, src)
+                    break
                 
     if not src:
         print(f"Lab {lab_id} not found in /labs-repo")

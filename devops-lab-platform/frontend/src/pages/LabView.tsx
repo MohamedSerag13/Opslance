@@ -36,6 +36,19 @@ export default function LabView() {
       try {
         const res = await api.get(`/labs/${id}`);
         setLab(res.data);
+        
+        // Check for active session
+        try {
+            const activeRes = await api.get(`/sessions/active/${id}`);
+            if (activeRes.data) {
+                setSession(activeRes.data);
+                if (activeRes.data.status === 'starting') {
+                    setPendingSessionId(activeRes.data.id);
+                }
+            }
+        } catch (e) {
+            // No active session, ignore
+        }
       } catch (err) {
         navigate('/');
       } finally {
@@ -101,26 +114,11 @@ export default function LabView() {
   };
 
   // Track the active ID in a ref so the unmount cleanup can access the latest value without causing re-runs
+  // Removed unmount session deletion to persist session state
   const activeSessionIdRef = useRef<string | null>(null);
   useEffect(() => {
     activeSessionIdRef.current = session?.id || pendingSessionId;
   }, [session?.id, pendingSessionId]);
-
-  useEffect(() => {
-    return () => {
-      const idToClean = activeSessionIdRef.current;
-      if (idToClean) {
-        const token = localStorage.getItem('auth-storage') ? JSON.parse(localStorage.getItem('auth-storage') as string).state?.token : null;
-        if (token) {
-          fetch(`/api/sessions/${idToClean}`, {
-            method: 'DELETE',
-            headers: { Authorization: `Bearer ${token}` },
-            keepalive: true
-          }).catch(() => {});
-        }
-      }
-    };
-  }, []);
 
   if (!lab) return <div className="p-8">Loading...</div>;
 
