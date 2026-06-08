@@ -2,9 +2,10 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y \
-    sudo vim nano curl wget \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    sudo vim nano wget \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN useradd -m -s /bin/bash intern && \
     echo "intern ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
@@ -16,8 +17,8 @@ ENV HOME=/
 
 RUN echo "FLAG-what-is-my-system-a7f3b2c9" > /root/flag.txt
 
-COPY check.sh /usr/local/bin/check.sh
-RUN chmod +x /usr/local/bin/check.sh
+COPY check.sh /check.sh
+RUN chmod +x /check.sh
 
 USER intern
 WORKDIR /

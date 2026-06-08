@@ -13,3 +13,5 @@ python-multipart
 websockets
 email-validator
 bcrypt==4.0.1
+stripe
+requests

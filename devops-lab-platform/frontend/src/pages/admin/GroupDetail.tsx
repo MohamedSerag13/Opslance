@@ -10,6 +10,8 @@ export default function GroupDetail() {
   const [labs, setLabs] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({ name: '', description: '' });
+  const [challengeMode, setChallengeMode] = useState(false);
+  const [helpQueue, setHelpQueue] = useState<any[]>([]);
 
   useEffect(() => {
     fetchGroup();
@@ -23,7 +25,33 @@ export default function GroupDetail() {
       setStudents(sRes.data);
       const lRes = await api.get(`/admin/groups/${id}/labs`);
       setLabs(lRes.data);
+      const cRes = await api.get(`/gamification/challenge_mode/${id}`);
+      setChallengeMode(cRes.data.active);
+      const hRes = await api.get(`/sessions/group/${id}/help`);
+      setHelpQueue(hRes.data);
     } catch (e) {}
+  };
+
+  const resolveHelp = async (studentId: string) => {
+    try {
+      await api.delete(`/sessions/group/${id}/help/${studentId}`);
+      setHelpQueue(helpQueue.filter(h => h.student_id !== studentId));
+    } catch (e) {}
+  };
+
+  const toggleChallengeMode = async () => {
+    const newState = !challengeMode;
+    try {
+      await api.post(`/gamification/challenge_mode?active=${newState}&group_id=${id}`);
+      setChallengeMode(newState);
+      if (newState) {
+        alert("Challenge Mode Activated! Leaderboard is now frozen.");
+      } else {
+        alert("Challenge Mode Deactivated! Leaderboard revealed.");
+      }
+    } catch (e) {
+      alert("Failed to toggle challenge mode");
+    }
   };
 
   const handleEdit = async (e: React.FormEvent) => {
@@ -64,15 +92,23 @@ export default function GroupDetail() {
           <h1 className="text-3xl font-bold">{group.name}</h1>
           <p className="text-gray-600 mt-1">{group.description}</p>
         </div>
-        <button 
-          onClick={() => {
-            setEditData({ name: group.name, description: group.description || '' });
-            setIsEditing(true);
-          }} 
-          className="px-4 py-2 border text-gray-700 hover:bg-gray-50 rounded font-medium"
-        >
-          Edit Group
-        </button>
+        <div className="flex gap-2 items-center">
+          <button 
+            onClick={toggleChallengeMode}
+            className={`px-4 py-2 border rounded font-medium flex items-center gap-2 ${challengeMode ? 'bg-red-500 text-white border-red-600 hover:bg-red-600' : 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200'}`}
+          >
+            {challengeMode ? '🛑 End Challenge Mode' : '⚡ Start Challenge Mode'}
+          </button>
+          <button 
+            onClick={() => {
+              setEditData({ name: group.name, description: group.description || '' });
+              setIsEditing(true);
+            }} 
+            className="px-4 py-2 border text-gray-700 hover:bg-gray-50 rounded font-medium"
+          >
+            Edit Group
+          </button>
+        </div>
       </div>
 
       <div className="flex border-b mb-6">
@@ -81,6 +117,9 @@ export default function GroupDetail() {
         </button>
         <button onClick={() => setTab('labs')} className={`px-4 py-2 font-medium border-b-2 ${tab === 'labs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>
           Labs Configuration
+        </button>
+        <button onClick={() => setTab('help')} className={`px-4 py-2 font-medium border-b-2 ${tab === 'help' ? 'border-yellow-600 text-yellow-600' : 'border-transparent text-gray-500'}`}>
+          Help Queue {helpQueue.length > 0 && <span className="ml-1 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{helpQueue.length}</span>}
         </button>
       </div>
 
@@ -143,6 +182,32 @@ export default function GroupDetail() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {tab === 'help' && (
+        <div>
+          <h2 className="text-xl font-bold mb-4">Live Help Queue</h2>
+          {helpQueue.length === 0 ? (
+            <div className="bg-white border rounded-lg shadow-sm p-8 text-center text-gray-500">
+              No students currently requesting help.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {helpQueue.map(h => (
+                <div key={h.student_id} className="bg-white border rounded-lg shadow-sm p-4 flex justify-between items-center border-l-4 border-l-yellow-400">
+                  <div>
+                    <h3 className="font-bold text-lg text-gray-900">{h.student_name}</h3>
+                    <p className="text-sm text-gray-600">Lab: {h.lab_title}</p>
+                    <p className="text-xs text-gray-400 mt-1">Requested at {new Date(h.requested_at * 1000).toLocaleTimeString()}</p>
+                  </div>
+                  <button onClick={() => resolveHelp(h.student_id)} className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded font-bold hover:bg-green-100">
+                    Mark Resolved
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

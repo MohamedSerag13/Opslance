@@ -13,8 +13,10 @@ interface AuthState {
   user: User | null;
   token: string | null;
   refreshToken: string | null;
+  mustResetPassword: boolean;
   setTokens: (token: string, refreshToken: string) => void;
   setUser: (user: User) => void;
+  setMustResetPassword: (value: boolean) => void;
   logout: () => void;
 }
 
@@ -24,9 +26,11 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       refreshToken: null,
+      mustResetPassword: false,
       setTokens: (token, refreshToken) => set({ token, refreshToken }),
       setUser: (user) => set({ user }),
-      logout: () => set({ user: null, token: null, refreshToken: null }),
+      setMustResetPassword: (value) => set({ mustResetPassword: value }),
+      logout: () => set({ user: null, token: null, refreshToken: null, mustResetPassword: false }),
     }),
     {
       name: 'auth-storage',

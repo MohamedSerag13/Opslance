@@ -19,17 +19,25 @@ run_check() {
 echo "=== Checking: What is My System? ==="
 echo ""
 
-# CHECK 1 (40%): system-report.txt exists and is not empty
+# CHECK 1 (20%): system-report.txt exists and is not empty
 [ -f /home/intern/system-report.txt ] && [ -s /home/intern/system-report.txt ]
-run_check 40 "system-report.txt exists and is not empty" $?
+run_check 20 "system-report.txt exists and is not empty" $?
 
-# CHECK 2 (30%): report contains the username 'intern'
-grep -qi "intern" /home/intern/system-report.txt 2>/dev/null
-run_check 30 "report contains username 'intern'" $?
+# CHECK 2 (20%): report contains username 'intern'
+grep -qi "Username:.*intern" /home/intern/system-report.txt 2>/dev/null
+run_check 20 "report contains username 'intern'" $?
 
-# CHECK 3 (30%): report contains 'Ubuntu' (OS identified)
-grep -qi "ubuntu" /home/intern/system-report.txt 2>/dev/null
-run_check 30 "report contains 'Ubuntu' (OS identified)" $?
+# CHECK 3 (20%): report contains the system hostname
+grep -qi "Hostname:.*$(hostname)" /home/intern/system-report.txt 2>/dev/null
+run_check 20 "report contains system hostname" $?
+
+# CHECK 4 (20%): report contains home directory '/home/intern'
+grep -qi "Home:.*/home/intern" /home/intern/system-report.txt 2>/dev/null
+run_check 20 "report contains home directory '/home/intern'" $?
+
+# CHECK 5 (20%): report contains working directory '/home/intern'
+grep -qi "PWD:.*/home/intern" /home/intern/system-report.txt 2>/dev/null
+run_check 20 "report contains working directory '/home/intern'" $?
 
 echo ""
 echo "SCORE: ${PASSED_WEIGHT}/100"

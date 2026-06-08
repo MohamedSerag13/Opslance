@@ -1,0 +1,29 @@
+{
+  "id": "module-01-lab-08-disk-space-detective",
+  "module_number": 1,
+  "module_title": "Linux Fundamentals",
+  "title": "Disk Space Detective",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "fundamentals",
+  "skills": ["df", "du", "disk usage", "sorting"],
+  "scenario": "A partition on your server is almost full. You are tasked with analyzing the disk space usage, identifying the largest directory and the largest file, and recording the findings in structured text files.",
+  "symptoms": [
+    "High disk consumption in /home/intern/data/",
+    "Unknown largest file and directories"
+  ],
+  "mission": "Write the partition disk free status to df_output.txt. Use 'du' to identify the largest subfolder inside /home/intern/data/ and write its name to disk_report.txt. Locate the single largest file and write its full path to largest_file.txt.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {"number": 1, "title": "Disk Free Space", "content": "You can output disk status to a file using `df -h > /home/intern/df_output.txt`."},
+    {"number": 2, "title": "Disk Usage by Folder", "content": "Run `du -sh /home/intern/data/* | sort -h` to see which directory takes the most space. Write that directory name (e.g. 'backups') into `disk_report.txt`."},
+    {"number": 3, "title": "Finding the Largest File", "content": "Use find with sort, e.g. `find /home/intern/data -type f -exec du -ah {} + | sort -rh | head -n 1` to find the largest file, and write its path to `largest_file.txt`."}
+  ],
+  "acceptance_criteria": [
+    {"id": "check_1", "description": "~/df_output.txt exists and contains the df output", "weight": 30},
+    {"id": "check_2", "description": "~/disk_report.txt exists and identifies the 'backups' folder", "weight": 35},
+    {"id": "check_3", "description": "~/largest_file.txt exists and contains the path to the largest file", "weight": 35}
+  ]
+}

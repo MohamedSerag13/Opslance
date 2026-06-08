@@ -13,20 +13,12 @@ echo "=== Checking: Command Not Found ==="
 echo ""
 
 # CHECK 1
-grep -q "/usr/local/bin" /home/intern/.bashrc
-run_check 30 "/usr/local/bin is in the student's PATH" $?
+grep -q "alias ll=" /home/intern/.bashrc
+run_check 50 "ll alias exists in .bashrc" $?
 
 # CHECK 2
-grep -q "alias ll=" /home/intern/.bashrc
-run_check 25 "ll alias exists in .bashrc" $?
-
-# CHECK 3
 grep -q 'export APP_ENV=staging' /home/intern/.bashrc
-run_check 25 "APP_ENV is exported in .bashrc with value staging" $?
-
-# CHECK 4
-grep -q "local" /home/intern/path-report.txt 2>/dev/null
-run_check 20 "/home/intern/path-report.txt exists and contains 'local'" $?
+run_check 50 "APP_ENV is exported in .bashrc with value staging" $?
 
 echo ""
 echo "SCORE: ${PASSED_WEIGHT}/100"

@@ -1,0 +1,30 @@
+{
+  "id": "module-01-lab-06-finding-things",
+  "module_number": 1,
+  "module_title": "Linux Fundamentals",
+  "title": "Finding Things",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "fundamentals",
+  "skills": ["find", "which", "grep", "file search"],
+  "scenario": "A legacy configuration file, an orphaned log file larger than 50KB, and a custom shell helper script are scattered somewhere in the system. You need to find their locations and write their full absolute paths into four specific output files.",
+  "symptoms": [
+    "Scattered config, log, and script files",
+    "Missing output path files in home directory"
+  ],
+  "mission": "Use 'find' and 'which' to locate the target files and save their absolute paths to ~/found_config.txt, ~/found_largelog.txt, ~/found_script.txt, and ~/bash_location.txt.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {"number": 1, "title": "Finding Config", "content": "You can find custom config files using `find /etc -name '*custom_app*'`."},
+    {"number": 2, "title": "Finding Large Logs", "content": "Use size options with find, such as `find /var/log -size +50k` to locate the orphaned log file."},
+    {"number": 3, "title": "Saving the paths", "content": "Save paths by redirecting output: e.g. `find /etc -name 'custom_app.conf' > /home/intern/found_config.txt` and `which bash > /home/intern/bash_location.txt`."}
+  ],
+  "acceptance_criteria": [
+    {"id": "check_1", "description": "/home/intern/found_config.txt contains path to custom_app.conf", "weight": 25},
+    {"id": "check_2", "description": "/home/intern/found_largelog.txt contains path to orphaned log", "weight": 25},
+    {"id": "check_3", "description": "/home/intern/found_script.txt contains path to helper script", "weight": 25},
+    {"id": "check_4", "description": "/home/intern/bash_location.txt contains path to bash executable", "weight": 25}
+  ]
+}

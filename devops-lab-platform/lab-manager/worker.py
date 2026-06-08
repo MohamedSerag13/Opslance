@@ -2,9 +2,9 @@ import redis
 import os
 import json
 import time
-import docker
 import re
 import docker
+import yaml
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from database import SessionLocal
@@ -27,6 +27,28 @@ def start_lab(data):
     if not sanitized_name:
         sanitized_name = "student"
     project_name = f"{sanitized_name}-{short_student_id}"
+    
+    # US-004 — Enforce one active session per student
+    db_check = SessionLocal()
+    try:
+        old_sessions = db_check.query(models.LabSession).filter(
+            models.LabSession.student_id == student_id,
+            models.LabSession.status == "running",
+            models.LabSession.id != session_id,
+        ).all()
+        for old in old_sessions:
+            print(f"[evict] stopping old session {old.id} to start {session_id}")
+            old.status = "expired"
+            db_check.commit()
+            stop_lab({
+                "student_id": str(old.student_id),
+                "lab_id": old.lab_id,
+            })
+    except Exception as e:
+        print(f"Error evicting old sessions: {e}")
+        db_check.rollback()
+    finally:
+        db_check.close()
     
     # 1. Find correct lab files
     src = None
@@ -83,6 +105,52 @@ def start_lab(data):
             
         content = re.sub(r'^(\s*-\s*["\']?)\./(.*?)$', replace_volume, content, flags=re.MULTILINE)
         
+        # US-001 — Parse with PyYAML and inject resource limits
+        # Load per-lab overrides from metadata.json if present
+        meta_path = os.path.join(dest, "metadata.json")
+        lab_limits = {}
+        if os.path.exists(meta_path):
+            try:
+                with open(meta_path) as f:
+                    meta = json.load(f)
+                    lab_limits = meta.get("resource_limits", {})
+            except Exception as e:
+                print(f"Error reading metadata.json for limits: {e}")
+
+        defaults = {
+            "cpu":     str(lab_limits.get("cpu", "0.1")),
+            "memory":  str(lab_limits.get("memory", "100m")),
+            "pids":    int(lab_limits.get("pids", 50)),
+            "network": str(lab_limits.get("network", "none")),
+        }
+
+        try:
+            compose = yaml.safe_load(content)
+            for svc in compose.get("services", {}).values():
+                deploy = svc.setdefault("deploy", {})
+                deploy["resources"] = {
+                    "limits":       {"cpus": defaults["cpu"], "memory": defaults["memory"], "pids": defaults["pids"]},
+                    "reservations": {"cpus": str(float(defaults["cpu"]) / 2), "memory": "32m"},
+                }
+                svc["pids_limit"] = defaults["pids"]
+                ulimits = svc.setdefault("ulimits", {})
+                ulimits["nproc"] = {"soft": defaults["pids"], "hard": defaults["pids"]}
+                ulimits["nofile"] = {"soft": 256, "hard": 512}
+                svc["network_mode"] = defaults["network"]
+                svc["cap_drop"] = ["ALL"]
+                svc["cap_add"] = ["CHOWN", "SETUID", "SETGID"]
+
+                security_opt = svc.setdefault("security_opt", [])
+                if not isinstance(security_opt, list):
+                    security_opt = []
+                if "no-new-privileges:true" not in security_opt:
+                    security_opt.append("no-new-privileges:true")
+                svc["security_opt"] = security_opt
+
+            content = yaml.dump(compose)
+        except Exception as e:
+            print(f"Failed to inject resource limits: {e}")
+        
         with open(compose_path, "w") as f:
             f.write(content)
     
@@ -110,7 +178,14 @@ def start_lab(data):
     if session:
         session.container_name = container_name
         session.status = "running"
-        session.expires_at = datetime.utcnow() + timedelta(hours=2)
+        
+        # Hard expiry: based on subscription tier (30 min free, 2 hours pro) set at session creation
+        student_tier = (session.student.subscription_tier or "free") if (session.student and session.student.subscription_tier) else "free"
+        ttl_minutes = 120 if student_tier == "pro" else 30
+
+        print(f"[session] TTL set to {ttl_minutes} min for lab {lab_id} (tier: {student_tier})")
+        session.expires_at = datetime.utcnow() + timedelta(minutes=ttl_minutes)
+        session.last_activity_at = datetime.utcnow()
         db.commit()
     db.close()
 
@@ -162,29 +237,90 @@ def check_lab(data):
         db.commit()
     db.close()
 
+def cleanup_idle_labs():
+    print("[cleanup] Running periodic idle container cleanup...")
+    db = SessionLocal()
+    try:
+        idle_timeout_min = int(os.getenv("LAB_IDLE_TIMEOUT_MINUTES", 20))
+        now = datetime.utcnow()
+        idle_threshold = now - timedelta(minutes=idle_timeout_min)
+        
+        expired_sessions = db.query(models.LabSession).filter(
+            models.LabSession.status == "running"
+        ).filter(
+            (models.LabSession.last_activity_at < idle_threshold) |
+            (models.LabSession.expires_at < now)
+        ).all()
+        
+        for sess in expired_sessions:
+            reason = "idle timeout" if (sess.last_activity_at and sess.last_activity_at < idle_threshold) else "hard expiry"
+            print(f"[cleanup] Expiring session {sess.id} for student {sess.student_id} due to {reason}")
+            
+            sess.status = "expired"
+            sess.auto_stopped = True
+            db.commit()
+            
+            stop_lab({
+                "student_id": str(sess.student_id),
+                "lab_id": sess.lab_id
+            })
+    except Exception as e:
+        print(f"[cleanup] Error during idle cleanup: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
 def run_worker():
     print("Starting Lab Manager Worker...")
+    last_cleanup = 0.0
     while True:
-        job = redis_client.brpop("lab_jobs", timeout=5)
-        if job:
-            _, data_str = job
-            data = json.loads(data_str)
-            print(f"Processing job: {data['type']}")
-            if data["type"] == "start_lab":
-                start_lab(data)
-            elif data["type"] == "stop_lab":
-                stop_lab(data)
-            elif data["type"] == "check_lab":
-                check_lab(data)
+        # Periodic cleanup of idle labs (every 5 minutes / 300 seconds)
+        now_ts = time.time()
+        if now_ts - last_cleanup >= 300:
+            try:
+                cleanup_idle_labs()
+            except Exception as e:
+                print(f"Error in idle cleanup trigger: {e}")
+            last_cleanup = now_ts
+
+        try:
+            job = redis_client.brpop("lab_jobs", timeout=5)
+            if job:
+                _, data_str = job
+                data = json.loads(data_str)
+                print(f"Processing job: {data['type']}")
+                if data["type"] == "start_lab":
+                    start_lab(data)
+                elif data["type"] == "stop_lab":
+                    stop_lab(data)
+                elif data["type"] == "check_lab":
+                    check_lab(data)
+        except redis.exceptions.TimeoutError:
+            pass
+        except Exception as e:
+            print(f"Error in worker job processing: {e}")
+            time.sleep(1)
         
-        # Expiry logic
+        # US-002 — Fix session expiry bug (zombie containers)
         db = SessionLocal()
-        expired = db.query(models.LabSession).filter(models.LabSession.status == "running", models.LabSession.expires_at < datetime.utcnow()).all()
-        for sess in expired:
-            stop_lab({"student_id": sess.student_id, "lab_id": sess.lab_id})
-            sess.status = "expired"
-        db.commit()
-        db.close()
+        try:
+            expired = db.query(models.LabSession).filter(
+                models.LabSession.status == "running",
+                models.LabSession.expires_at < datetime.utcnow()
+            ).all()
+            for sess in expired:
+                print(f"[expiry] stopping session {sess.id} for student {sess.student_id}")
+                sess.status = "expired"
+                db.commit()
+                stop_lab({
+                    "student_id": str(sess.student_id),
+                    "lab_id": sess.lab_id,
+                })
+        except Exception as e:
+            print(f"Error in expiry logic: {e}")
+            db.rollback()
+        finally:
+            db.close()
 
 if __name__ == "__main__":
     run_worker()

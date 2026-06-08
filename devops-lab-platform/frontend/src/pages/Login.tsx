@@ -7,7 +7,7 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { setTokens, setUser } = useAuthStore();
+  const { setTokens, setUser, setMustResetPassword } = useAuthStore();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -16,12 +16,20 @@ export default function Login() {
     try {
       const res = await api.post('/auth/login', { email, password });
       setTokens(res.data.access_token, res.data.refresh_token);
-      
+
+      // If the backend signals a required password reset, redirect immediately
+      // before resolving the user profile so other routes can't be reached.
+      if (res.data.must_reset_password) {
+        setMustResetPassword(true);
+        navigate('/reset-password', { replace: true });
+        return;
+      }
+
       const meRes = await api.get('/auth/me', {
         headers: { Authorization: `Bearer ${res.data.access_token}` }
       });
       setUser(meRes.data);
-      
+
       if (meRes.data.role === 'admin') {
         navigate('/admin');
       } else {

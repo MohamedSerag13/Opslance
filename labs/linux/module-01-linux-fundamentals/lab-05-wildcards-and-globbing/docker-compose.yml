@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-01-wildcards-and-globbing:
+    build: .
+    container_name: lab-05-wildcards-and-globbing
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 01"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Wildcards and Globbing"
+      - "lab.id=module-01-lab-05-wildcards-and-globbing"
+    volumes:
+      - ./solution:/solution:ro

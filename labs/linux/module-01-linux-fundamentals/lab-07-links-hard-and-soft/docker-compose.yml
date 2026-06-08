@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-01-links-hard-and-soft:
+    build: .
+    container_name: lab-07-links-hard-and-soft
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 01"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Links Hard and Soft"
+      - "lab.id=module-01-lab-07-links-hard-and-soft"
+    volumes:
+      - ./solution:/solution:ro

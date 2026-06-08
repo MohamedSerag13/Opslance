@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
     auth, admin_groups, admin_students, admin_labs, admin_environments,
-    labs, sessions, progress, websocket
+    labs, sessions, progress, websocket, gamification, billing
 )
 
 app = FastAPI(title="DevOps Lab Platform API")
@@ -16,6 +16,7 @@ app.add_middleware(
 )
 
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+app.include_router(billing.router, prefix="/api/billing", tags=["billing"])
 app.include_router(admin_groups.router, prefix="/api/admin/groups", tags=["admin_groups"])
 app.include_router(admin_students.router, prefix="/api/admin/students", tags=["admin_students"])
 app.include_router(admin_labs.router, prefix="/api/admin/labs", tags=["admin_labs"])
@@ -23,6 +24,7 @@ app.include_router(admin_environments.router, prefix="/api/admin/environments", 
 app.include_router(labs.router, prefix="/api/labs", tags=["student_labs"])
 app.include_router(sessions.router, prefix="/api/sessions", tags=["sessions"])
 app.include_router(progress.router, prefix="/api", tags=["progress"])
+app.include_router(gamification.router, prefix="/api/gamification", tags=["gamification"])
 app.include_router(websocket.router, prefix="/api/ws", tags=["websocket"])
 
 @app.get("/api/health")

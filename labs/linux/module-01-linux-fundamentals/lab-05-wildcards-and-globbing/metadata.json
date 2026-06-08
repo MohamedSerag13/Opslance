@@ -1,0 +1,30 @@
+{
+  "id": "module-01-lab-05-wildcards-and-globbing",
+  "module_number": 1,
+  "module_title": "Linux Fundamentals",
+  "title": "Wildcards and Globbing",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "fundamentals",
+  "skills": ["wildcards", "globbing", "mv", "rm", "mkdir"],
+  "scenario": "A backup tool dumped hundreds of files of different types (logs, reports, notes, temporary files) into a single folder '/home/intern/inbox'. The folders are messy. Organize them by moving logs to '/home/intern/logs/', reports to '/home/intern/reports/', notes to '/home/intern/notes/', and delete all the leftover '.tmp' files from '/home/intern/inbox/'.",
+  "symptoms": [
+    "Messy files in /home/intern/inbox/",
+    "Missing target folders /home/intern/logs, /home/intern/reports, /home/intern/notes"
+  ],
+  "mission": "Create the target directories /home/intern/logs, /home/intern/reports, /home/intern/notes. Move logs, reports, and notes to their respective folders. Delete all files ending in .tmp from the inbox.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {"number": 1, "title": "Understanding Wildcards", "content": "You can match all log files using wildcard patterns, like `log*` or `*.log`."},
+    {"number": 2, "title": "Organizing Files", "content": "Create the target directories first using `mkdir -p ~/logs ~/reports ~/notes`. Then use `mv ~/inbox/log* ~/logs/` to move logs."},
+    {"number": 3, "title": "Cleaning Up", "content": "Run `rm ~/inbox/*.tmp` to delete all temporary files. Make sure no `.tmp` files remain in the inbox."}
+  ],
+  "acceptance_criteria": [
+    {"id": "check_1", "description": "/home/intern/logs/ contains the log files", "weight": 25},
+    {"id": "check_2", "description": "/home/intern/reports/ contains the report files", "weight": 25},
+    {"id": "check_3", "description": "/home/intern/notes/ contains the notes files", "weight": 25},
+    {"id": "check_4", "description": "No .tmp files remain in /home/intern/inbox/", "weight": 25}
+  ]
+}

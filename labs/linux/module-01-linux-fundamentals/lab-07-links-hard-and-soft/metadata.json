@@ -1,0 +1,29 @@
+{
+  "id": "module-01-lab-07-links-hard-and-soft",
+  "module_number": 1,
+  "module_title": "Linux Fundamentals",
+  "title": "Links Hard and Soft",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "fundamentals",
+  "skills": ["ln", "symlinks", "hard links", "inodes"],
+  "scenario": "A deployment pipeline deploys v1.0 and v2.0 of an app under '/home/intern/releases/'. You need to manage application updates and backups using symbolic (soft) links and hard links. Create a symbolic link named '/home/intern/current' that points to the v2.0 release directory, and make a hard-link backup of the v1.0 configuration file.",
+  "symptoms": [
+    "No /home/intern/current symlink pointing to releases/v2.0",
+    "No hard link copy of app.conf in releases/v1.0/"
+  ],
+  "mission": "Create a symlink at ~/current pointing to releases/v2.0/ and a hard link at ~/releases/v1.0/app.conf.bak sharing the same inode as app.conf.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {"number": 1, "title": "Creating Symlinks", "content": "Use `ln -s` to create a symbolic link: e.g. `ln -s target link_name`."},
+    {"number": 2, "title": "Creating Hard Links", "content": "Use `ln` without any flags to create a hard link: e.g. `ln source_file backup_file`."},
+    {"number": 3, "title": "How to verify inodes", "content": "You can verify that two files share an inode using `ls -i` or `stat -c %i`."}
+  ],
+  "acceptance_criteria": [
+    {"id": "check_1", "description": "~/current exists and is a symlink", "weight": 40},
+    {"id": "check_2", "description": "~/current points to releases/v2.0", "weight": 20},
+    {"id": "check_3", "description": "~/releases/v1.0/app.conf.bak is a hard link of app.conf sharing the same inode", "weight": 40}
+  ]
+}

@@ -8,27 +8,27 @@
   "points": 100,
   "category": "linux",
   "subcategory": "fundamentals",
-  "skills": ["cp", "mv", "rm", "mkdir", "chmod", "ls"],
+  "skills": ["cp", "mv", "rm", "mkdir", "ls"],
   "description": "Organize a messy filesystem by moving, copying, and removing files.",
-  "scenario": "A sysadmin left the server in a mess before going on leave. A critical config file has wrong permissions and is in the wrong place, old backups are cluttering the home directory, and a required data directory does not exist. Fix it all.",
-  "symptoms": "- ~/staging.conf exists but cannot be read or moved (permissions 000)\n- /etc/app/ directory does not exist\n- Three backup-*.tar.gz files clutter the home directory\n- /var/app/data directory is missing",
+  "scenario": "A sysadmin left the server in a mess before going on leave. A critical config file is in the wrong place, old backups are cluttering the home directory, and a required data directory does not exist. Fix it all.",
+  "symptoms": "- ~/staging.conf exists in your home directory but is in the wrong place\n- /etc/app/ directory does not exist\n- Three backup-*.tar.gz files clutter the home directory\n- /var/app/data directory is missing",
   "mission": "Move staging.conf to /etc/app/, copy it to production.conf, delete the backup files, and create /var/app/data.",
   "verification_command": "bash /check.sh",
   "hints": [
     {
       "number": 1,
       "title": "Where to look",
-      "content": "Run ls -la in your home directory. Look carefully at the permissions column on staging.conf — what do all the dashes mean?"
+      "content": "Run ls -l in your home directory to find staging.conf and the backup files."
     },
     {
       "number": 2,
       "title": "What to check",
-      "content": "The staging.conf permissions are 000 — no one can touch it. Use chmod 644 ~/staging.conf to fix that first. Then use mkdir -p to create /etc/app/ before you try to move anything there."
+      "content": "Use mkdir -p to create /etc/app/ before you try to move the config file there."
     },
     {
       "number": 3,
       "title": "The fix",
-      "content": "chmod 644 ~/staging.conf\nsudo mkdir -p /etc/app\nmv ~/staging.conf /etc/app/staging.conf\nsudo cp /etc/app/staging.conf /etc/app/production.conf\nrm ~/backup-*.tar.gz\nsudo mkdir -p /var/app/data"
+      "content": "sudo mkdir -p /etc/app\nmv ~/staging.conf /etc/app/staging.conf\ncp /etc/app/staging.conf /etc/app/production.conf\nrm ~/backup-*.tar.gz\nsudo mkdir -p /var/app/data"
     }
   ],
   "acceptance_criteria": [

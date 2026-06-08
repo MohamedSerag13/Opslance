@@ -12,6 +12,24 @@ try:
 except:
     client = None
 
+def flush_activity(session_id: str, timestamp: float):
+    from database import SessionLocal
+    from datetime import datetime
+    import models
+    import uuid
+    db = SessionLocal()
+    try:
+        valid_uuid = uuid.UUID(session_id)
+        sess = db.query(models.LabSession).filter_by(id=valid_uuid).first()
+        if sess:
+            sess.last_activity_at = datetime.fromtimestamp(timestamp)
+            db.commit()
+    except Exception as e:
+        print(f"Error flushing activity to Postgres: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
 @router.websocket("/terminal/{session_id}")
 async def websocket_terminal(websocket: WebSocket, session_id: str, token: str):
     await websocket.accept()
@@ -49,7 +67,6 @@ async def websocket_terminal(websocket: WebSocket, session_id: str, token: str):
         exec_id = client.api.exec_create(container_name, cmd=["/bin/bash"], stdin=True, tty=True)
         sock = client.api.exec_start(exec_id["Id"], detach=False, tty=True, stream=True, socket=True)
         
-        # We use run_in_executor because docker-py socket might not be a pure _socket.socket
         loop = asyncio.get_running_loop()
         
         def blocking_read():
@@ -76,11 +93,27 @@ async def websocket_terminal(websocket: WebSocket, session_id: str, token: str):
                     break
 
         async def write_to_docker():
+            import time
+            import redis
+            import os
+            redis_client = redis.from_url(os.getenv("REDIS_URL", "redis://redis:6379/0"))
+            last_flush_time = time.time()
+            
             while True:
                 try:
                     data = await websocket.receive_text()
                     await loop.run_in_executor(None, blocking_write, data.encode('utf-8'))
+                    
+                    curr_time = time.time()
+                    redis_client.set(f"session_activity:{session_id}", curr_time)
+                    
+                    if curr_time - last_flush_time >= 60:
+                        loop.run_in_executor(None, flush_activity, session_id, curr_time)
+                        last_flush_time = curr_time
                 except WebSocketDisconnect:
+                    curr_time = time.time()
+                    redis_client.set(f"session_activity:{session_id}", curr_time)
+                    loop.run_in_executor(None, flush_activity, session_id, curr_time)
                     break
                 except Exception as e:
                     print(f"Write error: {e}")
@@ -90,12 +123,33 @@ async def websocket_terminal(websocket: WebSocket, session_id: str, token: str):
     except Exception as e:
         print(f"Terminal error: {e}")
 
+class EventManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: dict):
+        for connection in self.active_connections:
+            try:
+                await connection.send_json(message)
+            except Exception:
+                pass
+
+event_manager = EventManager()
+
 @router.websocket("/events")
 async def websocket_events(websocket: WebSocket, token: str):
-    await websocket.accept()
+    await event_manager.connect(websocket)
     try:
         while True:
             await asyncio.sleep(10)
             await websocket.send_json({"type": "ping"})
     except WebSocketDisconnect:
-        pass
+        event_manager.disconnect(websocket)

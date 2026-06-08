@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, DateTime, Text
+from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, DateTime, Text, Index
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -26,11 +26,58 @@ class Student(Base):
     password_hash = Column(String, nullable=False)
     group_id = Column(UUID(as_uuid=True), ForeignKey("groups.id"), nullable=True)
     is_active = Column(Boolean, default=True)
+    must_reset_password = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     last_login = Column(DateTime(timezone=True), nullable=True)
 
+    # Subscription & Billing Fields
+    subscription_tier = Column(String, default="free")
+    stripe_customer_id = Column(String, nullable=True)
+    opt_out_completion = Column(Boolean, default=False)
+
+    # Gamification Fields
+    xp = Column(Integer, default=0)
+    level = Column(Integer, default=1)
+    current_streak = Column(Integer, default=0)
+    longest_streak = Column(Integer, default=0)
+    last_activity_date = Column(DateTime(timezone=True), nullable=True)
+
     group = relationship("Group", back_populates="students")
     sessions = relationship("LabSession", back_populates="student")
+    achievements = relationship("StudentAchievement", back_populates="student", cascade="all, delete-orphan")
+
+
+class Achievement(Base):
+    __tablename__ = "achievements"
+
+    id = Column(String, primary_key=True)
+    name = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    icon = Column(String, nullable=True)
+    xp_reward = Column(Integer, default=0)
+
+
+class StudentAchievement(Base):
+    __tablename__ = "student_achievements"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    student_id = Column(UUID(as_uuid=True), ForeignKey("students.id"), nullable=False)
+    achievement_id = Column(String, ForeignKey("achievements.id"), nullable=False)
+    earned_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    student = relationship("Student", back_populates="achievements")
+    achievement = relationship("Achievement")
+
+
+class DailyChallenge(Base):
+    __tablename__ = "daily_challenges"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    date = Column(DateTime(timezone=True), server_default=func.now())
+    lab_id = Column(String, ForeignKey("labs.id"), nullable=False)
+    xp_reward = Column(Integer, default=50)
+
+    lab = relationship("Lab")
 
 
 class Lab(Base):
@@ -55,6 +102,7 @@ class Lab(Base):
     verification_command = Column(String, nullable=True)
     hints = Column(Text, nullable=True)
     acceptance_criteria = Column(Text, nullable=True)
+    solution = Column(Text, nullable=True)
 
     group_labs = relationship("GroupLab", back_populates="lab", cascade="all, delete-orphan")
 
@@ -83,10 +131,18 @@ class LabSession(Base):
     status = Column(String, default="running")
     container_name = Column(String, nullable=True)
     host_port = Column(Integer, nullable=True)
+    
+    # Idle Cleanup Fields
+    last_activity_at = Column(DateTime(timezone=True), server_default=func.now())
+    auto_stopped = Column(Boolean, default=False)
+
+    __table_args__ = (
+        Index("idx_student_status", "student_id", "status"),
+    )
 
     student = relationship("Student", back_populates="sessions")
     lab = relationship("Lab")
-    submissions = relationship("Submission", back_populates="session", cascade="all, delete-orphan")
+    submissions = relationship("Submission", back_populates="session")
     commands = relationship("CommandHistory", back_populates="session", cascade="all, delete-orphan")
 
 
@@ -94,7 +150,7 @@ class Submission(Base):
     __tablename__ = "submissions"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    session_id = Column(UUID(as_uuid=True), ForeignKey("lab_sessions.id"), nullable=False)
+    session_id = Column(UUID(as_uuid=True), ForeignKey("lab_sessions.id", ondelete="SET NULL"), nullable=True)
     student_id = Column(UUID(as_uuid=True), ForeignKey("students.id"), nullable=False)
     lab_id = Column(String, ForeignKey("labs.id"), nullable=False)
     attempt_number = Column(Integer, nullable=False, default=1)

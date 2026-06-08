@@ -23,4 +23,4 @@ cd projects/alpha/beta/gamma/
 touch visited.txt
 ```
 
-Run `/check.sh` to pass.
+Click the **Check** button on the left panel to verify and pass.

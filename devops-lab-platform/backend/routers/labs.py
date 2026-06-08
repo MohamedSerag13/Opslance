@@ -52,6 +52,16 @@ def get_lab_detail(lab_id: str, db: Session = Depends(get_db), student=Depends(r
             symptoms = ["Various errors and misconfigurations."]
     else:
         symptoms = ["Various errors and misconfigurations."]
+        
+    acceptance_criteria = []
+    if lab.acceptance_criteria:
+        try:
+            acceptance_criteria = json.loads(lab.acceptance_criteria)
+        except:
+            pass
+
+    # Check if student has passed the lab
+    passed = db.query(models.Submission).filter_by(student_id=student.id, lab_id=lab_id, passed=True).first() is not None
 
     return {
         "id": lab.id,
@@ -62,5 +72,20 @@ def get_lab_detail(lab_id: str, db: Session = Depends(get_db), student=Depends(r
         "points": lab.points,
         "scenario": lab.scenario or lab.description or "Resolve the issues as requested.",
         "symptoms": symptoms,
-        "mission": lab.mission or "Fix the environment and ensure the check script passes."
+        "mission": lab.mission or "Fix the environment and ensure the check script passes.",
+        "acceptance_criteria": acceptance_criteria,
+        "passed": passed
     }
+
+@router.get("/{lab_id}/solution")
+def get_lab_solution(lab_id: str, db: Session = Depends(get_db), student=Depends(rate_limit_student)):
+    if not student.group_id: raise HTTPException(403)
+    gl = db.query(models.GroupLab).filter_by(group_id=student.group_id, lab_id=lab_id, is_visible=True).first()
+    if not gl: raise HTTPException(404, "Lab not visible")
+    
+    # Check if student has passed the lab
+    passed = db.query(models.Submission).filter_by(student_id=student.id, lab_id=lab_id, passed=True).first() is not None
+    if not passed:
+        raise HTTPException(403, "You must complete the lab first to view the solution walkthrough.")
+        
+    return {"solution": gl.lab.solution or "No solution walkthrough available for this lab."}

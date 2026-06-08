@@ -1,6 +1,6 @@
 import csv
 import io
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from schemas import StudentCreate, StudentUpdate, StudentListOut, StudentOut, ResetPassword
@@ -8,6 +8,7 @@ from database import get_db
 import models
 from dependencies import require_admin
 from auth import get_password_hash
+from email_service import send_welcome_email_task
 
 router = APIRouter()
 
@@ -26,7 +27,7 @@ def get_students(group_id: Optional[str] = None, db: Session = Depends(get_db), 
     return res
 
 @router.post("", response_model=StudentOut)
-def create_student(data: StudentCreate, db: Session = Depends(get_db), admin=Depends(require_admin)):
+def create_student(data: StudentCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db), admin=Depends(require_admin)):
     try:
         if db.query(models.Student).filter(models.Student.email == data.email).first():
             raise HTTPException(400, "Email already exists")
@@ -39,6 +40,8 @@ def create_student(data: StudentCreate, db: Session = Depends(get_db), admin=Dep
         db.add(s)
         db.commit()
         db.refresh(s)
+        
+        background_tasks.add_task(send_welcome_email_task, s.email, s.full_name)
         return s
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"DEBUG ERROR: {str(e)}")
@@ -78,10 +81,11 @@ def reset_password(student_id: str, data: ResetPassword, db: Session = Depends(g
     return {"message": "password reset"}
 
 @router.post("/bulk")
-async def bulk_create_students(file: UploadFile = File(...), db: Session = Depends(get_db), admin=Depends(require_admin)):
+async def bulk_create_students(background_tasks: BackgroundTasks, file: UploadFile = File(...), db: Session = Depends(get_db), admin=Depends(require_admin)):
     contents = await file.read()
     reader = csv.DictReader(io.StringIO(contents.decode('utf-8')))
     created = 0
+    students_to_email = []
     for row in reader:
         email = row.get("email")
         if not email or db.query(models.Student).filter_by(email=email).first():
@@ -99,5 +103,10 @@ async def bulk_create_students(file: UploadFile = File(...), db: Session = Depen
         )
         db.add(s)
         created += 1
+        students_to_email.append((s.email, s.full_name))
     db.commit()
+    
+    for email_addr, name in students_to_email:
+        background_tasks.add_task(send_welcome_email_task, email_addr, name)
+        
     return {"created": created}
