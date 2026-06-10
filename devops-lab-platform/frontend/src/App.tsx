@@ -14,6 +14,7 @@ import StudentsList from './pages/admin/StudentsList';
 import StudentDetail from './pages/admin/StudentDetail';
 import LabCatalog from './pages/admin/LabCatalog';
 import Environments from './pages/admin/Environments';
+import AdminLeaderboard from './pages/admin/AdminLeaderboard';
 
 /**
  * Standard protected route.
@@ -66,6 +67,7 @@ function App() {
       <Route path="/admin/students/:id" element={<ProtectedRoute requireAdmin><StudentDetail /></ProtectedRoute>} />
       <Route path="/admin/labs" element={<ProtectedRoute requireAdmin><LabCatalog /></ProtectedRoute>} />
       <Route path="/admin/environments" element={<ProtectedRoute requireAdmin><Environments /></ProtectedRoute>} />
+      <Route path="/admin/leaderboard" element={<ProtectedRoute requireAdmin><AdminLeaderboard /></ProtectedRoute>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

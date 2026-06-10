@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-02-live-log-monitor:
+    build: .
+    container_name: lab-module02-03-live-log-monitor
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 02"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Monitor a Live Log File"
+      - "lab.id=module-02-lab-03-live-log-monitor"
+    volumes:
+      - ./solution:/solution:ro

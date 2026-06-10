@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-02-search-inside-logs:
+    build: .
+    container_name: lab-module02-02-search-inside-logs
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 02"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Search Inside Logs for Errors"
+      - "lab.id=module-02-lab-02-search-inside-logs"
+    volumes:
+      - ./solution:/solution:ro

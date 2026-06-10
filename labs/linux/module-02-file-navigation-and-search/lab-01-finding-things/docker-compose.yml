@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-02-finding-things:
+    build: .
+    container_name: lab-module02-01-finding-things
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 02"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Finding Things"
+      - "lab.id=module-02-lab-01-finding-things"
+    volumes:
+      - ./solution:/solution:ro

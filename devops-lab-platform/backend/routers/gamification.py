@@ -143,3 +143,28 @@ def get_daily_challenges(student=Depends(get_current_student), db: Session = Dep
             "completed": completed
         })
     return res
+
+@router.get("/admin/leaderboard")
+def get_admin_leaderboard(db: Session = Depends(get_db), admin=Depends(require_admin)):
+    students = db.query(models.Student).filter(models.Student.is_active == True).all()
+    result = []
+    for s in students:
+        submissions = db.query(models.Submission).filter(
+            models.Submission.student_id == s.id,
+            models.Submission.passed == True
+        ).all()
+        total_score = sum(sub.score for sub in submissions if sub.score)
+        result.append({
+            "student_id": str(s.id),
+            "name": s.full_name,
+            "email": s.email,
+            "group_name": s.group.name if s.group else "Ungrouped",
+            "total_score": total_score,
+            "xp": s.xp,
+            "level": s.level,
+        })
+    result.sort(key=lambda x: x["total_score"], reverse=True)
+    for i, r in enumerate(result):
+        r["rank"] = i + 1
+    return result
+

@@ -5,8 +5,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 RUN useradd -m -s /bin/bash intern && \
-    echo "intern ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
     echo "intern:intern123" | chpasswd
+# Note: sudo whitelist for intern is injected at runtime by lab-manager
+#       via /etc/sudoers.d/lab-student — do NOT add NOPASSWD:ALL here.
 
 # Create directories with different sizes
 RUN mkdir -p /home/intern/data/backups \
@@ -29,6 +30,9 @@ RUN dd if=/dev/zero of=/home/intern/data/temp/cache.tmp bs=1M count=5
 RUN echo "port=8080" > /home/intern/data/configs/web.conf
 
 RUN chown -R intern:intern /home/intern
+
+# Ensure /etc/sudoers.d is read (safe runtime whitelist injected there)
+RUN grep -qxF "#includedir /etc/sudoers.d" /etc/sudoers || echo "#includedir /etc/sudoers.d" >> /etc/sudoers
 COPY check.sh /check.sh
 RUN chmod +x /check.sh
 USER intern

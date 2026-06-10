@@ -1,9 +1,10 @@
 import csv
 import io
+import openpyxl
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from schemas import StudentCreate, StudentUpdate, StudentListOut, StudentOut, ResetPassword
+from schemas import StudentCreate, StudentUpdate, StudentListOut, StudentOut, ResetPassword, PointsUpdate, PlanUpdate
 from database import get_db
 import models
 from dependencies import require_admin
@@ -23,6 +24,13 @@ def get_students(group_id: Optional[str] = None, db: Session = Depends(get_db), 
         s_out = StudentListOut.model_validate(s)
         if s.group:
             s_out.group_name = s.group.name
+        # Calculate labs_done and total_score
+        subs = db.query(models.Submission).filter_by(student_id=s.id, passed=True).all()
+        scores = {}
+        for sub in subs:
+            scores[sub.lab_id] = max(scores.get(sub.lab_id, 0), sub.score)
+        s_out.labs_done = len(scores)
+        s_out.total_score = sum(scores.values())
         res.append(s_out)
     return res
 
@@ -83,10 +91,21 @@ def reset_password(student_id: str, data: ResetPassword, db: Session = Depends(g
 @router.post("/bulk")
 async def bulk_create_students(background_tasks: BackgroundTasks, file: UploadFile = File(...), db: Session = Depends(get_db), admin=Depends(require_admin)):
     contents = await file.read()
-    reader = csv.DictReader(io.StringIO(contents.decode('utf-8')))
+    filename = file.filename or ''
+    if filename.endswith('.xlsx') or filename.endswith('.xls'):
+        wb = openpyxl.load_workbook(io.BytesIO(contents))
+        ws = wb.active
+        headers = [str(cell.value).strip() for cell in ws[1]]
+        rows = []
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            rows.append(dict(zip(headers, [str(v).strip() if v is not None else '' for v in row])))
+    else:
+        reader = csv.DictReader(io.StringIO(contents.decode('utf-8')))
+        rows = list(reader)
+
     created = 0
     students_to_email = []
-    for row in reader:
+    for row in rows:
         email = row.get("email")
         if not email or db.query(models.Student).filter_by(email=email).first():
             continue
@@ -110,3 +129,28 @@ async def bulk_create_students(background_tasks: BackgroundTasks, file: UploadFi
         background_tasks.add_task(send_welcome_email_task, email_addr, name)
         
     return {"created": created}
+
+@router.patch("/{student_id}/points")
+def update_student_points(student_id: str, data: PointsUpdate, db: Session = Depends(get_db), admin=Depends(require_admin)):
+    s = db.query(models.Student).filter(models.Student.id == student_id).first()
+    if not s:
+        raise HTTPException(404, "Student not found")
+    old_xp = s.xp
+    s.xp = data.xp
+    # Recalculate level: 1 level per 500 XP
+    s.level = max(1, data.xp // 500 + 1)
+    db.commit()
+    db.refresh(s)
+    return {"student_id": student_id, "xp": s.xp, "level": s.level, "old_xp": old_xp}
+
+@router.patch("/{student_id}/plan")
+def update_student_plan(student_id: str, data: PlanUpdate, db: Session = Depends(get_db), admin=Depends(require_admin)):
+    valid_plans = ["free", "pro", "enterprise"]
+    if data.plan not in valid_plans:
+        raise HTTPException(400, f"Invalid plan. Must be one of: {valid_plans}")
+    s = db.query(models.Student).filter(models.Student.id == student_id).first()
+    if not s:
+        raise HTTPException(404, "Student not found")
+    s.subscription_tier = data.plan
+    db.commit()
+    return {"student_id": student_id, "plan": s.subscription_tier}

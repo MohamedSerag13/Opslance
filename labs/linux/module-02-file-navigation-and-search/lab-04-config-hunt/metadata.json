@@ -1,0 +1,32 @@
+{
+  "id": "module-02-lab-04-config-hunt",
+  "module_number": 2,
+  "module_title": "File Navigation & Search",
+  "title": "The Config Hunt (Capstone)",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "fundamentals",
+  "skills": ["find", "grep", "grep -c", "tail", "head", "combined pipelines"],
+  "scenario": "A new server has been handed to you. No documentation. You need to locate all config files, read critical values out of them using grep, and compile a report — combining find, grep, head, and tail together.",
+  "symptoms": [
+    "Unknown server with no documentation",
+    "Config files scattered under /etc/myapp/",
+    "Logs with errors and deploy events in /opt/myapp/"
+  ],
+  "mission": "Find all .conf files, extract DB_HOST, count ERROR lines in app.log, and capture the last 10 lines of deploy.log.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {"number": 1, "title": "Finding Configs", "content": "Finding configs: Use `find /etc/myapp -name '*.conf'` to list all config files."},
+    {"number": 2, "title": "Extracting Values", "content": "Extracting values: Use `grep 'DB_HOST' /etc/myapp/database.conf` to pull out the database host line."},
+    {"number": 3, "title": "Counting Errors", "content": "Counting errors: Use `grep -c 'ERROR' /opt/myapp/app.log` to count error lines."},
+    {"number": 4, "title": "Last Lines", "content": "Last lines: Use `tail -10 /opt/myapp/deploy.log > ~/deploy_tail.txt`."}
+  ],
+  "acceptance_criteria": [
+    {"id": "check_1", "description": "/home/intern/conf_files.txt exists and contains .conf", "weight": 25},
+    {"id": "check_2", "description": "/home/intern/db_host.txt exists and contains DB_HOST", "weight": 25},
+    {"id": "check_3", "description": "/home/intern/error_count.txt exists and contains a number greater than 0", "weight": 25},
+    {"id": "check_4", "description": "/home/intern/deploy_tail.txt exists and is non-empty", "weight": 25}
+  ]
+}

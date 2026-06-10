@@ -1,0 +1,30 @@
+{
+  "id": "module-02-lab-03-live-log-monitor",
+  "module_number": 2,
+  "module_title": "File Navigation & Search",
+  "title": "Monitor a Live Log File",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "fundamentals",
+  "skills": ["tail", "tail -f", "head", "head -n", "grep -m"],
+  "scenario": "A background service is writing events to /var/log/service/events.log. Your job is to monitor the log in real time and capture the moment a DEPLOY_SUCCESS event appears.",
+  "symptoms": [
+    "Live log file being written by a background service",
+    "Need to detect a specific DEPLOY_SUCCESS event as it appears"
+  ],
+  "mission": "Use head and tail to preview the log, monitor it live with tail -f, capture the DEPLOY_SUCCESS event, and then capture the final tail of the log.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {"number": 1, "title": "Preview a File", "content": "Preview a file: Use `head -5 /var/log/service/events.log > ~/log_preview.txt` to capture the first lines."},
+    {"number": 2, "title": "Live Monitoring", "content": "Live monitoring: Run `tail -f /var/log/service/events.log` and watch the output. When you see DEPLOY_SUCCESS, use Ctrl+C to stop."},
+    {"number": 3, "title": "Capturing a Specific Event", "content": "Capturing a specific event: Use `grep -m 1 'DEPLOY_SUCCESS' <(tail -f /var/log/service/events.log) > ~/deploy_event.txt` to automatically stop when the event appears."},
+    {"number": 4, "title": "Last N Lines", "content": "Last N lines: Use `tail -20 /var/log/service/events.log > ~/log_tail.txt` after the event has appeared."}
+  ],
+  "acceptance_criteria": [
+    {"id": "check_1", "description": "/home/intern/log_preview.txt exists and is non-empty", "weight": 30},
+    {"id": "check_2", "description": "/home/intern/deploy_event.txt exists and contains DEPLOY_SUCCESS", "weight": 40},
+    {"id": "check_3", "description": "/home/intern/log_tail.txt exists and has at least 5 lines", "weight": 30}
+  ]
+}

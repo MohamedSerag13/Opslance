@@ -60,6 +60,9 @@ class StudentOut(StudentBase):
     id: UUID
     created_at: datetime
     last_login: Optional[datetime] = None
+    subscription_tier: Optional[str] = 'free'
+    xp: int = 0
+    level: int = 1
     class Config:
         from_attributes = True
 
@@ -67,6 +70,13 @@ class StudentListOut(StudentOut):
     group_name: Optional[str] = None
     labs_done: int = 0
     total_score: int = 0
+
+class PointsUpdate(BaseModel):
+    xp: int
+    reason: Optional[str] = None
+
+class PlanUpdate(BaseModel):
+    plan: str # "free" | "pro" | "enterprise"
 
 class ResetPassword(BaseModel):
     password: str

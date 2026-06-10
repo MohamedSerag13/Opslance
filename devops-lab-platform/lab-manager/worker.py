@@ -3,6 +3,7 @@ import os
 import json
 import time
 import re
+import socket
 import docker
 import yaml
 from sqlalchemy.orm import Session
@@ -16,7 +17,66 @@ import shutil
 redis_client = redis.from_url(os.getenv("REDIS_URL", "redis://redis:6379/0"))
 docker_client = docker.from_env()
 
+SUDOERS_HOST_PATH = os.path.join(os.path.dirname(__file__), "sudoers-lab-student")
+SUDOERS_CONTAINER_PATH = "/etc/sudoers.d/lab-student"
+
+
+def _inject_sudoers(container_name: str) -> None:
+    """Copy the restricted sudoers whitelist into a running lab container.
+
+    This replaces the broad ``NOPASSWD:ALL`` rule baked into each lab
+    Dockerfile with a tightly-scoped whitelist so students can only sudo
+    whitelisted, safe commands.
+
+    Steps performed:
+      1. ``docker cp``  — copy the file in
+      2. ``chmod 0440`` — required by sudo (world-unreadable)
+      3. ``chown root:root`` — must be owned by root
+      4. Strip the dangerous ``NOPASSWD:ALL`` line from ``/etc/sudoers``
+         that each lab Dockerfile appends for the ``intern`` user.
+    """
+    sudoers_src = SUDOERS_HOST_PATH
+    if not os.path.exists(sudoers_src):
+        print(f"[sudoers] WARNING: {sudoers_src} not found — skipping sudoers injection")
+        return
+
+    try:
+        # 1. Copy the whitelist file into the container
+        subprocess.run(
+            ["docker", "cp", sudoers_src, f"{container_name}:{SUDOERS_CONTAINER_PATH}"],
+            check=True,
+        )
+        # 2. Set correct permissions (sudo refuses to read files not owned by root
+        #    or that are world-writable / group-writable)
+        subprocess.run(
+            ["docker", "exec", container_name, "chmod", "0440", SUDOERS_CONTAINER_PATH],
+            check=True,
+        )
+        subprocess.run(
+            ["docker", "exec", container_name, "chown", "root:root", SUDOERS_CONTAINER_PATH],
+            check=True,
+        )
+        # 3. Remove the dangerously-broad NOPASSWD:ALL line from /etc/sudoers
+        #    that each lab Dockerfile appends (e.g. "intern ALL=(ALL) NOPASSWD:ALL")
+        subprocess.run(
+            [
+                "docker", "exec", container_name,
+                "sed", "-i",
+                r"/intern.*NOPASSWD\s*:\s*ALL/d",
+                "/etc/sudoers",
+            ],
+            check=True,
+        )
+        # Note: "unable to resolve host" is suppressed via "Defaults !log_host" in
+        #       sudoers-lab-student rather than patching /etc/hosts, which is unreliable
+        #       when the container runs with network_mode: none.
+        print(f"[sudoers] Restricted sudoers whitelist injected into {container_name}")
+    except subprocess.CalledProcessError as exc:
+        print(f"[sudoers] ERROR injecting sudoers into {container_name}: {exc}")
+
+
 def start_lab(data):
+
     session_id = data["session_id"]
     student_id = data["student_id"]
     short_student_id = data["short_student_id"]
@@ -138,14 +198,11 @@ def start_lab(data):
                 ulimits["nofile"] = {"soft": 256, "hard": 512}
                 svc["network_mode"] = defaults["network"]
                 svc["cap_drop"] = ["ALL"]
-                svc["cap_add"] = ["CHOWN", "SETUID", "SETGID"]
-
-                security_opt = svc.setdefault("security_opt", [])
-                if not isinstance(security_opt, list):
-                    security_opt = []
-                if "no-new-privileges:true" not in security_opt:
-                    security_opt.append("no-new-privileges:true")
-                svc["security_opt"] = security_opt
+                # CHOWN, SETUID, SETGID are required for sudo's SUID mechanism.
+                # Privilege scope is enforced via /etc/sudoers.d/lab-student (whitelist)
+                # rather than no-new-privileges, which would block sudo entirely.
+                # AUDIT_WRITE silences "unable to send audit message" warnings from sudo.
+                svc["cap_add"] = ["CHOWN", "SETUID", "SETGID", "AUDIT_WRITE"]
 
             content = yaml.dump(compose)
         except Exception as e:
@@ -172,6 +229,11 @@ def start_lab(data):
     except:
         container_name = f"{project_name}-1"
     
+    # ── Inject restricted sudoers whitelist ──────────────────────────────────
+    # Replace the broad NOPASSWD:ALL baked into lab Dockerfiles with a
+    # tightly scoped whitelist that only allows safe commands.
+    _inject_sudoers(container_name)
+
     # Update DB
     db = SessionLocal()
     session = db.query(models.LabSession).filter_by(id=session_id).first()

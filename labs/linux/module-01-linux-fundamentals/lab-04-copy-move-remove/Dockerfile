@@ -8,8 +8,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 RUN useradd -m -s /bin/bash intern && \
-    echo "intern ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
     echo "intern:intern123" | chpasswd
+# Note: sudo whitelist for intern is injected at runtime by lab-manager
+#       via /etc/sudoers.d/lab-student — do NOT add NOPASSWD:ALL here.
 
 # Create the staging config file
 RUN mkdir -p /home/intern && \
@@ -30,6 +31,9 @@ RUN touch /home/intern/backup-2024-01.tar.gz && \
 
 RUN echo "FLAG-copy-move-remove-d4e8f1a2" > /root/flag.txt
 
+
+# Ensure /etc/sudoers.d is read (safe runtime whitelist injected there)
+RUN grep -qxF "#includedir /etc/sudoers.d" /etc/sudoers || echo "#includedir /etc/sudoers.d" >> /etc/sudoers
 COPY check.sh /check.sh
 RUN chmod +x /check.sh
 

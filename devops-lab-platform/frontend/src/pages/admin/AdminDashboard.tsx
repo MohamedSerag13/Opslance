@@ -6,16 +6,18 @@ import { useAuthStore } from '../../store/authStore';
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ students: 0, groups: 0, running: 0 });
   const [groups, setGroups] = useState<any[]>([]);
+  const [topScorer, setTopScorer] = useState({ name: '—', score: 0 });
   const { logout } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [groupsRes, studentsRes, envsRes] = await Promise.all([
+        const [groupsRes, studentsRes, envsRes, leaderboardRes] = await Promise.all([
           api.get('/admin/groups'),
           api.get('/admin/students'),
-          api.get('/admin/environments')
+          api.get('/admin/environments'),
+          api.get('/gamification/admin/leaderboard').catch(() => ({ data: [] }))
         ]);
         setGroups(groupsRes.data);
         setStats({
@@ -23,6 +25,12 @@ export default function AdminDashboard() {
           groups: groupsRes.data.length,
           running: envsRes.data.length
         });
+        if (leaderboardRes.data && leaderboardRes.data.length > 0) {
+          setTopScorer({
+            name: leaderboardRes.data[0].name || '—',
+            score: leaderboardRes.data[0].total_score || 0
+          });
+        }
       } catch (err) {}
     };
     fetchData();
@@ -44,13 +52,14 @@ export default function AdminDashboard() {
         <div className="flex gap-4 items-center">
           <Link to="/admin/groups" className="text-gray-600 hover:text-black">Groups</Link>
           <Link to="/admin/students" className="text-gray-600 hover:text-black">Students</Link>
+          <Link to="/admin/leaderboard" className="text-gray-600 hover:text-black">Leaderboard</Link>
           <Link to="/admin/labs" className="text-gray-600 hover:text-black">Labs</Link>
           <Link to="/admin/environments" className="text-gray-600 hover:text-black">Environments</Link>
           <button onClick={logout} className="text-red-600 font-medium ml-4">Logout</button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <div className="bg-white p-6 rounded-xl shadow border">
           <p className="text-sm text-gray-500 font-medium">Total Students</p>
           <p className="text-3xl font-bold">{stats.students}</p>
@@ -62,6 +71,16 @@ export default function AdminDashboard() {
         <div className="bg-white p-6 rounded-xl shadow border text-blue-600">
           <p className="text-sm text-gray-500 font-medium">Live Labs</p>
           <p className="text-3xl font-bold">{stats.running}</p>
+        </div>
+        <div className="bg-white p-6 rounded-xl shadow border flex flex-col justify-between">
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Top Scorer</p>
+            <p className="text-3xl font-bold truncate">{topScorer.name}</p>
+            <p className="text-sm text-gray-500 mt-1">{topScorer.score} points</p>
+          </div>
+          <div className="mt-2">
+            <Link to="/admin/leaderboard" className="text-sm text-blue-600 hover:underline">View Leaderboard →</Link>
+          </div>
         </div>
       </div>
 

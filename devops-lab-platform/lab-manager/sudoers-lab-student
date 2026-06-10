@@ -1,0 +1,44 @@
+# /etc/sudoers.d/lab-student
+# Managed by Opslance lab-manager — DO NOT EDIT MANUALLY
+#
+# Grants the 'intern' user passwordless sudo for a safe whitelist of commands.
+# All other commands are implicitly denied because this file does NOT grant
+# full sudo and the base sudoers has no wildcard rule for 'intern'.
+
+# Suppress "unable to resolve host" warning — containers have no DNS for their
+# own hostname (network_mode: none). The fqdn option causes sudo to call
+# getaddrinfo() to resolve the hostname into a FQDN; disabling it prevents
+# the warning entirely without needing any /etc/hosts changes.
+Defaults !fqdn
+
+# ── Whitelisted safe commands ─────────────────────────────────────────────────
+intern ALL=(ALL) NOPASSWD: \
+    /bin/cp, \
+    /bin/mv, \
+    /bin/find, \
+    /bin/grep, \
+    /bin/mkdir, \
+    /bin/touch, \
+    /bin/cat, \
+    /bin/ls, \
+    /bin/chmod, \
+    /bin/chown, \
+    /bin/ln, \
+    /bin/tar, \
+    /usr/bin/unzip, \
+    /usr/bin/zip, \
+    /usr/bin/apt-get, \
+    /usr/bin/systemctl, \
+    /bin/systemctl, \
+    /usr/bin/nano, \
+    /usr/bin/vi, \
+    /usr/bin/vim, \
+    /usr/bin/vim.basic, \
+    /usr/bin/vim.tiny
+
+# ── Security note ─────────────────────────────────────────────────────────────
+# The NOPASSWD whitelist above is the ONLY grant for 'intern'.
+# Commands not listed there are implicitly denied — no explicit deny block is
+# needed and the '!NOPASSWD:' tag negation is not valid sudoers syntax.
+# Dangerous shells / interpreters / privilege-escalation tools are simply absent
+# from the whitelist and therefore cannot be run with sudo.

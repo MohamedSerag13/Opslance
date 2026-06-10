@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-02-config-hunt:
+    build: .
+    container_name: lab-module02-04-config-hunt
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 02"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=The Config Hunt (Capstone)"
+      - "lab.id=module-02-lab-04-config-hunt"
+    volumes:
+      - ./solution:/solution:ro

@@ -13,5 +13,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/database.py .
 COPY backend/models.py .
 COPY lab-manager/worker.py .
+# Sudoers whitelist injected into student lab containers at runtime
+COPY lab-manager/sudoers-lab-student .
+
 
 CMD ["python", "worker.py"]
