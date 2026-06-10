@@ -2,30 +2,33 @@
   "id": "module-02-lab-01-finding-things",
   "module_number": 2,
   "module_title": "File Navigation & Search",
-  "title": "Finding Things",
+  "title": "Finding Files Across the Linux Filesystem",
   "difficulty": "beginner",
   "estimated_minutes": 15,
   "points": 100,
   "category": "linux",
   "subcategory": "fundamentals",
-  "skills": ["find", "which", "grep", "file search"],
-  "scenario": "A legacy configuration file, an orphaned log file larger than 50KB, and a custom shell helper script are scattered somewhere in the system. You need to find their locations and write their full absolute paths into four specific output files.",
+  "skills": ["find", "find -name", "find -size", "which", "output redirection"],
+  "scenario": "You have just joined the operations team and received a ticket about several missing files scattered across a Linux server. A custom application configuration file exists somewhere under /etc, an orphaned log file larger than 50 KB exists somewhere in /var/log, and a helper shell script exists somewhere under /opt. The location of the Bash executable must also be identified for a deployment script that is being written.",
   "symptoms": [
-    "Scattered config, log, and script files",
-    "Missing output path files in home directory"
+    "Custom application config file missing from known location",
+    "Orphaned log file larger than 50 KB exists somewhere in /var/log",
+    "Helper shell script lost somewhere under /opt",
+    "Deployment script needs the exact path of the bash executable"
   ],
   "mission": "Use 'find' and 'which' to locate the target files and save their absolute paths to ~/found_config.txt, ~/found_largelog.txt, ~/found_script.txt, and ~/bash_location.txt.",
   "verification_command": "bash /check.sh",
   "hints": [
-    {"number": 1, "title": "Finding Config", "content": "You can find custom config files using `find /etc -name '*custom_app*'`."},
-    {"number": 2, "title": "Finding Large Logs", "content": "Use size options with find, such as `find /var/log -size +50k` to locate the orphaned log file."},
-    {"number": 3, "title": "Saving the paths", "content": "Save paths by redirecting output: e.g. `find /etc -name 'custom_app.conf' > /home/intern/found_config.txt` and `which bash > /home/intern/bash_location.txt`."},
-    {"number": 4, "title": "Bonus: locate command", "content": "Bonus: Try `locate custom_app.conf` to find the same file using the locate index. Note: you may need to run `updatedb` first."}
+    {"number": 1, "title": "Searching by name", "content": "'find' takes a starting directory and a -name option. Think about how to structure a find command that searches under /etc for a file with a specific name."},
+    {"number": 2, "title": "Filtering by size", "content": "'find' supports a -size flag. Sizes can be expressed in kilobytes with the 'k' suffix. A '+' before the number means larger than."},
+    {"number": 3, "title": "Saving output", "content": "Use '>' to redirect the output of any command into a file. For example: some_command > ~/output.txt"},
+    {"number": 4, "title": "Finding executables", "content": "There is a dedicated command for locating where an executable lives on the system. It takes the name of the command as its argument."},
+    {"number": 5, "title": "Bonus", "content": "Try using 'locate custom_app.conf' to find the same config file using the system's file index. You may need to run 'updatedb' first to refresh the index. Notice how much faster 'locate' is compared to 'find'."}
   ],
   "acceptance_criteria": [
-    {"id": "check_1", "description": "/home/intern/found_config.txt contains path to custom_app.conf", "weight": 25},
-    {"id": "check_2", "description": "/home/intern/found_largelog.txt contains path to orphaned log", "weight": 25},
-    {"id": "check_3", "description": "/home/intern/found_script.txt contains path to helper script", "weight": 25},
-    {"id": "check_4", "description": "/home/intern/bash_location.txt contains path to bash executable", "weight": 25}
+    {"id": "check_1", "description": "/home/intern/found_config.txt contains the absolute path to custom_app.conf", "weight": 25},
+    {"id": "check_2", "description": "/home/intern/found_largelog.txt contains the absolute path to the orphaned log file", "weight": 25},
+    {"id": "check_3", "description": "/home/intern/found_script.txt contains the absolute path to helper.sh", "weight": 25},
+    {"id": "check_4", "description": "/home/intern/bash_location.txt contains the absolute path to the bash executable", "weight": 25}
   ]
 }

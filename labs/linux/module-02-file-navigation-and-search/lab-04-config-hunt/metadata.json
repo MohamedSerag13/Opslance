@@ -3,30 +3,33 @@
   "module_number": 2,
   "module_title": "File Navigation & Search",
   "title": "The Config Hunt (Capstone)",
-  "difficulty": "intermediate",
+  "difficulty": "beginner",
   "estimated_minutes": 20,
   "points": 100,
   "category": "linux",
   "subcategory": "fundamentals",
-  "skills": ["find", "grep", "grep -c", "tail", "head", "combined pipelines"],
-  "scenario": "A new server has been handed to you. No documentation. You need to locate all config files, read critical values out of them using grep, and compile a report — combining find, grep, head, and tail together.",
+  "skills": ["find", "find -name", "grep", "grep -r", "grep -c", "tail", "output redirection", "combined investigation"],
+  "scenario": "A server was handed to you with no documentation and no handover notes. You know it runs an application called myapp, but nothing else. Before the team can decide whether to keep the server running or decommission it, they need four pieces of information extracted from the filesystem. This is a capstone lab combining find, grep, and tail.",
   "symptoms": [
-    "Unknown server with no documentation",
-    "Config files scattered under /etc/myapp/",
-    "Logs with errors and deploy events in /opt/myapp/"
+    "Undocumented server with no handover notes",
+    "Application config files scattered under /etc/myapp/",
+    "Unknown database connection target (DB_HOST not documented)",
+    "Error count in /opt/myapp/app.log unknown",
+    "Most recent deployment state unclear"
   ],
-  "mission": "Find all .conf files, extract DB_HOST, count ERROR lines in app.log, and capture the last 10 lines of deploy.log.",
+  "mission": "Find all .conf files under /etc/myapp/, extract the DB_HOST line from the config, count ERROR lines in /opt/myapp/app.log, and capture the last 10 lines of /opt/myapp/deploy.log.",
   "verification_command": "bash /check.sh",
   "hints": [
-    {"number": 1, "title": "Finding Configs", "content": "Finding configs: Use `find /etc/myapp -name '*.conf'` to list all config files."},
-    {"number": 2, "title": "Extracting Values", "content": "Extracting values: Use `grep 'DB_HOST' /etc/myapp/database.conf` to pull out the database host line."},
-    {"number": 3, "title": "Counting Errors", "content": "Counting errors: Use `grep -c 'ERROR' /opt/myapp/app.log` to count error lines."},
-    {"number": 4, "title": "Last Lines", "content": "Last lines: Use `tail -10 /opt/myapp/deploy.log > ~/deploy_tail.txt`."}
+    {"number": 1, "title": "Wildcards in find", "content": "Use *.conf as the -name pattern to match any file ending in .conf. Make sure to quote the pattern so the shell does not expand it before passing it to find."},
+    {"number": 2, "title": "Extracting a config value", "content": "'grep KEY /path/to/file' prints the full line containing that key. If you are not sure which file contains it, search the whole directory with -r to scan all files at once."},
+    {"number": 3, "title": "Counting errors", "content": "'grep -c PATTERN file' returns a single number: the count of lines that match. Redirect that number directly to your output file with >."},
+    {"number": 4, "title": "Recent log entries", "content": "'tail -10 file' prints the last 10 lines. No flags other than the line count are needed — this is a simple, one-shot read."},
+    {"number": 5, "title": "Bonus", "content": "Try chaining find and grep together using xargs. This lets you search for a config value across all matching files at once without needing to know their names in advance."}
   ],
   "acceptance_criteria": [
-    {"id": "check_1", "description": "/home/intern/conf_files.txt exists and contains .conf", "weight": 25},
-    {"id": "check_2", "description": "/home/intern/db_host.txt exists and contains DB_HOST", "weight": 25},
+    {"id": "check_1", "description": "/home/intern/conf_files.txt exists and contains paths to .conf files under /etc/myapp/", "weight": 25},
+    {"id": "check_2", "description": "/home/intern/db_host.txt exists and contains the DB_HOST line from the myapp config", "weight": 25},
     {"id": "check_3", "description": "/home/intern/error_count.txt exists and contains a number greater than 0", "weight": 25},
-    {"id": "check_4", "description": "/home/intern/deploy_tail.txt exists and is non-empty", "weight": 25}
+    {"id": "check_4", "description": "/home/intern/deploy_tail.txt exists and contains the last 10 lines of /opt/myapp/deploy.log", "weight": 25}
   ]
 }

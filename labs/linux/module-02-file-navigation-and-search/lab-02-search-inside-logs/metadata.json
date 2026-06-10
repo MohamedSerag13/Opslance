@@ -2,30 +2,33 @@
   "id": "module-02-lab-02-search-inside-logs",
   "module_number": 2,
   "module_title": "File Navigation & Search",
-  "title": "Search Inside Logs for Errors",
+  "title": "Hunting Errors in Application Logs",
   "difficulty": "beginner",
   "estimated_minutes": 15,
   "points": 100,
   "category": "linux",
   "subcategory": "fundamentals",
-  "skills": ["grep", "grep -i", "grep -n", "grep -r", "grep -c"],
-  "scenario": "A web application has been misbehaving. Its logs are stored across multiple files in /var/log/webapp/. You need to hunt down errors and warnings using grep, count their occurrences, and save your findings.",
+  "skills": ["grep", "grep -i", "grep -c", "grep -r", "grep -n", "output redirection"],
+  "scenario": "The on-call engineer received alerts about a web application returning errors. The application writes logs to three separate files inside /var/log/webapp/: access.log, error.log, and app.log. The team needs to know how many warnings were logged, which requests returned HTTP 500 errors, and whether the word 'error' appears anywhere across the full log directory.",
   "symptoms": [
-    "Web application producing errors",
-    "Logs scattered across multiple files in /var/log/webapp/"
+    "Web application returning errors and triggering on-call alerts",
+    "Logs distributed across access.log, error.log, and app.log in /var/log/webapp/",
+    "Unknown count of WARNING and ERROR entries",
+    "HTTP 500 failures present in the access log"
   ],
-  "mission": "Use grep to search for errors and warnings in the webapp logs and save your findings to the appropriate output files.",
+  "mission": "Use grep to search for errors and warnings across the webapp logs and save your findings to ~/errors.txt, ~/warning_count.txt, ~/all_errors.txt, and ~/server_errors.txt.",
   "verification_command": "bash /check.sh",
   "hints": [
-    {"number": 1, "title": "Case-Sensitive Search", "content": "Case-sensitive search: Use `grep 'ERROR' /var/log/webapp/error.log` to find exact matches."},
-    {"number": 2, "title": "Counting Matches", "content": "Counting matches: Use `grep -c 'WARNING' /var/log/webapp/error.log` to count matching lines and save the number with >."},
-    {"number": 3, "title": "Recursive Search", "content": "Recursive search: Use `grep -ri 'error' /var/log/webapp/` to search all files in a directory at once."},
-    {"number": 4, "title": "Bonus: Line Numbers", "content": "Bonus: Add -n to any grep command to include line numbers in your output."}
+    {"number": 1, "title": "Basic grep", "content": "'grep PATTERN /path/to/file' prints every line in the file that contains the pattern. By default the match is case-sensitive."},
+    {"number": 2, "title": "Counting instead of printing", "content": "Adding -c to grep makes it output only the count of matching lines, not the lines themselves. That count can then be redirected to a file."},
+    {"number": 3, "title": "Case-insensitive search", "content": "The -i flag makes grep ignore case differences. 'grep -i error' matches ERROR, Error, error, and any other capitalisation."},
+    {"number": 4, "title": "Recursive search", "content": "The -r flag tells grep to search all files inside a directory and its subdirectories. Combine it with -i for a case-insensitive recursive search."},
+    {"number": 5, "title": "Bonus", "content": "Try adding -n to any grep command. It adds line numbers to every match, which is useful when you need to tell a colleague exactly where in the file a problem appears."}
   ],
   "acceptance_criteria": [
-    {"id": "check_1", "description": "/home/intern/errors.txt exists and contains ERROR lines from error.log", "weight": 25},
+    {"id": "check_1", "description": "/home/intern/errors.txt exists and contains ERROR lines from /var/log/webapp/error.log", "weight": 25},
     {"id": "check_2", "description": "/home/intern/warning_count.txt exists and contains a number greater than 0", "weight": 25},
-    {"id": "check_3", "description": "/home/intern/all_errors.txt exists and is non-empty", "weight": 25},
-    {"id": "check_4", "description": "/home/intern/server_errors.txt exists and contains 500", "weight": 25}
+    {"id": "check_3", "description": "/home/intern/all_errors.txt exists and is non-empty (case-insensitive search across all files in /var/log/webapp/)", "weight": 25},
+    {"id": "check_4", "description": "/home/intern/server_errors.txt exists and contains lines with 500 from /var/log/webapp/access.log", "weight": 25}
   ]
 }
