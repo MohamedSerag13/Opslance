@@ -1,0 +1,48 @@
+{
+  "id": "module-03-lab-01-permission-denied",
+  "module_number": 3,
+  "module_title": "File Permissions & Ownership",
+  "title": "Permission Denied",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "permissions",
+  "skills": ["ls -l", "chmod", "file permissions", "rwx notation"],
+  "scenario": "An intern saved important notes in secret.txt, but someone accidentally ran chmod 000 on the file. Now every attempt to read it fails with 'Permission denied'. You need to inspect the current permission bits and restore read access so the file can be viewed again.",
+  "symptoms": [
+    "cat secret.txt returns Permission denied",
+    "File exists but cannot be read"
+  ],
+  "mission": "Run cat secret.txt and observe the Permission denied error. Use ls -l to inspect the permission bits, understand the rwx notation, then use chmod to restore read access to the file.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Inspect the permissions",
+      "content": "Run ls -l secret.txt and look at the first column. What do the dashes mean?"
+    },
+    {
+      "number": 2,
+      "title": "Understand rwx",
+      "content": "Permissions are displayed as three groups of rwx (read, write, execute) for owner, group, and others. A dash means the permission is not set."
+    },
+    {
+      "number": 3,
+      "title": "Fix with chmod",
+      "content": "Use chmod 644 secret.txt to give the owner read and write access, and read access to group and others."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "secret.txt has read permission for the owner",
+      "weight": 50
+    },
+    {
+      "id": "check_2",
+      "description": "cat secret.txt outputs Secret Data",
+      "weight": 50
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-03-permission-denied:
+    build: .
+    container_name: lab-01-permission-denied
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 03"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Permission Denied"
+      - "lab.id=module-03-lab-01-permission-denied"
+    volumes:
+      - ./solution:/solution:ro

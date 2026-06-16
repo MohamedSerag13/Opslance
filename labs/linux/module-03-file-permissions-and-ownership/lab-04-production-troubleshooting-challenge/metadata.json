@@ -1,0 +1,33 @@
+{
+  "id": "module-03-lab-04-production-troubleshooting-challenge",
+  "module_number": 3,
+  "module_title": "File Permissions & Ownership",
+  "title": "Production Troubleshooting Challenge",
+  "difficulty": "advanced",
+  "estimated_minutes": 25,
+  "points": 200,
+  "category": "linux",
+  "subcategory": "permissions",
+  "skills": ["ls -l", "chmod", "chown", "sudo", "whoami", "id", "file permissions", "file ownership"],
+  "scenario": "A production project has landed on your desk with an urgent ticket: nothing works. The configuration file is unreadable, the backup script refuses to execute, and the data output file cannot be updated. All three problems trace back to incorrect file permissions and ownership. You must diagnose each issue and apply the correct fix before the next deployment window closes.",
+  "symptoms": [
+    "Configuration file /home/intern/project/config/settings.conf is unreadable — 'Permission denied' when trying to cat it",
+    "Backup script /home/intern/project/scripts/backup.sh cannot be executed — 'Permission denied' when trying to run it",
+    "Data file /home/intern/project/data/output.csv cannot be modified — owned by root, so intern cannot write to it",
+    "Multiple files have incorrect ownership or permission bits preventing normal project operation"
+  ],
+  "mission": "Fix all permission and ownership issues in the /home/intern/project/ directory so that: (1) the config file is readable by intern, (2) the backup script is executable, and (3) the output data file is owned by intern.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {"number": 1, "title": "Investigate first", "content": "Start by running 'ls -la' on each directory inside /home/intern/project/ to see the current permissions and ownership. Use 'whoami' and 'id' to confirm which user you are and what groups you belong to."},
+    {"number": 2, "title": "Reading a root-owned file", "content": "The config file is owned by root with mode 600 (rw-------). You can either use 'sudo chmod' to add read permission for others, or use 'sudo chown' to transfer ownership to intern."},
+    {"number": 3, "title": "Making a script executable", "content": "The backup script has mode 644 (rw-r--r--) — it is missing the execute bit. Use 'chmod +x' to add the executable permission."},
+    {"number": 4, "title": "Changing file ownership", "content": "The output CSV is owned by root. Use 'sudo chown intern:intern' to transfer ownership so that intern can write to it."}
+  ],
+  "acceptance_criteria": [
+    {"id": "check_1", "description": "settings.conf is readable by intern", "weight": 25},
+    {"id": "check_2", "description": "backup.sh is executable", "weight": 25},
+    {"id": "check_3", "description": "backup.sh outputs 'Backup completed successfully'", "weight": 25},
+    {"id": "check_4", "description": "output.csv is owned by intern", "weight": 25}
+  ]
+}

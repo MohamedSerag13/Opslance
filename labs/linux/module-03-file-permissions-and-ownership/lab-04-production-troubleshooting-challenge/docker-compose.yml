@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-03-production-troubleshooting-challenge:
+    build: .
+    container_name: lab-04-production-troubleshooting-challenge
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 03"
+      - "lab.category=linux"
+      - "lab.difficulty=advanced"
+      - "lab.title=Production Troubleshooting Challenge"
+      - "lab.id=module-03-lab-04-production-troubleshooting-challenge"
+    volumes:
+      - ./solution:/solution:ro

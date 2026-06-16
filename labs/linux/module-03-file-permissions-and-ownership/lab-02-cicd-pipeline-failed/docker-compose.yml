@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-03-cicd-pipeline-failed:
+    build: .
+    container_name: lab-02-cicd-pipeline-failed
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 03"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=CI/CD Pipeline Failed"
+      - "lab.id=module-03-lab-02-cicd-pipeline-failed"
+    volumes:
+      - ./solution:/solution:ro

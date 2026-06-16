@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-03-application-cannot-write-logs:
+    build: .
+    container_name: lab-03-application-cannot-write-logs
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 03"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Application Cannot Write Logs"
+      - "lab.id=module-03-lab-03-application-cannot-write-logs"
+    volumes:
+      - ./solution:/solution:ro

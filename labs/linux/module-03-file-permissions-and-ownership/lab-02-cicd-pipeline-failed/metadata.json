@@ -1,0 +1,40 @@
+{
+  "id": "module-03-lab-02-cicd-pipeline-failed",
+  "module_number": 3,
+  "module_title": "File Permissions & Ownership",
+  "title": "CI/CD Pipeline Failed",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "permissions",
+  "skills": ["ls -l", "chmod", "executable permissions", "bash scripts"],
+  "scenario": "The CI/CD pipeline calls a deploy script that was working fine yesterday, but today the deployment stage fails immediately. The deploy.sh script is still on the server but it refuses to run.",
+  "symptoms": [
+    "./deploy.sh returns Permission denied",
+    "Script file exists but cannot be executed"
+  ],
+  "mission": "Investigate why deploy.sh cannot run, fix the permissions, and execute it successfully.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Investigate the error",
+      "content": "Try running `./deploy.sh` and observe the error. Then use `ls -l deploy.sh` to inspect the file's permissions."
+    },
+    {
+      "number": 2,
+      "title": "Understand the permission bits",
+      "content": "The output of `ls -l` shows permissions like `-rw-r--r--`. The `x` bit is needed for a file to be executable. Notice it is missing."
+    },
+    {
+      "number": 3,
+      "title": "The fix",
+      "content": "Run `chmod +x deploy.sh` to add the execute permission, then run `./deploy.sh` to confirm it works."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {"id": "check_1", "description": "deploy.sh is executable", "weight": 40},
+    {"id": "check_2", "description": "Running deploy.sh outputs 'Deploying application...'", "weight": 60}
+  ]
+}

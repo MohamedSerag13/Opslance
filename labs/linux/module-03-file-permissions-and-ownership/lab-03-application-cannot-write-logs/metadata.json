@@ -1,0 +1,28 @@
+{
+  "id": "module-03-lab-03-application-cannot-write-logs",
+  "module_number": 3,
+  "module_title": "File Permissions & Ownership",
+  "title": "Application Cannot Write Logs",
+  "difficulty": "intermediate",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "ownership",
+  "skills": ["ls -l", "chown", "file ownership", "sudo"],
+  "scenario": "An application log file exists at ~/logs/app.log but the intern user cannot append to it. The file was accidentally created as root during a deployment script, so its ownership is root:root. Even though the file permissions are 644 (owner read-write, group and others read-only), only the owner — root — can write to it. The intern needs to take ownership of the file before the application can log normally.",
+  "symptoms": [
+    "echo 'Application started' >> logs/app.log returns Permission denied",
+    "File exists but is owned by root"
+  ],
+  "mission": "Investigate why you cannot write to ~/logs/app.log, fix the ownership so that intern owns the file, and then write 'Application started' to it.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {"number": 1, "title": "Inspect file details", "content": "Run 'ls -l logs/app.log' to see who owns the file and what permissions are set. The third and fourth columns show the owning user and group."},
+    {"number": 2, "title": "Change ownership", "content": "The 'chown' command changes file ownership. The syntax is 'chown user:group file'. You will need sudo to change ownership of a file you do not own."},
+    {"number": 3, "title": "Full solution pattern", "content": "Run 'sudo chown intern:intern logs/app.log' to take ownership, then 'echo \"Application started\" >> logs/app.log' to write the log entry."}
+  ],
+  "acceptance_criteria": [
+    {"id": "check_1", "description": "/home/intern/logs/app.log is owned by intern", "weight": 40},
+    {"id": "check_2", "description": "/home/intern/logs/app.log contains the line 'Application started'", "weight": 60}
+  ]
+}
