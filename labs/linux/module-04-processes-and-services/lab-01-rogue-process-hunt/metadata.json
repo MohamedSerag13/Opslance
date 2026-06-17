@@ -1,0 +1,54 @@
+{
+  "id": "module-04-lab-01-rogue-process-hunt",
+  "module_number": 4,
+  "module_title": "Processes & Services",
+  "title": "Rogue Process Hunt",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "processes",
+  "skills": ["ps", "ps aux", "grep", "pgrep", "kill", "pkill", "process management"],
+  "scenario": "Three rogue 'sleep 1000' processes were accidentally left running on a production server, consuming process-table slots and making it harder to audit what is actually running. A senior engineer has asked you to locate all of them, record their PIDs for the incident report, and terminate them cleanly.",
+  "symptoms": [
+    "Unexpected 'sleep 1000' processes appear in the process list",
+    "Running 'ps aux | grep sleep' reveals multiple zombie-like sleep processes",
+    "Process table is cluttered with processes that should not be running"
+  ],
+  "mission": "Use 'ps aux' and 'grep' (or 'pgrep') to locate the three rogue sleep processes. Write all three PIDs to /home/intern/pids_found.txt (one PID per line). Then kill one of them by PID using 'kill', and terminate the remaining sleep processes with 'pkill sleep'.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {
+      "number": 1,
+      "title": "List all running processes",
+      "content": "Run 'ps aux' to see every process on the system. The output shows USER, PID, %CPU, %MEM, and the COMMAND. Look for lines where the COMMAND column says 'sleep 1000'."
+    },
+    {
+      "number": 2,
+      "title": "Filter with grep or pgrep",
+      "content": "Pipe ps output through grep: 'ps aux | grep sleep'. Alternatively, 'pgrep sleep' prints just the PIDs of matching processes — one per line, ready to copy."
+    },
+    {
+      "number": 3,
+      "title": "Record the PIDs",
+      "content": "Write the PIDs to /home/intern/pids_found.txt, one per line. You can do this manually with a text editor, or use a redirect: 'pgrep sleep > /home/intern/pids_found.txt'."
+    },
+    {
+      "number": 4,
+      "title": "Kill processes",
+      "content": "Use 'kill <PID>' to terminate a single process by its PID. Then run 'pkill sleep' to kill all remaining processes whose name matches 'sleep'. Verify with 'pgrep sleep' — it should return nothing."
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "pids_found.txt exists and lists at least 3 sleep process PIDs",
+      "weight": 40
+    },
+    {
+      "id": "check_2",
+      "description": "all rogue sleep processes have been killed (none remain)",
+      "weight": 60
+    }
+  ]
+}

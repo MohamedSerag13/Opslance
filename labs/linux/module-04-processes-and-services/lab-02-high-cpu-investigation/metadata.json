@@ -1,0 +1,54 @@
+{
+  "id": "module-04-lab-02-high-cpu-investigation",
+  "module_number": 4,
+  "module_title": "Processes & Services",
+  "title": "High CPU Investigation",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "processes",
+  "skills": ["top", "htop", "ps aux", "kill", "pgrep", "CPU monitoring", "process investigation"],
+  "scenario": "The on-call engineer has been paged: a server is running at near 100% CPU but the monitoring dashboard shows no known scheduled job is active. You have been asked to SSH in, identify the runaway process using real-time CPU tools, record its PID for the incident report, and kill it to restore normal operation.",
+  "symptoms": [
+    "Server CPU is pegged at or near 100%",
+    "The offending process is not immediately obvious from the process name alone",
+    "Normal workloads are degraded due to resource starvation"
+  ],
+  "mission": "Use 'top' (sorted by CPU) or 'htop' to identify the process consuming the most CPU. Write its PID to /home/intern/culprit_pid.txt, then kill the process to restore normal CPU usage.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Launch top and sort by CPU",
+      "content": "Run 'top'. The process list is already sorted by CPU usage by default — the highest consumer appears at the top. Note the PID in the first column. Press 'q' to quit."
+    },
+    {
+      "number": 2,
+      "title": "Try htop for a clearer view",
+      "content": "Run 'htop'. It shows a colour bar graph of CPU usage per core at the top and sorts processes by CPU automatically. The PID column is on the left. Press F10 or 'q' to exit."
+    },
+    {
+      "number": 3,
+      "title": "Record the PID",
+      "content": "Write the PID to /home/intern/culprit_pid.txt. For example: echo 1234 > /home/intern/culprit_pid.txt"
+    },
+    {
+      "number": 4,
+      "title": "Kill the process",
+      "content": "Use 'kill <PID>' to send SIGTERM to the process. Verify it is gone with 'pgrep yes' — it should return nothing."
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "culprit_pid.txt contains the correct yes process PID",
+      "weight": 40
+    },
+    {
+      "id": "check_2",
+      "description": "yes process has been killed (no longer running)",
+      "weight": 60
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-04-high-cpu-investigation:
+    build: .
+    container_name: lab-04-02-high-cpu-investigation
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 04"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=High CPU Investigation"
+      - "lab.id=module-04-lab-02-high-cpu-investigation"
+    volumes:
+      - ./solution:/solution:ro

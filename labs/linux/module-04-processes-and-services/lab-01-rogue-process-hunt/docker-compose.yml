@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-04-rogue-process-hunt:
+    build: .
+    container_name: lab-04-01-rogue-process-hunt
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 04"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Rogue Process Hunt"
+      - "lab.id=module-04-lab-01-rogue-process-hunt"
+    volumes:
+      - ./solution:/solution:ro

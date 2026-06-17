@@ -1,0 +1,59 @@
+{
+  "id": "module-04-lab-03-recover-crashed-service",
+  "module_number": 4,
+  "module_title": "Processes & Services",
+  "title": "Recover a Crashed Service",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "services",
+  "skills": ["systemctl", "systemctl status", "systemctl start", "systemctl enable", "curl", "service management"],
+  "scenario": "An nginx web server is installed on this server but is not running — it was left in a stopped state after a failed deployment. The site is returning no response. You need to confirm the service is down, bring it back up, verify it is serving traffic, and ensure it will start automatically if the server ever reboots.",
+  "symptoms": [
+    "curl http://localhost:8080 times out or returns a connection refused error",
+    "systemctl status nginx shows the service as inactive (dead)",
+    "The service is not enabled — it will not survive a reboot"
+  ],
+  "mission": "Confirm nginx is down with 'systemctl status nginx'. Start it with 'systemctl start nginx'. Verify it is serving traffic with 'curl http://localhost:8080'. Enable it for auto-start with 'systemctl enable nginx'.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Check the service status",
+      "content": "Run 'systemctl status nginx' to see whether the service is active, inactive, or failed. Look at the 'Active:' line."
+    },
+    {
+      "number": 2,
+      "title": "Start the service",
+      "content": "Run 'systemctl start nginx'. If it succeeds, the Active line in 'systemctl status nginx' will change to 'active (running)'."
+    },
+    {
+      "number": 3,
+      "title": "Verify with curl",
+      "content": "Run 'curl http://localhost:8080' to confirm nginx is serving HTTP responses. You should see an HTML page."
+    },
+    {
+      "number": 4,
+      "title": "Enable for auto-start",
+      "content": "Run 'systemctl enable nginx' to create the symlink that would start the service at boot. 'systemctl status nginx' will then show 'enabled' next to the Loaded line."
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "nginx is serving HTTP responses on localhost:8080",
+      "weight": 35
+    },
+    {
+      "id": "check_2",
+      "description": "systemctl reports nginx as active",
+      "weight": 35
+    },
+    {
+      "id": "check_3",
+      "description": "nginx is enabled (systemctl enable nginx was run)",
+      "weight": 30
+    }
+  ]
+}

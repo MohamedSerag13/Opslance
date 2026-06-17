@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-04-recover-crashed-service:
+    build: .
+    container_name: lab-04-03-recover-crashed-service
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 04"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Recover a Crashed Service"
+      - "lab.id=module-04-lab-03-recover-crashed-service"
+    volumes:
+      - ./solution:/solution:ro

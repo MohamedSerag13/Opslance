@@ -1,0 +1,70 @@
+{
+  "id": "module-04-lab-04-debug-failed-systemd-service",
+  "module_number": 4,
+  "module_title": "Processes & Services",
+  "title": "Debug a Failed Systemd Service",
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "points": 150,
+  "category": "linux",
+  "subcategory": "services",
+  "skills": ["systemctl", "journalctl", "systemctl status", "service debugging", "ExecStart", "unit files", "chmod +x"],
+  "scenario": "A new microservice called 'broken-app' has just been deployed. The deployment script created the systemd unit file but forgot to actually place the application script at the expected path. The service immediately fails every time it is started. You need to use systemctl and journalctl to diagnose exactly why it is failing, then repair the deployment so the service reaches a running state.",
+  "symptoms": [
+    "systemctl start broken-app exits with an error",
+    "systemctl status broken-app shows 'failed (Result: exit-code)'",
+    "journalctl -u broken-app reveals a 'No such file or directory' error for the ExecStart command",
+    "The application is completely down — no process is running"
+  ],
+  "mission": "Start the broken-app service and observe the failure. Use 'systemctl status' and 'journalctl -u broken-app' to identify the root cause from the journal logs. Create the missing /opt/app/start.sh script (it should be executable and run a long-lived process), then restart the service and confirm it reaches the active (running) state.",
+  "verification_command": "bash /check.sh",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Trigger the failure and read the error",
+      "content": "Run 'systemctl start broken-app'. It will fail. Then run 'systemctl status broken-app' to see the Active line change to 'failed'. The last few log lines shown in the status output will hint at the cause."
+    },
+    {
+      "number": 2,
+      "title": "Dig deeper with journalctl",
+      "content": "Run 'journalctl -u broken-app' to see the full journal for this unit. Look for a line containing 'No such file or directory' — it will tell you exactly which file is missing."
+    },
+    {
+      "number": 3,
+      "title": "Read the unit file to find the expected path",
+      "content": "Run 'cat /etc/systemd/system/broken-app.service' and look at the ExecStart= line. That is the exact path the service manager will try to execute."
+    },
+    {
+      "number": 4,
+      "title": "Create the missing script",
+      "content": "Create /opt/app/start.sh with a text editor (nano or vim). The script must: (1) have a shebang line (#!/bin/bash), (2) do something — e.g. echo a message, and (3) run indefinitely so the service stays active (e.g. use 'sleep infinity' or a 'while true' loop at the end)."
+    },
+    {
+      "number": 5,
+      "title": "Make the script executable",
+      "content": "A script file must have the execute permission bit set before the service manager can run it. Use 'chmod +x /opt/app/start.sh' to add it."
+    },
+    {
+      "number": 6,
+      "title": "Restart and verify",
+      "content": "Run 'systemctl restart broken-app', then 'systemctl status broken-app'. The Active line should now read 'active (running)'. Confirm with 'journalctl -u broken-app' — you should see a 'Started' line after the earlier failure entry."
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "systemctl reports broken-app as active (running)",
+      "weight": 40
+    },
+    {
+      "id": "check_2",
+      "description": "/opt/app/start.sh exists and is executable",
+      "weight": 30
+    },
+    {
+      "id": "check_3",
+      "description": "broken-app journal log contains a successful start entry",
+      "weight": 30
+    }
+  ]
+}

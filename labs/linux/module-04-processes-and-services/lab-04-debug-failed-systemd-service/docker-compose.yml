@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  linux-module-04-debug-failed-systemd-service:
+    build: .
+    container_name: lab-04-04-debug-failed-systemd-service
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 04"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Debug a Failed Systemd Service"
+      - "lab.id=module-04-lab-04-debug-failed-systemd-service"
+    volumes:
+      - ./solution:/solution:ro
