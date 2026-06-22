@@ -58,6 +58,14 @@ RUN printf '%s\n' \
 # ── Initial state: nginx is inactive (stopped) and not enabled ────────────────
 RUN echo "inactive" > /var/lib/fakesystemd/state/nginx
 
+# IMPORTANT: the state file above is created by root with a default umask
+# (-rw-r--r--), so re-apply world-writable perms + intern ownership AFTER
+# seeding it. Otherwise `systemctl start` (run as intern) cannot overwrite the
+# state file and the service can never flip to "active". The earlier
+# `chmod -R 777` on the empty dir does not cover files created later.
+RUN chown -R intern:intern /var/lib/fakesystemd /var/log/fakesystemd \
+    && chmod -R 777 /var/lib/fakesystemd /var/log/fakesystemd
+
 # ── Simple web page served by nginx ──────────────────────────────────────────
 RUN echo '<html><body><h1>nginx is running!</h1><p>Service recovered successfully.</p></body></html>' \
     > /var/www/html/index.html

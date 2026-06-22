@@ -52,6 +52,16 @@ _do_start() {
     return 1
   fi
 
+  # Idempotent start: if the unit is already active and its process is alive,
+  # do nothing (mirrors real systemd) instead of launching a second instance
+  # that would fail to bind the port and spam the journal.
+  local cur_state; cur_state=$(_get_state "$unit")
+  local cur_pid;   cur_pid=$(_get_pid "$unit")
+  if [ "$cur_state" = "active" ] && [ -n "$cur_pid" ] && kill -0 "$cur_pid" 2>/dev/null; then
+    echo "[ OK   ] ${unit}.service is already active."
+    return 0
+  fi
+
   local exec_start; exec_start=$(_get_field "$unit" "ExecStart")
   if [ -z "$exec_start" ]; then
     echo "Failed to start ${unit}.service: ExecStart= missing or empty." >&2
