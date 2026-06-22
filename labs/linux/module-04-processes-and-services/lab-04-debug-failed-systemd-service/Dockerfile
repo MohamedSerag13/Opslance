@@ -40,8 +40,13 @@ RUN printf '%s\n' \
 # without needing sudo. The script itself does NOT exist yet; that is the bug.
 RUN mkdir -p /opt/app && chown intern:intern /opt/app
 
-# Set initial state: broken-app is inactive (never been started)
-RUN echo "inactive" > /var/lib/fakesystemd/state/broken-app
+# Set initial state: broken-app is inactive (never been started).
+# This RUN executes as root, so the file is created root-owned; the earlier
+# `chmod -R 777` ran before this file existed. Make it world-writable so the
+# fake systemctl (run by the non-root `intern` user) can update the state to
+# "active" — otherwise the in-place `>` redirect fails with "Permission denied".
+RUN echo "inactive" > /var/lib/fakesystemd/state/broken-app \
+    && chmod 666 /var/lib/fakesystemd/state/broken-app
 
 # Hint file
 RUN printf '%s\n' \
