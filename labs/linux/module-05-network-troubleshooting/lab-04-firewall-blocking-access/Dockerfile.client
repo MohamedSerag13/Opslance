@@ -1,0 +1,30 @@
+FROM ubuntu:22.04
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Minimal client image — only needs curl to test HTTP access to the server.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Print instructions when the client container starts
+RUN printf '%s\n' \
+  '=========================================================' \
+  ' Opslance Lab 04 — Client Container' \
+  '=========================================================' \
+  '' \
+  ' This container simulates a remote machine on the same' \
+  ' network as the server. Use it to test remote access.' \
+  '' \
+  ' To test access from here, run:' \
+  '   curl http://server:8080' \
+  '' \
+  ' This will FAIL until you allow port 8080 on the SERVER:' \
+  '   sudo ufw allow 8080' \
+  '' \
+  ' After allowing, try again:' \
+  '   curl http://server:8080' \
+  '=========================================================' \
+  > /etc/motd
+
+ENTRYPOINT ["tail", "-f", "/dev/null"]

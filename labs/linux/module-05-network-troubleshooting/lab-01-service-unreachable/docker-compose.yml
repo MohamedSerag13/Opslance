@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  linux-module-05-lab-01-service-unreachable:
+    build: .
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 05"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Service Unreachable — Nothing on Port 8080"
+      - "lab.id=module-05-lab-01-service-unreachable"

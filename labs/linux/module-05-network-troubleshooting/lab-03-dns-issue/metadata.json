@@ -1,0 +1,71 @@
+{
+  "id": "module-05-lab-03-dns-issue",
+  "module_number": 5,
+  "module_title": "Network & Connectivity Troubleshooting",
+  "title": "Broken DNS Resolution",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "networking",
+  "skills": ["dig", "ping", "resolv.conf", "DNS troubleshooting", "nameserver", "network layer isolation", "sudo tee"],
+  "scenario": "After a routine server migration, all DNS lookups have stopped working. Applications that use hostnames (like curl google.com) are failing, but the network link itself appears functional. A previous admin accidentally wrote a non-existent nameserver into /etc/resolv.conf. Your job is to isolate whether this is a DNS-layer issue or a full network outage, then fix the resolver configuration.",
+  "symptoms": [
+    "dig google.com fails or times out",
+    "curl google.com fails with name resolution error",
+    "ping 8.8.8.8 succeeds (proving network is up)",
+    "/etc/resolv.conf contains nameserver 1.2.3.4 (non-existent)"
+  ],
+  "mission": "Back up /etc/resolv.conf to /tmp/resolv.conf.bak. Confirm dig google.com fails while ping 8.8.8.8 succeeds (proving DNS-layer isolation). Fix /etc/resolv.conf to use a valid nameserver (8.8.8.8 or 1.1.1.1). Verify dig google.com now resolves.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Back up before you change anything",
+      "content": "Run: cp /etc/resolv.conf /tmp/resolv.conf.bak — good habit: always keep a copy of what you're about to change."
+    },
+    {
+      "number": 2,
+      "title": "Prove it's DNS, not the network",
+      "content": "Run 'ping -c 3 8.8.8.8'. If pings succeed, the IP layer is fine. Then run 'dig google.com'. If dig fails but ping 8.8.8.8 works, the problem is ONLY in name resolution, not connectivity."
+    },
+    {
+      "number": 3,
+      "title": "Read the broken config",
+      "content": "Run: cat /etc/resolv.conf — look at the nameserver line. Does that IP (1.2.3.4) look like a real DNS server to you?"
+    },
+    {
+      "number": 4,
+      "title": "Fix the resolver",
+      "content": "Run: echo 'nameserver 8.8.8.8' | sudo tee /etc/resolv.conf — this replaces the broken config with Google's public DNS. Use 'sudo tee' because /etc/resolv.conf is root-owned."
+    },
+    {
+      "number": 5,
+      "title": "Verify the fix",
+      "content": "Run: dig google.com — you should now see an ANSWER SECTION with IP addresses. Also try: curl -s https://google.com -o /dev/null -w '%{http_code}' to confirm HTTP resolution also works."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/etc/resolv.conf no longer contains broken nameserver 1.2.3.4",
+      "weight": 35
+    },
+    {
+      "id": "check_2",
+      "description": "/etc/resolv.conf contains a known-good nameserver (8.8.8.8 or 1.1.1.1)",
+      "weight": 35
+    },
+    {
+      "id": "check_3",
+      "description": "dig google.com resolves successfully",
+      "weight": 30
+    }
+  ],
+  "resource_limits": {
+    "cpu": "0.2",
+    "memory": "128m",
+    "pids": 60,
+    "network": "bridge"
+  }
+}

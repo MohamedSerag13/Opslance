@@ -1,0 +1,65 @@
+{
+  "id": "module-05-lab-02-wrong-port",
+  "module_number": 5,
+  "module_title": "Network & Connectivity Troubleshooting",
+  "title": "App on the Wrong Port",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "networking",
+  "skills": ["curl", "ss -tulnp", "port discovery", "connection refused", "port binding"],
+  "scenario": "A web application is deployed and claimed to be 'running', but curl localhost:8080 returns Connection refused. A junior engineer insists the app is healthy. Your investigation reveals the app IS running — just not on the port everyone expects. This is a classic misconfiguration where the app's startup config doesn't match the documented port.",
+  "symptoms": [
+    "curl localhost:8080 returns Connection refused",
+    "The application process IS running (visible in ps aux)",
+    "ss -tulnp shows a listener — but NOT on 8080"
+  ],
+  "mission": "Use ss -tulnp to discover which port the application is actually listening on. Record the actual port to /home/intern/actual_port.txt (just the number), then confirm the application works by running curl localhost:ACTUAL_PORT.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Confirm the failure",
+      "content": "Run 'curl localhost:8080'. You'll get Connection refused. Before assuming the app is down, check whether it's listening somewhere else."
+    },
+    {
+      "number": 2,
+      "title": "List all listeners",
+      "content": "Run 'ss -tulnp'. Look at every entry in the Local Address:Port column. Is there a port other than 8080 showing a python3 process?"
+    },
+    {
+      "number": 3,
+      "title": "Record the actual port",
+      "content": "Once you find the real port number, run: echo \"8081\" > /home/intern/actual_port.txt"
+    },
+    {
+      "number": 4,
+      "title": "Verify the app",
+      "content": "Run 'curl localhost:8081' — you should get a valid HTTP response (directory listing). The app was never broken, just misconfigured on the wrong port."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/actual_port.txt contains '8081'",
+      "weight": 40
+    },
+    {
+      "id": "check_2",
+      "description": "Port 8081 is currently listening",
+      "weight": 30
+    },
+    {
+      "id": "check_3",
+      "description": "curl localhost:8081 returns HTTP 200",
+      "weight": 30
+    }
+  ],
+  "resource_limits": {
+    "cpu": "0.2",
+    "memory": "128m",
+    "pids": 60,
+    "network": "none"
+  }
+}

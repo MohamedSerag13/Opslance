@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  linux-module-05-lab-02-wrong-port:
+    build: .
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 05"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=App on the Wrong Port"
+      - "lab.id=module-05-lab-02-wrong-port"

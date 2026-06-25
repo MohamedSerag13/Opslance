@@ -1,0 +1,19 @@
+version: '3.8'
+# Single service — the gatekeeper proxy enforces fake-ufw rules against any
+# non-loopback (eth0) connection, giving a realistic "works locally, blocked
+# remotely" experience without a second container.
+# worker.py injects network_mode: bridge so the container has an eth0 IP
+# the student can curl to test non-loopback enforcement.
+
+services:
+  linux-module-05-lab-04-firewall-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 05"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Firewall Blocking Remote Access"
+      - "lab.id=module-05-lab-04-firewall-blocking-access"

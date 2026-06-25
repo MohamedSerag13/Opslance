@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  linux-module-05-lab-03-dns-issue:
+    build: .
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 05"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Broken DNS Resolution"
+      - "lab.id=module-05-lab-03-dns-issue"

@@ -1,0 +1,70 @@
+{
+  "id": "module-05-lab-01-service-unreachable",
+  "module_number": 5,
+  "module_title": "Network & Connectivity Troubleshooting",
+  "title": "Service Unreachable — Nothing on Port 8080",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "networking",
+  "skills": ["curl", "ss -tulnp", "port listening", "connection refused", "python3 http.server", "process inspection"],
+  "scenario": "You have been handed access to a server that is supposed to be running a web service on port 8080. The on-call engineer reported 'connection refused' and escalated to you. Nothing has been started yet — the outage IS the starting state. Your job is to confirm the diagnosis methodically and then bring the service back up.",
+  "symptoms": [
+    "curl localhost:8080 returns 'Connection refused'",
+    "No process is listening on port 8080",
+    "ss -tulnp shows an empty listener table for port 8080"
+  ],
+  "mission": "Use curl to confirm connection refused, then use ss -tulnp to verify nothing is listening. Write your diagnosis to /home/intern/diagnosis.txt (include the phrase 'nothing listening' or similar). Then start the web server with 'python3 -m http.server 8080 &' and verify with curl.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Confirm the failure first",
+      "content": "Run 'curl localhost:8080'. You will see 'Connection refused'. This is the error we need to diagnose."
+    },
+    {
+      "number": 2,
+      "title": "Inspect the socket table",
+      "content": "Run 'ss -tulnp'. Look at the Local Address:Port column. Is there any entry for port 8080? The flags mean: -t TCP, -u UDP, -l listening, -n numeric, -p show process."
+    },
+    {
+      "number": 3,
+      "title": "Write your diagnosis",
+      "content": "Run: echo \"No process listening on port 8080\" > /home/intern/diagnosis.txt"
+    },
+    {
+      "number": 4,
+      "title": "Start the service",
+      "content": "Run: python3 -m http.server 8080 &  — the & sends it to the background so your shell stays usable."
+    },
+    {
+      "number": 5,
+      "title": "Verify the fix",
+      "content": "Run 'ss -tulnp' again — you should now see :8080 listed. Then 'curl localhost:8080' should return an HTML page (HTTP 200)."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/diagnosis.txt exists and contains the diagnosis keyword",
+      "weight": 40
+    },
+    {
+      "id": "check_2",
+      "description": "A process is now listening on port 8080",
+      "weight": 30
+    },
+    {
+      "id": "check_3",
+      "description": "curl localhost:8080 returns HTTP 200",
+      "weight": 30
+    }
+  ],
+  "resource_limits": {
+    "cpu": "0.2",
+    "memory": "128m",
+    "pids": 60,
+    "network": "none"
+  }
+}

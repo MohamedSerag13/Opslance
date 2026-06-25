@@ -1,0 +1,71 @@
+{
+  "id": "module-05-lab-04-firewall-blocking-access",
+  "module_number": 5,
+  "module_title": "Network & Connectivity Troubleshooting",
+  "title": "Firewall Blocking Remote Access",
+  "difficulty": "intermediate",
+  "estimated_minutes": 25,
+  "points": 150,
+  "category": "linux",
+  "subcategory": "networking",
+  "skills": ["ufw", "firewall troubleshooting", "ss -tulnp", "curl", "remote access", "port access control", "firewall rules"],
+  "scenario": "A web application is running and healthy — curl from the server itself confirms it. But a remote team can't reach it from their machines. The server firewall (ufw) is blocking inbound connections to port 8080 from external sources, while allowing local access. You need to diagnose the firewall state, understand why it blocks remote access but allows local access, and open the correct port.",
+  "symptoms": [
+    "curl localhost:8080 from the server succeeds (HTTP 200)",
+    "curl from any other machine returns HTTP 403 Forbidden",
+    "ss -tulnp shows the app IS listening on 8080",
+    "ufw status shows port 8080 as DENY"
+  ],
+  "mission": "Confirm the app is running locally with ss -tulnp and curl localhost:8080. Check ufw status to see the DENY rule for port 8080. Run 'sudo ufw allow 8080' to open the port. Verify remote access now works. Note: This lab uses a realistic simulation of ufw — see README for details.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Confirm the service is running",
+      "content": "Run 'ss -tulnp'. You should see the gatekeeper listening on port 8080. Then run 'curl localhost:8080' — it should return HTTP 200. The service is up; the firewall is the issue."
+    },
+    {
+      "number": 2,
+      "title": "Check the firewall",
+      "content": "Run 'sudo ufw status'. Look at the rules table. You'll see port 8080 is listed as DENY — that's why remote connections get blocked."
+    },
+    {
+      "number": 3,
+      "title": "Allow port 8080",
+      "content": "Run: sudo ufw allow 8080 — this adds an ALLOW rule for port 8080. Then run 'sudo ufw status' again to confirm the rule changed to ALLOW."
+    },
+    {
+      "number": 4,
+      "title": "Test remote access",
+      "content": "To simulate a remote machine, find your server's non-loopback IP: ip addr show eth0 | grep 'inet '. Then curl that IP on port 8080. It should now return HTTP 200."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "Gatekeeper is listening on port 8080",
+      "weight": 25
+    },
+    {
+      "id": "check_2",
+      "description": "fake-ufw rules show port 8080 as ALLOW",
+      "weight": 35
+    },
+    {
+      "id": "check_3",
+      "description": "curl localhost:8080 returns HTTP 200",
+      "weight": 20
+    },
+    {
+      "id": "check_4",
+      "description": "Non-loopback access to port 8080 returns HTTP 200",
+      "weight": 20
+    }
+  ],
+  "resource_limits": {
+    "cpu": "0.3",
+    "memory": "256m",
+    "pids": 80,
+    "network": "bridge"
+  }
+}
