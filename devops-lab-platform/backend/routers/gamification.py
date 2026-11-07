@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 import models
 from dependencies import get_current_student, require_admin, redis_client
+from achievements import ensure_achievement_catalog, achievement_progress
 from datetime import datetime, date, timedelta
 from routers.websocket import event_manager
 import json
@@ -11,22 +12,48 @@ router = APIRouter()
 
 @router.get("/profile")
 def get_gamification_profile(student=Depends(get_current_student), db: Session = Depends(get_db)):
-    achievements = db.query(models.StudentAchievement).filter_by(student_id=student.id).all()
+    ensure_achievement_catalog(db)
+    earned = {a.achievement_id: a for a in
+              db.query(models.StudentAchievement).filter_by(student_id=student.id).all()}
+
     achievements_list = []
-    for a in achievements:
-        achievements_list.append({
-            "id": a.achievement.id,
-            "name": a.achievement.name,
-            "icon": a.achievement.icon,
-            "earned_at": a.earned_at
+    for a in earned.values():
+        if a.achievement:
+            achievements_list.append({
+                "id": a.achievement.id,
+                "name": a.achievement.name,
+                "icon": a.achievement.icon,
+                "earned_at": a.earned_at
+            })
+
+    labs_passed = db.query(models.Submission.lab_id).filter_by(
+        student_id=student.id, passed=True).distinct().count()
+    progress_map = achievement_progress(student, labs_passed)
+
+    # Full catalog for the /achievements page — earned badges carry their
+    # timestamp, locked ones carry a {current, target} fill bar where it makes
+    # sense (binary badges have none).
+    catalog = []
+    for a in db.query(models.Achievement).all():
+        e = earned.get(a.id)
+        catalog.append({
+            "id": a.id,
+            "name": a.name,
+            "description": a.description,
+            "icon": a.icon,
+            "xp_reward": a.xp_reward,
+            "earned": e is not None,
+            "earned_at": e.earned_at if e else None,
+            "progress": None if e else progress_map.get(a.id),
         })
-    
+
     return {
         "xp": student.xp,
         "level": student.level,
         "current_streak": student.current_streak,
         "longest_streak": student.longest_streak,
-        "achievements": achievements_list
+        "achievements": achievements_list,
+        "catalog": catalog,
     }
 
 @router.get("/leaderboard/{scope}")
@@ -89,7 +116,7 @@ def toggle_challenge_mode(active: bool, group_id: str, background_tasks: Backgro
                 if s:
                     leaderboard.append({
                         "rank": rank,
-                        "student_id": s.id,
+                        "student_id": str(s.id),
                         "name": s.full_name,
                         "score": int(score)
                     })

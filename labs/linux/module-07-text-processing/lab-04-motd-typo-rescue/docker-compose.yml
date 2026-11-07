@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-07-lab-04-motd-typo-rescue:
+    build: .
+    container_name: lab-07-04-motd-typo-rescue
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 07"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Message-of-the-Day Rescue"
+      - "lab.id=module-07-lab-04-motd-typo-rescue"

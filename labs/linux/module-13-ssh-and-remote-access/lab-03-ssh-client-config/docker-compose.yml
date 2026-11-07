@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-13-lab-03-ssh-client-config:
+    build: .
+    container_name: lab-13-03-ssh-client-config
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 13"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Tame the Hostnames"
+      - "lab.id=module-13-lab-03-ssh-client-config"

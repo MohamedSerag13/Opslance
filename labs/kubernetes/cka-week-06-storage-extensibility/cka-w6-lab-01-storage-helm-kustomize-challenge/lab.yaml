@@ -1,0 +1,325 @@
+schema_version: 2
+lab: cka-w6-lab-01-storage-helm-kustomize-challenge
+title: CKA Week 6 Challenge - Storage, Helm, Kustomize, CRDs
+category: kubernetes
+domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+pass_mark: 66
+grading_scale: points
+total: 120
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: task_01
+  order: 1
+  domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+  weight: 10
+  prompt: 'PV manual-pv: 1Gi, RWO, hostPath /mnt/data'
+  context: null
+  hints:
+  - title: Static vs dynamic binding
+    content: manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path
+      provisioner. A PVC binds on capacity + accessModes + className matching.
+  - title: RWO vs RWOP
+    content: ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam
+      loves this distinction.
+  - title: Helm lifecycle order
+    content: install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev
+      3). helm history shows every revision; get values shows the live ones.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: task
+    description: 'PV manual-pv: 1Gi, RWO, hostPath /mnt/data'
+  time_target_minutes: 12
+  description: 'Create a PersistentVolume manual-pv: capacity 1Gi, accessModes ReadWriteOnce, hostPath
+    /mnt/data. The check verifies all three fields.'
+- id: task_02
+  order: 2
+  domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+  weight: 10
+  prompt: PVC manual-pvc is Bound to manual-pv
+  context: null
+  hints:
+  - title: Static vs dynamic binding
+    content: manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path
+      provisioner. A PVC binds on capacity + accessModes + className matching.
+  - title: RWO vs RWOP
+    content: ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam
+      loves this distinction.
+  - title: Helm lifecycle order
+    content: install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev
+      3). helm history shows every revision; get values shows the live ones.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: task
+    description: PVC manual-pvc is Bound to manual-pv
+  time_target_minutes: 12
+  description: Create a PersistentVolumeClaim manual-pvc that binds to manual-pv. The check verifies the
+    claim status is Bound.
+- id: task_03
+  order: 3
+  domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+  weight: 10
+  prompt: Pod pvc-user mounts manual-pvc at /usr/share/nginx/html and runs
+  context: null
+  hints:
+  - title: Static vs dynamic binding
+    content: manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path
+      provisioner. A PVC binds on capacity + accessModes + className matching.
+  - title: RWO vs RWOP
+    content: ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam
+      loves this distinction.
+  - title: Helm lifecycle order
+    content: install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev
+      3). helm history shows every revision; get values shows the live ones.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: task
+    description: Pod pvc-user mounts manual-pvc at /usr/share/nginx/html and runs
+  time_target_minutes: 12
+  description: Create a pod pvc-user that mounts manual-pvc at /usr/share/nginx/html and runs nginx. The
+    check verifies the volume mount and pod phase.
+- id: task_04
+  order: 4
+  domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+  weight: 10
+  prompt: Dynamic PVC dyn-pvc (1Gi, storageClassName local-path) is Bound
+  context: null
+  hints:
+  - title: Static vs dynamic binding
+    content: manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path
+      provisioner. A PVC binds on capacity + accessModes + className matching.
+  - title: RWO vs RWOP
+    content: ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam
+      loves this distinction.
+  - title: Helm lifecycle order
+    content: install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev
+      3). helm history shows every revision; get values shows the live ones.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: task
+    description: Dynamic PVC dyn-pvc (1Gi, storageClassName local-path) is Bound
+  time_target_minutes: 12
+  description: Create a dynamic PVC dyn-pvc requesting 1Gi from storageClassName local-path; it must bind
+    automatically. The check verifies Bound status.
+- id: task_05
+  order: 5
+  domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+  weight: 10
+  prompt: 'Rescue: seeded pending-pvc (bad StorageClass) is now Bound'
+  context: null
+  hints:
+  - title: Static vs dynamic binding
+    content: manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path
+      provisioner. A PVC binds on capacity + accessModes + className matching.
+  - title: RWO vs RWOP
+    content: ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam
+      loves this distinction.
+  - title: Helm lifecycle order
+    content: install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev
+      3). helm history shows every revision; get values shows the live ones.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 5
+    kind: task
+    description: 'Rescue: seeded pending-pvc (bad StorageClass) is now Bound'
+  time_target_minutes: 12
+  description: The seeded pending-pvc references a missing StorageClass — rescue it (recreate/patch it
+    against an existing class) so it becomes Bound. The check verifies status.
+- id: task_06
+  order: 6
+  domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+  weight: 10
+  prompt: 'StorageClass fast: local-path provisioner, Retain, allowVolumeExpansion'
+  context: null
+  hints:
+  - title: Static vs dynamic binding
+    content: manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path
+      provisioner. A PVC binds on capacity + accessModes + className matching.
+  - title: RWO vs RWOP
+    content: ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam
+      loves this distinction.
+  - title: Helm lifecycle order
+    content: install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev
+      3). helm history shows every revision; get values shows the live ones.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 6
+    kind: task
+    description: 'StorageClass fast: local-path provisioner, Retain, allowVolumeExpansion'
+  time_target_minutes: 12
+  description: 'Create a StorageClass named fast using the local-path provisioner with reclaimPolicy Retain
+    and allowVolumeExpansion: true. The check verifies all fields.'
+- id: task_07
+  order: 7
+  domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+  weight: 10
+  prompt: Helm release webapp installed in w6 with replicaCount 2
+  context: null
+  hints:
+  - title: Static vs dynamic binding
+    content: manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path
+      provisioner. A PVC binds on capacity + accessModes + className matching.
+  - title: RWO vs RWOP
+    content: ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam
+      loves this distinction.
+  - title: Helm lifecycle order
+    content: install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev
+      3). helm history shows every revision; get values shows the live ones.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 7
+    kind: task
+    description: Helm release webapp installed in w6 with replicaCount 2
+  time_target_minutes: 12
+  description: Install the provided chart as a Helm release named webapp into namespace w6 with replicaCount=2.
+    The check verifies the release and the replica count.
+- id: task_08
+  order: 8
+  domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+  weight: 10
+  prompt: Helm upgrade pins image.tag=1.28
+  context: null
+  hints:
+  - title: Static vs dynamic binding
+    content: manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path
+      provisioner. A PVC binds on capacity + accessModes + className matching.
+  - title: RWO vs RWOP
+    content: ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam
+      loves this distinction.
+  - title: Helm lifecycle order
+    content: install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev
+      3). helm history shows every revision; get values shows the live ones.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 8
+    kind: task
+    description: Helm upgrade pins image.tag=1.28
+  time_target_minutes: 12
+  description: Upgrade the webapp release pinning image.tag=1.28 (`helm upgrade --set image.tag=1.28`).
+    The check verifies the deployed image.
+- id: task_09
+  order: 9
+  domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+  weight: 10
+  prompt: Helm rollback executed (history shows a Rollback entry)
+  context: null
+  hints:
+  - title: Static vs dynamic binding
+    content: manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path
+      provisioner. A PVC binds on capacity + accessModes + className matching.
+  - title: RWO vs RWOP
+    content: ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam
+      loves this distinction.
+  - title: Helm lifecycle order
+    content: install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev
+      3). helm history shows every revision; get values shows the live ones.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 9
+    kind: task
+    description: Helm rollback executed (history shows a Rollback entry)
+  time_target_minutes: 12
+  description: Roll the webapp release back one revision (`helm rollback`). The check inspects helm history
+    for a Rollback entry.
+- id: task_10
+  order: 10
+  domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+  weight: 10
+  prompt: helm template output saved to /root/chart-render.yaml (Deployment + ConfigMap)
+  context: null
+  hints:
+  - title: Static vs dynamic binding
+    content: manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path
+      provisioner. A PVC binds on capacity + accessModes + className matching.
+  - title: RWO vs RWOP
+    content: ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam
+      loves this distinction.
+  - title: Helm lifecycle order
+    content: install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev
+      3). helm history shows every revision; get values shows the live ones.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 10
+    kind: task
+    description: helm template output saved to /root/chart-render.yaml (Deployment + ConfigMap)
+  time_target_minutes: 12
+  description: Render the chart with `helm template` and save the output to /root/chart-render.yaml. The
+    check requires a Deployment and a ConfigMap in the file.
+- id: task_11
+  order: 11
+  domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+  weight: 10
+  prompt: 'Kustomize overlay prod applied: cka-web at 3 replicas on nginx:1.28'
+  context: null
+  hints:
+  - title: Static vs dynamic binding
+    content: manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path
+      provisioner. A PVC binds on capacity + accessModes + className matching.
+  - title: RWO vs RWOP
+    content: ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam
+      loves this distinction.
+  - title: Helm lifecycle order
+    content: install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev
+      3). helm history shows every revision; get values shows the live ones.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 11
+    kind: task
+    description: 'Kustomize overlay prod applied: cka-web at 3 replicas on nginx:1.28'
+  time_target_minutes: 12
+  description: Apply the kustomize prod overlay so deployment cka-web runs 3 replicas on nginx:1.28. The
+    check verifies the live deployment.
+- id: task_12
+  order: 12
+  domain: CKA Week 6 - Storage, Helm, Kustomize and Extension Points
+  weight: 10
+  prompt: CRD databases.example.com Established + CR my-db with spec.size=small
+  context: null
+  hints:
+  - title: Static vs dynamic binding
+    content: manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path
+      provisioner. A PVC binds on capacity + accessModes + className matching.
+  - title: RWO vs RWOP
+    content: ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam
+      loves this distinction.
+  - title: Helm lifecycle order
+    content: install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev
+      3). helm history shows every revision; get values shows the live ones.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 12
+    kind: task
+    description: CRD databases.example.com Established + CR my-db with spec.size=small
+  time_target_minutes: 12
+  description: Create CRD databases.example.com (provided manifest) and a custom resource my-db with spec.size=small.
+    The check verifies the CRD is Established and the CR spec.

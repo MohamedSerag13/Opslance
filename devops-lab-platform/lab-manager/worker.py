@@ -6,6 +6,7 @@ import re
 import socket
 import docker
 import yaml
+import traceback
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from database import SessionLocal
@@ -19,6 +20,27 @@ docker_client = docker.from_env()
 
 SUDOERS_HOST_PATH = os.path.join(os.path.dirname(__file__), "sudoers-lab-student")
 SUDOERS_CONTAINER_PATH = "/etc/sudoers.d/lab-student"
+
+
+def _resolve_labs_host_path(mountinfo_path: str = "/proc/self/mountinfo") -> str:
+    """Derive the host-side path of the /labs-repo mount.
+
+    Bind mounts for lab containers are resolved by the host Docker daemon,
+    so relative paths from the lab compose files must be rewritten to the
+    absolute host path. This container's mount table records exactly the
+    source path the daemon used, which removes the need to hardcode
+    LABS_HOST_PATH per machine.
+    """
+    try:
+        with open(mountinfo_path) as fh:
+            for line in fh:
+                fields = line.split()
+                # fields[3] = source path on the host, fields[4] = mount point
+                if len(fields) > 4 and fields[4] == "/labs-repo" and fields[3].startswith("/"):
+                    return fields[3]
+    except OSError:
+        pass
+    return "./labs-repo"
 
 
 def _inject_sudoers(container_name: str) -> None:
@@ -75,7 +97,72 @@ def _inject_sudoers(container_name: str) -> None:
         print(f"[sudoers] ERROR injecting sudoers into {container_name}: {exc}")
 
 
+def _resolve_labs_host_path_docker() -> str:
+    """Resolve the /labs-repo bind source via the Docker API.
+
+    Docker Desktop (macOS/Windows) reports the true client-side source path
+    here (e.g. /Users/you/.../labs), while /proc/self/mountinfo only shows
+    VM-internal paths — so this is the reliable method on Desktop installs.
+    """
+    try:
+        own = docker_client.containers.get(socket.gethostname())
+        for m in (own.attrs.get("Mounts") or []):
+            if m.get("Destination") == "/labs-repo":
+                src = (m.get("Source") or "").rstrip("/")
+                if src.startswith("/"):
+                    return src
+    except Exception as e:
+        print(f"[labs-path] docker-inspect resolution failed: {e}")
+    return None
+
+
+def _labs_host_path() -> str:
+    """Host-side path of the labs dir, for rewriting relative bind mounts.
+
+    Order: LABS_HOST_PATH env > docker inspect (works on Docker Desktop)
+    > mountinfo (works on plain Linux). Returns None only when nothing
+    works — start_lab then refuses bind-mount labs with a clear error
+    instead of crashing every start like os.path.join(None, ...) did.
+    """
+    env = os.getenv("LABS_HOST_PATH")
+    if env:
+        print(f"[labs-path] using LABS_HOST_PATH from env: {env}")
+        return env.rstrip("/")
+    via_docker = _resolve_labs_host_path_docker()
+    if via_docker:
+        print(f"[labs-path] resolved labs host path via docker inspect: {via_docker}")
+        return via_docker
+    via_mountinfo = _resolve_labs_host_path()
+    if via_mountinfo:
+        print(f"[labs-path] resolved labs host path via mountinfo: {via_mountinfo}")
+        return via_mountinfo
+    print("[labs-path] WARNING: host-side labs path unknown. Labs with relative "
+          "bind mounts will fail - set LABS_HOST_PATH in .env (see .env.example).")
+    return None
+
+
 def start_lab(data):
+    """Wrapper: any start failure must be loud in the logs AND expire the
+    session, so the UI stops polling a 'starting' session forever."""
+    session_id = data.get("session_id")
+    try:
+        _start_lab_impl(data)
+    except Exception:
+        print(f"[start_lab] FAILED for session {session_id} - traceback follows")
+        traceback.print_exc()
+        try:
+            db = SessionLocal()
+            s = db.query(models.LabSession).filter_by(id=session_id).first()
+            if s and s.status == "starting":
+                s.status = "expired"
+                db.commit()
+                print(f"[start_lab] session {session_id} marked expired")
+            db.close()
+        except Exception:
+            print("[start_lab] could not mark the session expired after failure")
+
+
+def _start_lab_impl(data):
 
     session_id = data["session_id"]
     student_id = data["student_id"]
@@ -134,18 +221,19 @@ def start_lab(data):
                     break
                 
     if not src:
-        print(f"Lab {lab_id} not found in /labs-repo")
-        return
-        
+        raise RuntimeError(
+            f"Lab {lab_id} not found under /labs-repo - is the labs volume mounted "
+            "and did the backend lab sync run? (check: docker compose logs backend)"
+        )
+    print(f"[start_lab] found lab dir {src}")
+
     dest = f"/tmp/lab-envs/{student_id}-{lab_id}"
     # Always copy fresh to avoid stale files from previous failures
     shutil.copytree(src, dest, dirs_exist_ok=True)
-        
-        
+
     # Get relative path from /labs-repo
     rel_path = os.path.relpath(src, "/labs-repo")
-    labs_host_path = os.getenv("LABS_HOST_PATH", "./labs-repo")
-    host_lab_path = os.path.join(labs_host_path, rel_path)
+    labs_host_path = _labs_host_path()
     
     # Remove hardcoded container_name and rewrite volume paths
     compose_path = os.path.join(dest, "docker-compose.yml")
@@ -158,12 +246,22 @@ def start_lab(data):
         
         # Rewrite relative bind mounts e.g. - ./solution:/solution:ro -> - /absolute/host/path/solution:/solution:ro
         # We look for lines like `      - ./something:` or `- "./something:"`
-        def replace_volume(match):
-            prefix = match.group(1)
-            rest = match.group(2)
-            return f"{prefix}{host_lab_path}/{rest}"
-            
-        content = re.sub(r'^(\s*-\s*["\']?)\./(.*?)$', replace_volume, content, flags=re.MULTILINE)
+        if re.search(r'^(\s*-\s*["\']?)\./', content, flags=re.MULTILINE):
+            if not labs_host_path:
+                raise RuntimeError(
+                    "This lab uses relative bind mounts but the host-side labs path is "
+                    "unknown (typical on Docker Desktop). Set LABS_HOST_PATH=/absolute/"
+                    "host/path/to/Opslance/labs in .env and restart the stack."
+                )
+            host_lab_path = os.path.join(labs_host_path, rel_path)
+            print(f"[start_lab] rewriting relative bind mounts against {host_lab_path}")
+
+            def replace_volume(match):
+                prefix = match.group(1)
+                rest = match.group(2)
+                return f"{prefix}{host_lab_path}/{rest}"
+
+            content = re.sub(r'^(\s*-\s*["\']?)\./(.*?)$', replace_volume, content, flags=re.MULTILINE)
         
         # US-001 — Parse with PyYAML and inject resource limits
         # Load per-lab overrides from metadata.json if present
@@ -186,23 +284,39 @@ def start_lab(data):
 
         try:
             compose = yaml.safe_load(content)
+            # metadata.json may opt a lab out of the default lockdown via
+            # resource_limits.privileged — k3s-based labs need privileged
+            # containers, real service networking and generous resources.
+            privileged_lab = bool(lab_limits.get("privileged", False))
             for svc in compose.get("services", {}).values():
-                deploy = svc.setdefault("deploy", {})
-                deploy["resources"] = {
-                    "limits":       {"cpus": defaults["cpu"], "memory": defaults["memory"], "pids": defaults["pids"]},
-                    "reservations": {"cpus": str(float(defaults["cpu"]) / 2), "memory": "32m"},
-                }
-                svc["pids_limit"] = defaults["pids"]
-                ulimits = svc.setdefault("ulimits", {})
-                ulimits["nproc"] = {"soft": defaults["pids"], "hard": defaults["pids"]}
-                ulimits["nofile"] = {"soft": 256, "hard": 512}
-                svc["network_mode"] = defaults["network"]
-                svc["cap_drop"] = ["ALL"]
-                # CHOWN, SETUID, SETGID are required for sudo's SUID mechanism.
-                # Privilege scope is enforced via /etc/sudoers.d/lab-student (whitelist)
-                # rather than no-new-privileges, which would block sudo entirely.
-                # AUDIT_WRITE silences "unable to send audit message" warnings from sudo.
-                svc["cap_add"] = ["CHOWN", "SETUID", "SETGID", "AUDIT_WRITE"]
+                if privileged_lab:
+                    svc["privileged"] = True
+                    svc.pop("network_mode", None)
+                else:
+                    deploy = svc.setdefault("deploy", {})
+                    deploy["resources"] = {
+                        "limits":       {"cpus": defaults["cpu"], "memory": defaults["memory"], "pids": defaults["pids"]},
+                        "reservations": {"cpus": str(float(defaults["cpu"]) / 2), "memory": "32m"},
+                    }
+                    svc["pids_limit"] = defaults["pids"]
+                    ulimits = svc.setdefault("ulimits", {})
+                    ulimits["nproc"] = {"soft": defaults["pids"], "hard": defaults["pids"]}
+                    ulimits["nofile"] = {"soft": 256, "hard": 512}
+                    svc["network_mode"] = defaults["network"]
+                    svc["cap_drop"] = ["ALL"]
+                    # CHOWN, SETUID, SETGID are required for sudo's SUID mechanism.
+                    # Privilege scope is enforced via /etc/sudoers.d/lab-student (whitelist)
+                    # rather than no-new-privileges, which would block sudo entirely.
+                    # AUDIT_WRITE silences "unable to send audit message" warnings from sudo.
+                    svc["cap_add"] = ["CHOWN", "SETUID", "SETGID", "AUDIT_WRITE"]
+                # Keep terminal containers alive: compose CMDs like plain
+                # `bash` exit immediately without a TTY, which would break
+                # the websocket terminal and the /check.sh verification exec.
+                svc["tty"] = True
+                svc["stdin_open"] = True
+
+            if privileged_lab:
+                print("[limits] privileged lab mode: k3s resources unlocked")
 
             content = yaml.dump(compose)
         except Exception as e:
@@ -213,21 +327,37 @@ def start_lab(data):
     
     # 2. Run docker-compose up
     try:
+        print(f"[start_lab] running docker-compose up for {project_name} "
+              f"(first run builds the image; k3s labs pull ~200MB on first start)")
         subprocess.run(["docker-compose", "-p", project_name, "up", "-d", "--build"], cwd=dest, check=True)
-    except Exception as e:
-        print(f"Failed to start lab: {e}")
-        return
+    except Exception:
+        print("Failed to start lab - the docker-compose output above is the cause")
+        traceback.print_exc()
+        raise
     
+    # The terminal/verification container is the FIRST service listed in the
+    # lab's docker-compose.yml — select it deterministically instead of
+    # relying on `docker-compose ps` output ordering.
+    first_service = None
     try:
-        out = subprocess.check_output(["docker-compose", "-p", project_name, "ps", "-q"], cwd=dest)
-        container_ids = out.decode('utf-8').strip().split('\n')
-        if container_ids and container_ids[0]:
+        with open(compose_path) as f:
+            first_service = next(iter((yaml.safe_load(f) or {}).get("services", {})), None)
+    except Exception:
+        first_service = None
+
+    try:
+        ps_cmd = ["docker-compose", "-p", project_name, "ps", "-q"]
+        if first_service:
+            ps_cmd.append(first_service)
+        out = subprocess.check_output(ps_cmd, cwd=dest)
+        container_ids = [c for c in out.decode('utf-8').strip().split('\n') if c.strip()]
+        if container_ids:
             container_obj = docker_client.containers.get(container_ids[0])
             container_name = container_obj.name
         else:
-            container_name = f"{project_name}-1"
-    except:
-        container_name = f"{project_name}-1"
+            container_name = f"{project_name}-{first_service or '1'}-1"
+    except Exception:
+        container_name = f"{project_name}-{first_service or '1'}-1"
     
     # ── Inject restricted sudoers whitelist ──────────────────────────────────
     # Replace the broad NOPASSWD:ALL baked into lab Dockerfiles with a
@@ -317,15 +447,27 @@ def cleanup_idle_labs():
         for sess in expired_sessions:
             reason = "idle timeout" if (sess.last_activity_at and sess.last_activity_at < idle_threshold) else "hard expiry"
             print(f"[cleanup] Expiring session {sess.id} for student {sess.student_id} due to {reason}")
-            
+
             sess.status = "expired"
             sess.auto_stopped = True
             db.commit()
-            
+
             stop_lab({
                 "student_id": str(sess.student_id),
                 "lab_id": sess.lab_id
             })
+
+        # Sessions stuck in 'starting' mean the worker failed before the status
+        # could change — expire them so the UI stops polling forever.
+        stuck_starting = db.query(models.LabSession).filter(
+            models.LabSession.status == "starting",
+            models.LabSession.started_at < now - timedelta(minutes=10),
+        ).all()
+        for sess in stuck_starting:
+            print(f"[cleanup] Expiring stuck 'starting' session {sess.id} (worker never finished)")
+            sess.status = "expired"
+            sess.auto_stopped = True
+            db.commit()
     except Exception as e:
         print(f"[cleanup] Error during idle cleanup: {e}")
         db.rollback()

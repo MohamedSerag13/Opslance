@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-06-lab-01-who-am-i:
+    build: .
+    container_name: lab-06-01-who-am-i
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 06"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Who Am I? Account Triage"
+      - "lab.id=module-06-lab-01-who-am-i"

@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-09-lab-02-remove-rogue-package:
+    build: .
+    container_name: lab-09-02-remove-rogue-package
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 09"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Remove the Rogue Package"
+      - "lab.id=module-09-lab-02-remove-rogue-package"

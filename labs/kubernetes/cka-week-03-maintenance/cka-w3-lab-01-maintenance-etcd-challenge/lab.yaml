@@ -1,0 +1,339 @@
+schema_version: 2
+lab: cka-w3-lab-01-maintenance-etcd-challenge
+title: CKA Week 3 Challenge - Maintenance, etcd, Logging
+category: kubernetes
+domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+pass_mark: 66
+grading_scale: points
+total: 120
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: task_01
+  order: 1
+  domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+  weight: 10
+  prompt: 'Drain (--ignore-daemonsets --delete-emptydir-data) then uncordon: bare-worker evicted, node
+    schedulable'
+  context: null
+  hints:
+  - title: Drain proof
+    content: bare-worker has no owner References, so after drain + uncordon it is gone for good - that
+      is your proof the drain actually evicted it. Deployments come back; bare pods do not.
+  - title: The exam etcd flow
+    content: On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd.
+      Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork
+      - same steps, same flags, copy them exactly.
+  - title: snapshot status is offline
+    content: etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db
+      is a real snapshot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: task
+    description: 'Drain (--ignore-daemonsets --delete-emptydir-data) then uncordon: bare-worker evicted,
+      node schedulable'
+  time_target_minutes: 12
+  description: Drain node bare-worker with --ignore-daemonsets --delete-emptydir-data, then uncordon it
+    again. The check verifies the node was drained (evicted pods) and is schedulable afterwards.
+- id: task_02
+  order: 2
+  domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+  weight: 10
+  prompt: etcd-helper pod Running in kube-system (k3s image, hostNetwork, /tls + /snapshots hostPaths)
+  context: null
+  hints:
+  - title: Drain proof
+    content: bare-worker has no owner References, so after drain + uncordon it is gone for good - that
+      is your proof the drain actually evicted it. Deployments come back; bare pods do not.
+  - title: The exam etcd flow
+    content: On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd.
+      Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork
+      - same steps, same flags, copy them exactly.
+  - title: snapshot status is offline
+    content: etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db
+      is a real snapshot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: task
+    description: etcd-helper pod Running in kube-system (k3s image, hostNetwork, /tls + /snapshots hostPaths)
+  time_target_minutes: 12
+  description: Get the seeded etcd-helper pod in kube-system Running (k3s image, hostNetwork, hostPath
+    mounts for /tls and /snapshots are pre-configured). The check inspects the pod spec and phase.
+- id: task_03
+  order: 3
+  domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+  weight: 10
+  prompt: etcd snapshot saved via helper and copied to /root/etcd-backup.db (valid snapshot file)
+  context: null
+  hints:
+  - title: Drain proof
+    content: bare-worker has no owner References, so after drain + uncordon it is gone for good - that
+      is your proof the drain actually evicted it. Deployments come back; bare pods do not.
+  - title: The exam etcd flow
+    content: On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd.
+      Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork
+      - same steps, same flags, copy them exactly.
+  - title: snapshot status is offline
+    content: etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db
+      is a real snapshot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: task
+    description: etcd snapshot saved via helper and copied to /root/etcd-backup.db (valid snapshot file)
+  time_target_minutes: 12
+  description: Use the helper to take an etcd snapshot and copy it to /root/etcd-backup.db. The check
+    verifies a non-empty file that etcdctl recognises as a valid snapshot.
+- id: task_04
+  order: 4
+  domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+  weight: 10
+  prompt: /root/snapshot-status.txt captures the snapshot status table (DB size present)
+  context: null
+  hints:
+  - title: Drain proof
+    content: bare-worker has no owner References, so after drain + uncordon it is gone for good - that
+      is your proof the drain actually evicted it. Deployments come back; bare pods do not.
+  - title: The exam etcd flow
+    content: On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd.
+      Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork
+      - same steps, same flags, copy them exactly.
+  - title: snapshot status is offline
+    content: etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db
+      is a real snapshot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: task
+    description: /root/snapshot-status.txt captures the snapshot status table (DB size present)
+  time_target_minutes: 12
+  description: Save the snapshot status output (etcdctl snapshot status) to /root/snapshot-status.txt.
+    The check requires the DB size line to be present.
+- id: task_05
+  order: 5
+  domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+  weight: 10
+  prompt: /root/backup-manifest.txt contains the snapshot sha256
+  context: null
+  hints:
+  - title: Drain proof
+    content: bare-worker has no owner References, so after drain + uncordon it is gone for good - that
+      is your proof the drain actually evicted it. Deployments come back; bare pods do not.
+  - title: The exam etcd flow
+    content: On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd.
+      Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork
+      - same steps, same flags, copy them exactly.
+  - title: snapshot status is offline
+    content: etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db
+      is a real snapshot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 5
+    kind: task
+    description: /root/backup-manifest.txt contains the snapshot sha256
+  time_target_minutes: 12
+  description: Write the snapshot's sha256 checksum into /root/backup-manifest.txt. The check verifies
+    the hash matches /root/etcd-backup.db.
+- id: task_06
+  order: 6
+  domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+  weight: 10
+  prompt: 'Restore drilled: etcdutl restore produced /snapshots/restored/member inside the helper'
+  context: null
+  hints:
+  - title: Drain proof
+    content: bare-worker has no owner References, so after drain + uncordon it is gone for good - that
+      is your proof the drain actually evicted it. Deployments come back; bare pods do not.
+  - title: The exam etcd flow
+    content: On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd.
+      Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork
+      - same steps, same flags, copy them exactly.
+  - title: snapshot status is offline
+    content: etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db
+      is a real snapshot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 6
+    kind: task
+    description: 'Restore drilled: etcdutl restore produced /snapshots/restored/member inside the helper'
+  time_target_minutes: 12
+  description: 'Drill the restore path: run `etcdutl snapshot restore` inside the helper so /snapshots/restored/member
+    exists. The check verifies the restored member directory.'
+- id: task_07
+  order: 7
+  domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+  weight: 10
+  prompt: /root/crash.log captures logs --previous of the crash-looping fail-log deployment
+  context: null
+  hints:
+  - title: Drain proof
+    content: bare-worker has no owner References, so after drain + uncordon it is gone for good - that
+      is your proof the drain actually evicted it. Deployments come back; bare pods do not.
+  - title: The exam etcd flow
+    content: On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd.
+      Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork
+      - same steps, same flags, copy them exactly.
+  - title: snapshot status is offline
+    content: etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db
+      is a real snapshot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 7
+    kind: task
+    description: /root/crash.log captures logs --previous of the crash-looping fail-log deployment
+  time_target_minutes: 12
+  description: The fail-log deployment is crash-looping. Capture the PREVIOUS container's logs with `kubectl
+    logs --previous` into /root/crash.log. The check verifies the file mentions the crash.
+- id: task_08
+  order: 8
+  domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+  weight: 10
+  prompt: /root/top-pods.txt has live metrics-server output for all pods
+  context: null
+  hints:
+  - title: Drain proof
+    content: bare-worker has no owner References, so after drain + uncordon it is gone for good - that
+      is your proof the drain actually evicted it. Deployments come back; bare pods do not.
+  - title: The exam etcd flow
+    content: On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd.
+      Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork
+      - same steps, same flags, copy them exactly.
+  - title: snapshot status is offline
+    content: etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db
+      is a real snapshot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 8
+    kind: task
+    description: /root/top-pods.txt has live metrics-server output for all pods
+  time_target_minutes: 12
+  description: Save live `kubectl top pods` output (metrics-server) for all pods to /root/top-pods.txt.
+    The check requires real metrics columns.
+- id: task_09
+  order: 9
+  domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+  weight: 10
+  prompt: /root/events-ops.txt shows events mentioning fail-log
+  context: null
+  hints:
+  - title: Drain proof
+    content: bare-worker has no owner References, so after drain + uncordon it is gone for good - that
+      is your proof the drain actually evicted it. Deployments come back; bare pods do not.
+  - title: The exam etcd flow
+    content: On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd.
+      Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork
+      - same steps, same flags, copy them exactly.
+  - title: snapshot status is offline
+    content: etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db
+      is a real snapshot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 9
+    kind: task
+    description: /root/events-ops.txt shows events mentioning fail-log
+  time_target_minutes: 12
+  description: Save the cluster events mentioning fail-log into /root/events-ops.txt. The check greps
+    for fail-log.
+- id: task_10
+  order: 10
+  domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+  weight: 10
+  prompt: /root/static-manifests.txt lists the k3s static pod manifests (coredns visible)
+  context: null
+  hints:
+  - title: Drain proof
+    content: bare-worker has no owner References, so after drain + uncordon it is gone for good - that
+      is your proof the drain actually evicted it. Deployments come back; bare pods do not.
+  - title: The exam etcd flow
+    content: On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd.
+      Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork
+      - same steps, same flags, copy them exactly.
+  - title: snapshot status is offline
+    content: etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db
+      is a real snapshot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 10
+    kind: task
+    description: /root/static-manifests.txt lists the k3s static pod manifests (coredns visible)
+  time_target_minutes: 12
+  description: Save the k3s static pod manifest listing to /root/static-manifests.txt — coredns must be
+    visible. The check greps for coredns.
+- id: task_11
+  order: 11
+  domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+  weight: 10
+  prompt: /root/node-describe.txt is a node describe output containing Conditions
+  context: null
+  hints:
+  - title: Drain proof
+    content: bare-worker has no owner References, so after drain + uncordon it is gone for good - that
+      is your proof the drain actually evicted it. Deployments come back; bare pods do not.
+  - title: The exam etcd flow
+    content: On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd.
+      Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork
+      - same steps, same flags, copy them exactly.
+  - title: snapshot status is offline
+    content: etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db
+      is a real snapshot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 11
+    kind: task
+    description: /root/node-describe.txt is a node describe output containing Conditions
+  time_target_minutes: 12
+  description: Save `kubectl describe node <name>` output to /root/node-describe.txt. The check requires
+    the Conditions section.
+- id: task_12
+  order: 12
+  domain: CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring
+  weight: 10
+  prompt: etcd endpoint health verified through the helper
+  context: null
+  hints:
+  - title: Drain proof
+    content: bare-worker has no owner References, so after drain + uncordon it is gone for good - that
+      is your proof the drain actually evicted it. Deployments come back; bare pods do not.
+  - title: The exam etcd flow
+    content: On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd.
+      Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork
+      - same steps, same flags, copy them exactly.
+  - title: snapshot status is offline
+    content: etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db
+      is a real snapshot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 12
+    kind: task
+    description: etcd endpoint health verified through the helper
+  time_target_minutes: 12
+  description: Verify etcd endpoint health through the helper pod (etcdctl endpoint health). The check
+    inspects the helper's recorded result.

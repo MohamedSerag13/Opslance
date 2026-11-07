@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-08-lab-02-script-arguments:
+    build: .
+    container_name: lab-08-02-script-arguments
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 08"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Scripts That Take Arguments"
+      - "lab.id=module-08-lab-02-script-arguments"

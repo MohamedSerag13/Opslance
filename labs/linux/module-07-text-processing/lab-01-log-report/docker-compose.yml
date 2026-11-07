@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-07-lab-01-log-report:
+    build: .
+    container_name: lab-07-01-log-report
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 07"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Traffic Report from Raw Logs"
+      - "lab.id=module-07-lab-01-log-report"

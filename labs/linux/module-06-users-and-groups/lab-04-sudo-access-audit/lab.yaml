@@ -1,0 +1,105 @@
+schema_version: 2
+lab: module-06-lab-04-sudo-access-audit
+title: The Missing Sudo Grant
+category: linux
+domain: users
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: users
+  weight: 20
+  prompt: jordan account exists
+  context: null
+  hints:
+  - title: The sudo group
+    content: On Ubuntu, membership of the sudo group is what allows a user to escalate. Check it with
+      `groups jordan`.
+  - title: Grant it
+    content: '`sudo usermod -aG sudo jordan` — the same -aG pattern as any other group.'
+  - title: Ask sudo itself
+    content: '`sudo -l -U jordan` shows exactly which commands the user may run — ideal evidence for an
+      audit record. You can run it because your intern account has passwordless sudo in this lab.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: jordan account exists
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: users
+  weight: 40
+  prompt: jordan is a member of the sudo group
+  context: null
+  hints:
+  - title: The sudo group
+    content: On Ubuntu, membership of the sudo group is what allows a user to escalate. Check it with
+      `groups jordan`.
+  - title: Grant it
+    content: '`sudo usermod -aG sudo jordan` — the same -aG pattern as any other group.'
+  - title: Ask sudo itself
+    content: '`sudo -l -U jordan` shows exactly which commands the user may run — ideal evidence for an
+      audit record. You can run it because your intern account has passwordless sudo in this lab.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: jordan is a member of the sudo group
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: users
+  weight: 20
+  prompt: /home/intern/sudo-audit.txt exists and mentions jordan
+  context: null
+  hints:
+  - title: The sudo group
+    content: On Ubuntu, membership of the sudo group is what allows a user to escalate. Check it with
+      `groups jordan`.
+  - title: Grant it
+    content: '`sudo usermod -aG sudo jordan` — the same -aG pattern as any other group.'
+  - title: Ask sudo itself
+    content: '`sudo -l -U jordan` shows exactly which commands the user may run — ideal evidence for an
+      audit record. You can run it because your intern account has passwordless sudo in this lab.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: /home/intern/sudo-audit.txt exists and mentions jordan
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: users
+  weight: 20
+  prompt: audit file records the sudo privilege listing
+  context: null
+  hints:
+  - title: The sudo group
+    content: On Ubuntu, membership of the sudo group is what allows a user to escalate. Check it with
+      `groups jordan`.
+  - title: Grant it
+    content: '`sudo usermod -aG sudo jordan` — the same -aG pattern as any other group.'
+  - title: Ask sudo itself
+    content: '`sudo -l -U jordan` shows exactly which commands the user may run — ideal evidence for an
+      audit record. You can run it because your intern account has passwordless sudo in this lab.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: audit file records the sudo privilege listing
+  time_target_minutes: 4

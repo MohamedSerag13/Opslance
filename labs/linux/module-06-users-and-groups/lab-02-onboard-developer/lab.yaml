@@ -1,0 +1,85 @@
+schema_version: 2
+lab: module-06-lab-02-onboard-developer
+title: Onboard a New Developer
+category: linux
+domain: users
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: users
+  weight: 30
+  prompt: /home/amara home directory exists
+  context: null
+  hints:
+  - title: Create, don't edit
+    content: Use `useradd -m` — the `-m` flag creates /home/<name> and copies the skeleton files. Never
+      edit /etc/passwd directly.
+  - title: GECOS comment
+    content: 'The `-c` flag of useradd sets the comment (real name) field: `-c "Amara Okafor - Platform
+      Team"`.'
+  - title: Append to a group
+    content: '`usermod -aG developers amara` — the `-a` (append) is critical: without it you REPLACE all
+      her groups.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/amara home directory exists
+  time_target_minutes: 7
+- id: check_2
+  order: 2
+  domain: users
+  weight: 40
+  prompt: amara has a bash shell and the correct GECOS comment in /etc/passwd
+  context: null
+  hints:
+  - title: Create, don't edit
+    content: Use `useradd -m` — the `-m` flag creates /home/<name> and copies the skeleton files. Never
+      edit /etc/passwd directly.
+  - title: GECOS comment
+    content: 'The `-c` flag of useradd sets the comment (real name) field: `-c "Amara Okafor - Platform
+      Team"`.'
+  - title: Append to a group
+    content: '`usermod -aG developers amara` — the `-a` (append) is critical: without it you REPLACE all
+      her groups.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: amara has a bash shell and the correct GECOS comment in /etc/passwd
+  time_target_minutes: 7
+- id: check_3
+  order: 3
+  domain: users
+  weight: 30
+  prompt: amara is a member of the developers group
+  context: null
+  hints:
+  - title: Create, don't edit
+    content: Use `useradd -m` — the `-m` flag creates /home/<name> and copies the skeleton files. Never
+      edit /etc/passwd directly.
+  - title: GECOS comment
+    content: 'The `-c` flag of useradd sets the comment (real name) field: `-c "Amara Okafor - Platform
+      Team"`.'
+  - title: Append to a group
+    content: '`usermod -aG developers amara` — the `-a` (append) is critical: without it you REPLACE all
+      her groups.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: amara is a member of the developers group
+  time_target_minutes: 7

@@ -1,0 +1,71 @@
+{
+  "id": "module-10-lab-02-extract-and-verify",
+  "module_number": 10,
+  "module_title": "Archiving & Compression",
+  "title": "Deploy from a Tarball",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "archiving",
+  "skills": [
+    "tar xzf",
+    "tar -C",
+    "mkdir -p",
+    "content verification"
+  ],
+  "description": "Finish a partial release extraction: unpack site-v2.tar.gz into /var/www/site and verify the files landed.",
+  "scenario": "Last night's release half-failed: the previous intern extracted /opt/releases/site-v2.tar.gz into /var/www/site but only the css/ directory made it — index.html and js/ are missing and the site is broken. The tarball's entries sit at the top level (index.html, css/, js/), so a clean extraction into the existing directory fixes everything. /var/www is root-owned, so use sudo.",
+  "symptoms": [
+    "The site returns 404 for / — index.html is missing",
+    "/var/www/site contains only the css/ directory",
+    "/opt/releases/site-v2.tar.gz is intact and verified",
+    "The release checklist requires index.html, css/ and js/ to exist after deploy"
+  ],
+  "mission": "Extract /opt/releases/site-v2.tar.gz into /var/www/site so that index.html, css/style.css and js/app.js all exist, then verify index.html's content survived.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "List before extracting",
+      "content": "`tar -tzf file.tar.gz` shows exactly which paths will appear — no surprises about a wrapping top-level directory."
+    },
+    {
+      "number": 2,
+      "title": "-C chooses the destination",
+      "content": "`tar -xzf archive -C /var/www/site` extracts INTO that directory instead of the current one."
+    },
+    {
+      "number": 3,
+      "title": "sudo for root-owned targets",
+      "content": "/var/www belongs to root, so writing into it needs `sudo tar …`."
+    },
+    {
+      "number": 4,
+      "title": "Verify the bytes",
+      "content": "Extraction is only successful if the content is intact: `grep -q '<h1>' /var/www/site/index.html`."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/var/www/site/index.html exists after extraction",
+      "weight": 35
+    },
+    {
+      "id": "check_2",
+      "description": "/var/www/site/css/style.css exists",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "/var/www/site/js/app.js exists",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "index.html content is intact (contains <h1>)",
+      "weight": 15
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "id": "module-14-lab-02-fix-broken-crontab",
+  "module_number": 14,
+  "module_title": "Job Scheduling & Automation",
+  "title": "Fix the Broken Cron File",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "scheduling",
+  "skills": [
+    "cron syntax debugging",
+    "/etc/cron.d",
+    "field validation",
+    "awk"
+  ],
+  "description": "Two jobs never run: one cron.d line has 7 fields, another uses an invalid */0 step. Repair both.",
+  "scenario": "Two scheduled jobs on this box have never fired, and syslog shows cron discarding their lines as malformed. /etc/cron.d/nightly-report has a line with SEVEN fields (an extra '*' someone pasted in) and a cleanup line using the nonsense step '*/0'. Repair both lines to the runbook targets: the report job at 03:30 daily and the cleanup job at 05:15 daily, both as root.",
+  "symptoms": [
+    "Neither send-report.sh nor cleanup-temp.sh has ever run",
+    "The first active line of /etc/cron.d/nightly-report has 7 fields",
+    "The second line uses an invalid '*/0' step value",
+    "cron logs warn about malformed lines every time it reloads"
+  ],
+  "mission": "Repair /etc/cron.d/nightly-report so its two active lines are `30 3 * * * root /usr/local/bin/send-report.sh` and `15 5 * * * root /usr/local/bin/cleanup-temp.sh`.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Eight fields is one too many",
+      "content": "/etc/cron.d lines have exactly seven: five time fields, the username, then the command. The broken line has EIGHT — an extra '*' shifts everything and cron reads a wrong username."
+    },
+    {
+      "number": 2,
+      "title": "Step values can't be zero",
+      "content": "`*/0` means 'every 0 minutes' — undefined. Valid steps look like */5, */15, */10. Here the runbook simply wants a fixed time: 15 5 * * *."
+    },
+    {
+      "number": 3,
+      "title": "Rewrite the whole file",
+      "content": "With only two active lines, the safest fix is rewriting the file cleanly with sudo tee rather than surgical seds."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "the report job line is exactly '30 3 * * * root /usr/local/bin/send-report.sh'",
+      "weight": 40
+    },
+    {
+      "id": "check_2",
+      "description": "the cleanup job line is exactly '15 5 * * * root /usr/local/bin/cleanup-temp.sh'",
+      "weight": 35
+    },
+    {
+      "id": "check_3",
+      "description": "every active line has exactly 7 fields (5 time fields + username + command)",
+      "weight": 25
+    }
+  ]
+}

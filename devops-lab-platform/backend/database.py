@@ -3,7 +3,24 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/lab_platform")
+
+# SQLAlchemy >= 2.1 routes a bare postgresql:// URL to the psycopg (v3)
+# driver, which is not installed — the image ships psycopg2. Pin the driver
+# explicitly no matter who supplies the URL: the container entrypoint, .env,
+# or the local default below.
+def _normalize_db_url(url: str) -> str:
+    if url.startswith("postgresql+"):
+        return url
+    if url.startswith(("postgresql://", "postgres://")):
+        return "postgresql+psycopg2://" + url.split("://", 1)[1]
+    return url
+
+
+SQLALCHEMY_DATABASE_URL = _normalize_db_url(
+    # "or" (not the getenv default) so an EMPTY DATABASE_URL from compose
+    # falls back to the default instead of becoming an unparseable "" URL
+    os.getenv("DATABASE_URL") or "postgresql://postgres:postgres@localhost:5432/lab_platform"
+)
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,

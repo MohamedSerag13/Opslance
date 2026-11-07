@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-12-lab-01-broken-path:
+    build: .
+    container_name: lab-12-01-broken-path
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 12"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=The Broken PATH"
+      - "lab.id=module-12-lab-01-broken-path"

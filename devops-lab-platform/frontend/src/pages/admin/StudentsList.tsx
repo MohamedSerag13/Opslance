@@ -109,30 +109,30 @@ export default function StudentsList() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <Link to="/admin" className="text-blue-600 mb-4 inline-block">← Dashboard</Link>
+      <Link to="/admin" className="text-primary-strong mb-4 inline-block">← Dashboard</Link>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Students</h1>
         <div className="flex gap-2">
-          <button onClick={() => setShowBulkModal(true)} className="bg-gray-800 text-white px-4 py-2 rounded">Bulk Import</button>
-          <button onClick={exportStudents} disabled={exportLoading} className="bg-green-600 text-white px-4 py-2 rounded disabled:opacity-50">
+          <button onClick={() => setShowBulkModal(true)} className="bg-content text-bg px-4 py-2 rounded">Bulk Import</button>
+          <button onClick={exportStudents} disabled={exportLoading} className="bg-success text-white px-4 py-2 rounded disabled:opacity-50">
             {exportLoading ? 'Exporting...' : 'Export Students'}
           </button>
-          <button onClick={() => setShowModal(true)} className="bg-blue-600 text-white px-4 py-2 rounded">+ New Student</button>
+          <button onClick={() => setShowModal(true)} className="bg-primary text-white px-4 py-2 rounded">+ New Student</button>
         </div>
       </div>
 
-      <div className="bg-white shadow rounded-lg border">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="bg-surface shadow rounded-lg border">
+        <table className="min-w-full divide-y divide-border">
+          <thead className="bg-surface-2">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Group</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plan</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Email</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Group</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Plan</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-border">
             {students.map(s => (
               <tr key={s.id}>
                 <td className="px-6 py-4 font-medium">{s.full_name}</td>
@@ -140,16 +140,16 @@ export default function StudentsList() {
                 <td className="px-6 py-4">{s.group_name || 'Ungrouped'}</td>
                 <td className="px-6 py-4">
                   {s.subscription_tier === 'enterprise' ? (
-                    <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-bold uppercase">Enterprise</span>
+                    <span className="bg-primary/15 text-primary-strong px-2 py-1 rounded text-xs font-bold uppercase">Enterprise</span>
                   ) : s.subscription_tier === 'pro' ? (
-                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold uppercase">Pro</span>
+                    <span className="bg-primary/15 text-primary-strong px-2 py-1 rounded text-xs font-bold uppercase">Pro</span>
                   ) : (
-                    <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-bold uppercase">Free</span>
+                    <span className="bg-surface-2 text-content px-2 py-1 rounded text-xs font-bold uppercase">Free</span>
                   )}
                 </td>
                 <td className="px-6 py-4 flex gap-4">
-                  <Link to={`/admin/students/${s.id}`} className="text-blue-600 hover:underline">View/Edit</Link>
-                  <button onClick={() => handleDelete(s.id)} className="text-red-600 hover:underline">Delete</button>
+                  <Link to={`/admin/students/${s.id}`} className="text-primary-strong hover:underline">View/Edit</Link>
+                  <button onClick={() => handleDelete(s.id)} className="text-danger hover:underline">Delete</button>
                 </td>
               </tr>
             ))}
@@ -159,7 +159,7 @@ export default function StudentsList() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96">
+          <div className="bg-surface p-6 rounded-lg w-96">
             <h2 className="text-xl font-bold mb-4">New Student</h2>
             <form onSubmit={handleCreate}>
               <input className="w-full border p-2 mb-2 rounded" placeholder="Full Name" value={formData.full_name} onChange={e => setFormData({...formData, full_name: e.target.value})} required />
@@ -171,7 +171,7 @@ export default function StudentsList() {
               </select>
               <div className="flex justify-end gap-2">
                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 border rounded">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Create</button>
+                <button type="submit" className="px-4 py-2 bg-primary text-white rounded">Create</button>
               </div>
             </form>
           </div>
@@ -180,17 +180,17 @@ export default function StudentsList() {
 
       {showBulkModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96">
+          <div className="bg-surface p-6 rounded-lg w-96">
             <h2 className="text-xl font-bold mb-4">Bulk Import Excel</h2>
-            <button type="button" onClick={downloadTemplate} className="w-full mb-4 bg-indigo-50 border border-indigo-200 text-indigo-700 py-2 rounded text-sm hover:bg-indigo-100 font-medium">
+            <button type="button" onClick={downloadTemplate} className="w-full mb-4 bg-primary/10 border border-primary/30 text-primary-strong py-2 rounded text-sm hover:bg-primary/15 font-medium">
               Download Template
             </button>
             <form onSubmit={handleBulkImport}>
               <input type="file" accept=".xlsx,.xls" onChange={e => setBulkFile(e.target.files?.[0] || null)} className="mb-2 w-full border p-2 rounded" required />
-              <p className="text-xs text-gray-500 mb-4">Columns required: full_name, email, password, group_name (optional)</p>
+              <p className="text-xs text-muted mb-4">Columns required: full_name, email, password, group_name (optional)</p>
               <div className="flex justify-end gap-2">
                 <button type="button" onClick={() => setShowBulkModal(false)} className="px-4 py-2 border rounded" disabled={importLoading}>Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-gray-800 text-white rounded disabled:opacity-50" disabled={importLoading}>
+                <button type="submit" className="px-4 py-2 bg-content text-bg rounded disabled:opacity-50" disabled={importLoading}>
                   {importLoading ? 'Importing...' : 'Import'}
                 </button>
               </div>

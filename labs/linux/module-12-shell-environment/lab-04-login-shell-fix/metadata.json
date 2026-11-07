@@ -1,0 +1,62 @@
+{
+  "id": "module-12-lab-04-login-shell-fix",
+  "module_number": 12,
+  "module_title": "Shell Environment & Configuration",
+  "title": "The Silent Login Shell",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "shell-config",
+  "skills": [
+    "login vs non-login shells",
+    ".profile",
+    ".bashrc",
+    "bash -l",
+    "startup file order"
+  ],
+  "description": "Login shells skip .bashrc because .profile never sources it; wire them together and prove APP_MODE survives a login shell.",
+  "scenario": "Your custom environment works in terminal tabs but evaporates over SSH. Reason: SSH starts a LOGIN shell, which reads ~/.profile — and this .profile is empty, so ~/.bashrc (where APP_MODE=training and the team aliases live) is never sourced. Fix /home/intern/.profile so it sources ~/.bashrc for bash users, then prove a login shell sees APP_MODE.",
+  "symptoms": [
+    "Over SSH: `echo $APP_MODE` prints nothing, aliases are gone",
+    "In local terminal tabs everything works (they start non-login shells)",
+    "/home/intern/.profile exists but does not mention .bashrc",
+    "bash -lc 'echo $APP_MODE' prints an empty line"
+  ],
+  "mission": "Make /home/intern/.profile source /home/intern/.bashrc (guarded for bash), so that `bash -lc 'echo $APP_MODE'` prints training.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Two kinds of shells",
+      "content": "Login shells (SSH, console, bash -l) read ~/.profile; non-login interactive shells (terminal tabs) read ~/.bashrc. Ubuntu wires them together FROM .profile — and that wiring is missing here."
+    },
+    {
+      "number": 2,
+      "title": "The standard guard",
+      "content": "`[ -n \"$BASH_VERSION\" ] && . \"$HOME/.bashrc\"` sources .bashrc only under bash (sh/dash would choke on bashisms)."
+    },
+    {
+      "number": 3,
+      "title": "Prove it",
+      "content": "`bash -l` starts a login shell: it reads .profile → sources .bashrc → APP_MODE must appear."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": ".profile references .bashrc (the wiring exists)",
+      "weight": 35
+    },
+    {
+      "id": "check_2",
+      "description": "a login shell (bash -l) sees APP_MODE=training",
+      "weight": 40
+    },
+    {
+      "id": "check_3",
+      "description": ".profile passes a bash syntax check",
+      "weight": 25
+    }
+  ]
+}

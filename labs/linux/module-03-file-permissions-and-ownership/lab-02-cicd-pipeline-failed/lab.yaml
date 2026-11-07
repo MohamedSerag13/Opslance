@@ -1,0 +1,61 @@
+schema_version: 2
+lab: module-03-lab-02-cicd-pipeline-failed
+title: CI/CD Pipeline Failed
+category: linux
+domain: permissions
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: permissions
+  weight: 40
+  prompt: deploy.sh is executable
+  context: null
+  hints:
+  - title: Investigate the error
+    content: Try running `./deploy.sh` and observe the error. Then use `ls -l deploy.sh` to inspect the
+      file's permissions.
+  - title: Understand the permission bits
+    content: The output of `ls -l` shows permissions like `-rw-r--r--`. The `x` bit is needed for a file
+      to be executable. Notice it is missing.
+  - title: The fix
+    content: Run `chmod +x deploy.sh` to add the execute permission, then run `./deploy.sh` to confirm
+      it works.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: deploy.sh is executable
+  time_target_minutes: 8
+- id: check_2
+  order: 2
+  domain: permissions
+  weight: 60
+  prompt: Running deploy.sh outputs 'Deploying application...'
+  context: null
+  hints:
+  - title: Investigate the error
+    content: Try running `./deploy.sh` and observe the error. Then use `ls -l deploy.sh` to inspect the
+      file's permissions.
+  - title: Understand the permission bits
+    content: The output of `ls -l` shows permissions like `-rw-r--r--`. The `x` bit is needed for a file
+      to be executable. Notice it is missing.
+  - title: The fix
+    content: Run `chmod +x deploy.sh` to add the execute permission, then run `./deploy.sh` to confirm
+      it works.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: Running deploy.sh outputs 'Deploying application...'
+  time_target_minutes: 8

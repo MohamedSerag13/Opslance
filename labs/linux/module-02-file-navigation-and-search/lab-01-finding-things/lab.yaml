@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-02-lab-01-finding-things
+title: Finding Files Across the Linux Filesystem
+category: linux
+domain: fundamentals
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/found_config.txt contains the absolute path to custom_app.conf
+  context: null
+  hints:
+  - title: Searching by name
+    content: '''find'' takes a starting directory and a -name option. Think about how to structure a find
+      command that searches under /etc for a file with a specific name.'
+  - title: Filtering by size
+    content: '''find'' supports a -size flag. Sizes can be expressed in kilobytes with the ''k'' suffix.
+      A ''+'' before the number means larger than.'
+  - title: Saving output
+    content: 'Use ''>'' to redirect the output of any command into a file. For example: some_command >
+      ~/output.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: found_config.txt points to /etc/custom_app.conf
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/found_largelog.txt contains the absolute path to the orphaned log file
+  context: null
+  hints:
+  - title: Searching by name
+    content: '''find'' takes a starting directory and a -name option. Think about how to structure a find
+      command that searches under /etc for a file with a specific name.'
+  - title: Filtering by size
+    content: '''find'' supports a -size flag. Sizes can be expressed in kilobytes with the ''k'' suffix.
+      A ''+'' before the number means larger than.'
+  - title: Saving output
+    content: 'Use ''>'' to redirect the output of any command into a file. For example: some_command >
+      ~/output.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: found_largelog.txt points to /var/log/orphaned_app.log
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/found_script.txt contains the absolute path to helper.sh
+  context: null
+  hints:
+  - title: Searching by name
+    content: '''find'' takes a starting directory and a -name option. Think about how to structure a find
+      command that searches under /etc for a file with a specific name.'
+  - title: Filtering by size
+    content: '''find'' supports a -size flag. Sizes can be expressed in kilobytes with the ''k'' suffix.
+      A ''+'' before the number means larger than.'
+  - title: Saving output
+    content: 'Use ''>'' to redirect the output of any command into a file. For example: some_command >
+      ~/output.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: found_script.txt points to /opt/tools/helper.sh
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/bash_location.txt contains the absolute path to the bash executable
+  context: null
+  hints:
+  - title: Searching by name
+    content: '''find'' takes a starting directory and a -name option. Think about how to structure a find
+      command that searches under /etc for a file with a specific name.'
+  - title: Filtering by size
+    content: '''find'' supports a -size flag. Sizes can be expressed in kilobytes with the ''k'' suffix.
+      A ''+'' before the number means larger than.'
+  - title: Saving output
+    content: 'Use ''>'' to redirect the output of any command into a file. For example: some_command >
+      ~/output.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: bash_location.txt contains a valid path to bash executable
+  time_target_minutes: 4

@@ -1,0 +1,73 @@
+{
+  "id": "module-06-lab-03-shared-folder-access",
+  "module_number": 6,
+  "module_title": "Users, Groups & Sudo",
+  "title": "Shared Folder Access",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "users",
+  "skills": [
+    "groupadd",
+    "usermod",
+    "chgrp",
+    "chmod",
+    "setgid bit",
+    "stat"
+  ],
+  "description": "Create a shared group and configure a project directory so two contractors can collaborate safely.",
+  "scenario": "Two contractors, alice and bob, must collaborate on /srv/projectx. The directory is currently owned by root:root with 755 permissions, so neither of them can write to it. Files they will create must stay editable by both — which is exactly what a shared group plus the setgid bit is for. There is no projectx group yet.",
+  "symptoms": [
+    "bob gets 'Permission denied' when saving files in /srv/projectx",
+    "alice can read but not write either",
+    "Files created by one of them are not editable by the other",
+    "No shared group for the project exists in /etc/group"
+  ],
+  "mission": "Create a projectx group, put alice and bob in it, change the group of /srv/projectx recursively to projectx, and set the directory permissions to 2770 (setgid + rwx for group, nothing for others).",
+  "hints": [
+    {
+      "number": 1,
+      "title": "One group to rule them all",
+      "content": "Create the group first with `sudo groupadd projectx`, then add both users with `usermod -aG`."
+    },
+    {
+      "number": 2,
+      "title": "Group ownership",
+      "content": "`chgrp -R projectx /srv/projectx` changes the group of the directory and everything inside it."
+    },
+    {
+      "number": 3,
+      "title": "The setgid bit",
+      "content": "On a directory, chmod 2770 sets the setgid bit: every NEW file inside automatically inherits the directory's group, so alice and bob stay in the same group without manual chgrp."
+    },
+    {
+      "number": 4,
+      "title": "Verify like an admin",
+      "content": "`stat -c '%U %G %a' /srv/projectx` shows owner, group and numeric permissions in one line."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "projectx group exists in /etc/group",
+      "weight": 25
+    },
+    {
+      "id": "check_2",
+      "description": "both alice and bob are members of projectx",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "/srv/projectx group ownership is projectx",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "/srv/projectx permissions are 2770 (setgid, group rwx, no access for others)",
+      "weight": 25
+    }
+  ]
+}

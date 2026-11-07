@@ -1,0 +1,66 @@
+{
+  "id": "module-09-lab-01-install-missing-tool",
+  "module_number": 9,
+  "module_title": "Package Management",
+  "title": "Install the Missing Tool",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "packages",
+  "skills": [
+    "apt update",
+    "apt install",
+    "command -v",
+    "package verification"
+  ],
+  "description": "The healthcheck script needs curl; refresh the package index and install it with apt.",
+  "scenario": "A monitoring agent's healthcheck script fails because curl was never installed on this server. Your job is the standard Debian/Ubuntu drill: refresh the local package index with apt update, install curl, and verify the tool actually runs. This lab's container has network access so apt can reach the package archives.",
+  "symptoms": [
+    "/usr/local/bin/healthcheck.sh fails immediately with 'curl: command not found'",
+    "No curl binary anywhere on the PATH",
+    "The local apt package index has never been refreshed on this box"
+  ],
+  "mission": "Refresh the package index, install curl, and verify that curl runs and reports a version.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Index first, install second",
+      "content": "apt installs from its local index. If the index is stale or empty, `sudo apt-get update` refreshes it from the archives — always run it before installing."
+    },
+    {
+      "number": 2,
+      "title": "The -y flag",
+      "content": "`apt-get install -y curl` answers yes to the 'Do you want to continue?' prompt automatically — essential in scripts."
+    },
+    {
+      "number": 3,
+      "title": "Verify like an operator",
+      "content": "`command -v curl` prints the path if the tool is on the PATH and nothing (with a failing exit status) if it is not."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "curl is installed and on the PATH",
+      "weight": 50
+    },
+    {
+      "id": "check_2",
+      "description": "curl runs and reports a version",
+      "weight": 30
+    },
+    {
+      "id": "check_3",
+      "description": "the healthcheck script is still in place",
+      "weight": 20
+    }
+  ],
+  "resource_limits": {
+    "cpu": "0.2",
+    "memory": "128m",
+    "pids": 80,
+    "network": "bridge"
+  }
+}

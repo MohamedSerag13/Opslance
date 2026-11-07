@@ -1,0 +1,82 @@
+schema_version: 2
+lab: module-01-lab-08-disk-space-detective
+title: Disk Space Detective
+category: linux
+domain: fundamentals
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: fundamentals
+  weight: 30
+  prompt: ~/df_output.txt exists and contains the df output
+  context: null
+  hints:
+  - title: Disk Free Space
+    content: You can output disk status to a file using `df -h > /home/intern/df_output.txt`.
+  - title: Disk Usage by Folder
+    content: Run `du -sh /home/intern/data/* | sort -h` to see which directory takes the most space. Write
+      that directory name (e.g. 'backups') into `disk_report.txt`.
+  - title: Finding the Largest File
+    content: Use find with sort, e.g. `find /home/intern/data -type f -exec du -ah {} + | sort -rh | head
+      -n 1` to find the largest file, and write its path to `largest_file.txt`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: df_output.txt contains Filesystem header
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: fundamentals
+  weight: 35
+  prompt: ~/disk_report.txt exists and identifies the 'backups' folder
+  context: null
+  hints:
+  - title: Disk Free Space
+    content: You can output disk status to a file using `df -h > /home/intern/df_output.txt`.
+  - title: Disk Usage by Folder
+    content: Run `du -sh /home/intern/data/* | sort -h` to see which directory takes the most space. Write
+      that directory name (e.g. 'backups') into `disk_report.txt`.
+  - title: Finding the Largest File
+    content: Use find with sort, e.g. `find /home/intern/data -type f -exec du -ah {} + | sort -rh | head
+      -n 1` to find the largest file, and write its path to `largest_file.txt`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: disk_report.txt identifies 'backups' directory
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: fundamentals
+  weight: 35
+  prompt: ~/largest_file.txt exists and contains the path to the largest file
+  context: null
+  hints:
+  - title: Disk Free Space
+    content: You can output disk status to a file using `df -h > /home/intern/df_output.txt`.
+  - title: Disk Usage by Folder
+    content: Run `du -sh /home/intern/data/* | sort -h` to see which directory takes the most space. Write
+      that directory name (e.g. 'backups') into `disk_report.txt`.
+  - title: Finding the Largest File
+    content: Use find with sort, e.g. `find /home/intern/data -type f -exec du -ah {} + | sort -rh | head
+      -n 1` to find the largest file, and write its path to `largest_file.txt`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: largest_file.txt identifies /home/intern/data/backups/archive.tar
+  time_target_minutes: 5

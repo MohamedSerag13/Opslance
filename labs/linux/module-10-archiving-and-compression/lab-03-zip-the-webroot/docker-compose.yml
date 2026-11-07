@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-10-lab-03-zip-the-webroot:
+    build: .
+    container_name: lab-10-03-zip-the-webroot
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 10"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Zip the Webroot"
+      - "lab.id=module-10-lab-03-zip-the-webroot"

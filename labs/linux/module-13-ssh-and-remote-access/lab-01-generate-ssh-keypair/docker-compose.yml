@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-13-lab-01-generate-ssh-keypair:
+    build: .
+    container_name: lab-13-01-generate-ssh-keypair
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 13"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Generate Your First SSH Key"
+      - "lab.id=module-13-lab-01-generate-ssh-keypair"

@@ -1,0 +1,85 @@
+schema_version: 2
+lab: module-09-lab-04-refresh-package-index
+title: The Empty Package Index
+category: linux
+domain: packages
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: packages
+  weight: 45
+  prompt: package index files exist again under /var/lib/apt/lists
+  context: null
+  hints:
+  - title: What update really does
+    content: apt-get update downloads fresh index files into /var/lib/apt/lists/. Install anything you
+      like afterwards — but without this step apt is blind.
+  - title: Who would install what
+    content: '`apt-cache policy nginx` prints Installed: (none) and Candidate: <version> — the version
+      a fresh install would get right now.'
+  - title: Capture the version
+    content: '`apt-cache policy nginx | grep ''Candidate:'' | awk ''{print $2}''` isolates the version
+      string for your report line.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: package index files exist again under /var/lib/apt/lists
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: packages
+  weight: 20
+  prompt: /home/intern/pkg-report.txt exists
+  context: null
+  hints:
+  - title: What update really does
+    content: apt-get update downloads fresh index files into /var/lib/apt/lists/. Install anything you
+      like afterwards — but without this step apt is blind.
+  - title: Who would install what
+    content: '`apt-cache policy nginx` prints Installed: (none) and Candidate: <version> — the version
+      a fresh install would get right now.'
+  - title: Capture the version
+    content: '`apt-cache policy nginx | grep ''Candidate:'' | awk ''{print $2}''` isolates the version
+      string for your report line.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: /home/intern/pkg-report.txt exists
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: packages
+  weight: 35
+  prompt: report records the nginx candidate version
+  context: null
+  hints:
+  - title: What update really does
+    content: apt-get update downloads fresh index files into /var/lib/apt/lists/. Install anything you
+      like afterwards — but without this step apt is blind.
+  - title: Who would install what
+    content: '`apt-cache policy nginx` prints Installed: (none) and Candidate: <version> — the version
+      a fresh install would get right now.'
+  - title: Capture the version
+    content: '`apt-cache policy nginx | grep ''Candidate:'' | awk ''{print $2}''` isolates the version
+      string for your report line.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: report records the nginx candidate version
+  time_target_minutes: 5

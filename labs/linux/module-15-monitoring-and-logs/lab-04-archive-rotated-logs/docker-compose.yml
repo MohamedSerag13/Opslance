@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-15-lab-04-archive-rotated-logs:
+    build: .
+    container_name: lab-15-04-archive-rotated-logs
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 15"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Rotate Out the Rotated Logs"
+      - "lab.id=module-15-lab-04-archive-rotated-logs"

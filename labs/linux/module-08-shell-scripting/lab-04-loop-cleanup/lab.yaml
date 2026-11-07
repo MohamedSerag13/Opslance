@@ -1,0 +1,105 @@
+schema_version: 2
+lab: module-08-lab-04-loop-cleanup
+title: Clean Up with a Loop
+category: linux
+domain: scripting
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: scripting
+  weight: 20
+  prompt: /home/intern/cleanup.sh exists and is executable
+  context: null
+  hints:
+  - title: Glob the pattern
+    content: '`for f in /home/intern/spool/*.tmp` expands the wildcard into one loop iteration per match.'
+  - title: Move inside the loop
+    content: The loop body is just `mv "$f" /home/intern/spool/archive/` — quote the variable so filenames
+      with spaces stay intact.
+  - title: Guard the empty case
+    content: If no files match, the loop would try to move the literal '*.tmp'. Guard with `[ -e "$f"
+      ] || continue` — good habit for idempotent scripts.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/cleanup.sh exists and is executable
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: scripting
+  weight: 25
+  prompt: the script uses a for loop
+  context: null
+  hints:
+  - title: Glob the pattern
+    content: '`for f in /home/intern/spool/*.tmp` expands the wildcard into one loop iteration per match.'
+  - title: Move inside the loop
+    content: The loop body is just `mv "$f" /home/intern/spool/archive/` — quote the variable so filenames
+      with spaces stay intact.
+  - title: Guard the empty case
+    content: If no files match, the loop would try to move the literal '*.tmp'. Guard with `[ -e "$f"
+      ] || continue` — good habit for idempotent scripts.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: the script uses a for loop
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: scripting
+  weight: 25
+  prompt: no .tmp files remain in the spool root
+  context: null
+  hints:
+  - title: Glob the pattern
+    content: '`for f in /home/intern/spool/*.tmp` expands the wildcard into one loop iteration per match.'
+  - title: Move inside the loop
+    content: The loop body is just `mv "$f" /home/intern/spool/archive/` — quote the variable so filenames
+      with spaces stay intact.
+  - title: Guard the empty case
+    content: If no files match, the loop would try to move the literal '*.tmp'. Guard with `[ -e "$f"
+      ] || continue` — good habit for idempotent scripts.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: no .tmp files remain in the spool root
+  time_target_minutes: 5
+- id: check_4
+  order: 4
+  domain: scripting
+  weight: 30
+  prompt: all 6 .tmp files are now in spool/archive/
+  context: null
+  hints:
+  - title: Glob the pattern
+    content: '`for f in /home/intern/spool/*.tmp` expands the wildcard into one loop iteration per match.'
+  - title: Move inside the loop
+    content: The loop body is just `mv "$f" /home/intern/spool/archive/` — quote the variable so filenames
+      with spaces stay intact.
+  - title: Guard the empty case
+    content: If no files match, the loop would try to move the literal '*.tmp'. Guard with `[ -e "$f"
+      ] || continue` — good habit for idempotent scripts.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: all 6 .tmp files are now in spool/archive/
+  time_target_minutes: 5

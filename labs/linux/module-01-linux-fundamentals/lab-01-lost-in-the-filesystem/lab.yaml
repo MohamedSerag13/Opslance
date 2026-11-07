@@ -1,0 +1,79 @@
+schema_version: 2
+lab: module-01-lab-01-lost-in-the-filesystem
+title: Lost in the Filesystem
+category: linux
+domain: fundamentals
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: fundamentals
+  weight: 35
+  prompt: /home/intern/found.txt exists and contains target text
+  context: null
+  hints:
+  - title: Where to look
+    content: The file is located in the user's home directory. You can go there using the ~ symbol or
+      the absolute path /home/intern.
+  - title: What to check
+    content: Once in the home directory, list all files to find mission.txt and read it.
+  - title: The fix
+    content: Run `cd ~`, then `cat mission.txt`. Then create the required files.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/found.txt exists and contains 'I navigated the Linux filesystem'
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: fundamentals
+  weight: 35
+  prompt: /home/intern/etc-count.txt exists and is not empty
+  context: null
+  hints:
+  - title: Where to look
+    content: The file is located in the user's home directory. You can go there using the ~ symbol or
+      the absolute path /home/intern.
+  - title: What to check
+    content: Once in the home directory, list all files to find mission.txt and read it.
+  - title: The fix
+    content: Run `cd ~`, then `cat mission.txt`. Then create the required files.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: /home/intern/etc-count.txt exists and is not empty
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: fundamentals
+  weight: 30
+  prompt: /home/intern/projects/alpha/beta/gamma/visited.txt exists
+  context: null
+  hints:
+  - title: Where to look
+    content: The file is located in the user's home directory. You can go there using the ~ symbol or
+      the absolute path /home/intern.
+  - title: What to check
+    content: Once in the home directory, list all files to find mission.txt and read it.
+  - title: The fix
+    content: Run `cd ~`, then `cat mission.txt`. Then create the required files.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: /home/intern/projects/alpha/beta/gamma/visited.txt exists
+  time_target_minutes: 5

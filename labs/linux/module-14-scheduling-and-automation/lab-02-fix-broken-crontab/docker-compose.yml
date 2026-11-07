@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-14-lab-02-fix-broken-crontab:
+    build: .
+    container_name: lab-14-02-fix-broken-crontab
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 14"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Fix the Broken Cron File"
+      - "lab.id=module-14-lab-02-fix-broken-crontab"

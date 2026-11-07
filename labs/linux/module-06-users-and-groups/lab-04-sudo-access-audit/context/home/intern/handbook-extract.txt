@@ -1,0 +1,4 @@
+Ops Handbook §7.3 — sudo grants
+================================
+Every sudo grant on a shared host must be recorded in an audit file
+containing the output of `groups <user>` and `sudo -l -U <user>`.

@@ -103,7 +103,7 @@ export default function AdminLeaderboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <Link to="/admin" className="text-blue-600 mb-4 inline-block">← Dashboard</Link>
+      <Link to="/admin" className="text-primary-strong mb-4 inline-block">← Dashboard</Link>
       
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Admin Leaderboard 🏆</h1>
@@ -111,13 +111,13 @@ export default function AdminLeaderboard() {
           <button 
             onClick={fetchStudents} 
             disabled={loading}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded font-medium disabled:opacity-50"
+            className="bg-surface-2 hover:bg-surface-2 text-content px-4 py-2 rounded font-medium disabled:opacity-50"
           >
             {loading ? 'Refreshing...' : 'Refresh'}
           </button>
           <button 
             onClick={handleExport} 
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium"
+            className="bg-success hover:bg-success text-white px-4 py-2 rounded font-medium"
           >
             Export View
           </button>
@@ -126,29 +126,29 @@ export default function AdminLeaderboard() {
 
       {/* Stats Bar */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-xl shadow border">
-          <p className="text-sm text-gray-500 font-medium">Total Students</p>
+        <div className="bg-surface p-6 rounded-xl shadow border">
+          <p className="text-sm text-muted font-medium">Total Students</p>
           <p className="text-3xl font-bold">{totalStudents}</p>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow border">
-          <p className="text-sm text-gray-500 font-medium">Highest Score</p>
+        <div className="bg-surface p-6 rounded-xl shadow border">
+          <p className="text-sm text-muted font-medium">Highest Score</p>
           <p className="text-3xl font-bold">{highestScore} pts</p>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow border">
-          <p className="text-sm text-gray-500 font-medium">Average Score</p>
+        <div className="bg-surface p-6 rounded-xl shadow border">
+          <p className="text-sm text-muted font-medium">Average Score</p>
           <p className="text-3xl font-bold">{averageScore} pts</p>
         </div>
       </div>
 
       {/* Filters and Table */}
-      <div className="bg-white shadow rounded-lg border">
-        <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+      <div className="bg-surface shadow rounded-lg border">
+        <div className="p-4 border-b flex justify-between items-center bg-surface-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Filter by Group:</span>
+            <span className="text-sm font-medium text-content">Filter by Group:</span>
             <select 
               value={selectedGroup} 
               onChange={e => setSelectedGroup(e.target.value)} 
-              className="border p-1.5 rounded text-sm bg-white"
+              className="border p-1.5 rounded text-sm bg-surface"
             >
               <option value="All">All Groups</option>
               {uniqueGroups.map(g => (
@@ -158,39 +158,39 @@ export default function AdminLeaderboard() {
           </div>
         </div>
 
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <table className="min-w-full divide-y divide-border">
+          <thead className="bg-surface-2">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-20">Rank</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Group</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">XP (Level)</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider w-20">Rank</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Group</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Score</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">XP (Level)</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-surface divide-y divide-border">
             {filteredStudents.map(s => (
               <tr key={s.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold ${
-                    s.rank === 1 ? 'bg-yellow-400 text-yellow-900' :
-                    s.rank === 2 ? 'bg-gray-300 text-gray-800' :
-                    s.rank === 3 ? 'bg-orange-300 text-orange-900' : 'bg-gray-100 text-gray-600'
+                    s.rank === 1 ? 'bg-warn text-warn' :
+                    s.rank === 2 ? 'bg-border text-content' :
+                    s.rank === 3 ? 'bg-orange-300 text-orange-900' : 'bg-surface-2 text-muted'
                   }`}>
                     {s.rank}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap font-medium text-content">
                   {s.full_name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-muted">
                   {s.group_name || 'Ungrouped'}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap font-bold text-indigo-600">
+                <td className="px-6 py-4 whitespace-nowrap font-bold text-primary-strong">
                   {s.total_score || 0}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+                <td className="px-6 py-4 whitespace-nowrap text-muted">
                   {s.xp || 0} (Lvl {s.level || 1})
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -200,11 +200,11 @@ export default function AdminLeaderboard() {
                       setNewXP(s.xp || 0);
                       setShowPointsModal(true);
                     }}
-                    className="text-blue-600 hover:text-blue-900 mr-4"
+                    className="text-primary-strong hover:text-primary-strong mr-4"
                   >
                     Edit Points
                   </button>
-                  <Link to={`/admin/students/${s.id}`} className="text-gray-600 hover:text-gray-900 hover:underline">
+                  <Link to={`/admin/students/${s.id}`} className="text-muted hover:text-content hover:underline">
                     View
                   </Link>
                 </td>
@@ -212,7 +212,7 @@ export default function AdminLeaderboard() {
             ))}
             {filteredStudents.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
+                <td colSpan={6} className="px-6 py-10 text-center text-muted">
                   No students found
                 </td>
               </tr>
@@ -224,26 +224,26 @@ export default function AdminLeaderboard() {
       {/* Edit Points Modal */}
       {showPointsModal && editingStudent && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96 max-w-full">
-            <h2 className="text-xl font-bold mb-4 font-sans text-gray-900">Edit Points</h2>
-            <p className="text-sm text-gray-600 mb-4">Editing points for <span className="font-semibold">{editingStudent.full_name}</span></p>
+          <div className="bg-surface p-6 rounded-lg w-96 max-w-full">
+            <h2 className="text-xl font-bold mb-4 font-sans text-content">Edit Points</h2>
+            <p className="text-sm text-muted mb-4">Editing points for <span className="font-semibold">{editingStudent.full_name}</span></p>
             <form onSubmit={handleSavePoints} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">New XP Value</label>
+                <label className="block text-sm font-medium mb-1 text-content">New XP Value</label>
                 <input 
                   type="number" 
                   min={0}
-                  className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 focus:outline-none" 
+                  className="w-full border p-2 rounded focus:ring-1 focus:ring-primary focus:outline-none" 
                   value={newXP}
                   onChange={e => setNewXP(parseInt(e.target.value) || 0)}
                   required 
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1 text-gray-700">Reason (Optional)</label>
+                <label className="block text-sm font-medium mb-1 text-content">Reason (Optional)</label>
                 <input 
                   type="text" 
-                  className="w-full border p-2 rounded focus:ring-1 focus:ring-blue-500 focus:outline-none" 
+                  className="w-full border p-2 rounded focus:ring-1 focus:ring-primary focus:outline-none" 
                   placeholder="e.g. Activity bonus"
                   value={reason}
                   onChange={e => setReason(e.target.value)} 
@@ -256,14 +256,14 @@ export default function AdminLeaderboard() {
                     setShowPointsModal(false);
                     setEditingStudent(null);
                   }} 
-                  className="px-4 py-2 border rounded text-gray-600 hover:bg-gray-50"
+                  className="px-4 py-2 border rounded text-muted hover:bg-surface-2"
                   disabled={pointsLoading}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 font-medium"
+                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-strong disabled:opacity-50 font-medium"
                   disabled={pointsLoading}
                 >
                   {pointsLoading ? 'Saving...' : 'Save XP'}

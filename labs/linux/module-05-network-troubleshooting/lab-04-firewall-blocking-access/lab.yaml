@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-05-lab-04-firewall-blocking-access
+title: Firewall Blocking Remote Access
+category: linux
+domain: networking
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: networking
+  weight: 25
+  prompt: Gatekeeper is listening on port 8080
+  context: null
+  hints:
+  - title: Confirm the service is running
+    content: Run 'ss -tulnp'. You should see the gatekeeper listening on port 8080. Then run 'curl localhost:8080'
+      — it should return HTTP 200. The service is up; the firewall is the issue.
+  - title: Check the firewall
+    content: Run 'sudo ufw status'. Look at the rules table. You'll see port 8080 is listed as DENY —
+      that's why remote connections get blocked.
+  - title: Allow port 8080
+    content: 'Run: sudo ufw allow 8080 — this adds an ALLOW rule for port 8080. Then run ''sudo ufw status''
+      again to confirm the rule changed to ALLOW.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: Gatekeeper is listening on port 8080
+  time_target_minutes: 6
+- id: check_2
+  order: 2
+  domain: networking
+  weight: 35
+  prompt: fake-ufw rules show port 8080 as ALLOW
+  context: null
+  hints:
+  - title: Confirm the service is running
+    content: Run 'ss -tulnp'. You should see the gatekeeper listening on port 8080. Then run 'curl localhost:8080'
+      — it should return HTTP 200. The service is up; the firewall is the issue.
+  - title: Check the firewall
+    content: Run 'sudo ufw status'. Look at the rules table. You'll see port 8080 is listed as DENY —
+      that's why remote connections get blocked.
+  - title: Allow port 8080
+    content: 'Run: sudo ufw allow 8080 — this adds an ALLOW rule for port 8080. Then run ''sudo ufw status''
+      again to confirm the rule changed to ALLOW.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: fake-ufw rules show port 8080 as ALLOW
+  time_target_minutes: 6
+- id: check_3
+  order: 3
+  domain: networking
+  weight: 20
+  prompt: curl localhost:8080 returns HTTP 200
+  context: null
+  hints:
+  - title: Confirm the service is running
+    content: Run 'ss -tulnp'. You should see the gatekeeper listening on port 8080. Then run 'curl localhost:8080'
+      — it should return HTTP 200. The service is up; the firewall is the issue.
+  - title: Check the firewall
+    content: Run 'sudo ufw status'. Look at the rules table. You'll see port 8080 is listed as DENY —
+      that's why remote connections get blocked.
+  - title: Allow port 8080
+    content: 'Run: sudo ufw allow 8080 — this adds an ALLOW rule for port 8080. Then run ''sudo ufw status''
+      again to confirm the rule changed to ALLOW.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: curl localhost:8080 returns HTTP 200 (local/loopback access)
+  time_target_minutes: 6
+- id: check_4
+  order: 4
+  domain: networking
+  weight: 20
+  prompt: Non-loopback access to port 8080 returns HTTP 200
+  context: null
+  hints:
+  - title: Confirm the service is running
+    content: Run 'ss -tulnp'. You should see the gatekeeper listening on port 8080. Then run 'curl localhost:8080'
+      — it should return HTTP 200. The service is up; the firewall is the issue.
+  - title: Check the firewall
+    content: Run 'sudo ufw status'. Look at the rules table. You'll see port 8080 is listed as DENY —
+      that's why remote connections get blocked.
+  - title: Allow port 8080
+    content: 'Run: sudo ufw allow 8080 — this adds an ALLOW rule for port 8080. Then run ''sudo ufw status''
+      again to confirm the rule changed to ALLOW.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: Non-loopback access to port 8080 returns HTTP 200 (fake-ufw ALLOW enforced)
+  time_target_minutes: 6

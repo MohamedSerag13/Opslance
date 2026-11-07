@@ -1,0 +1,71 @@
+{
+  "id": "module-10-lab-04-date-stamped-backup",
+  "module_number": 10,
+  "module_title": "Archiving & Compression",
+  "title": "The Date-Stamped Backup",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "archiving",
+  "skills": [
+    "date +%F",
+    "command substitution $()",
+    "tar czf",
+    "mkdir -p"
+  ],
+  "description": "Produce an /etc/app backup whose filename contains today's date, as the retention policy requires.",
+  "scenario": "The retention policy requires every config backup to be named etc-YYYY-MM-DD.tar.gz (today's real date) under /tmp/backups, so old backups sort chronologically and a rotation script can purge them. Yesterday's backup was named 'backup-final-final.tar.gz' and was rejected. Archive /etc/app with the date embedded via command substitution.",
+  "symptoms": [
+    "/tmp/backups does not exist yet",
+    "No backup of /etc/app exists at all",
+    "The naming convention etc-YYYY-MM-DD.tar.gz is not negotiable — the rotation script globs it",
+    "The archive must be gzip-compressed"
+  ],
+  "mission": "Create /tmp/backups/ and produce /tmp/backups/etc-$(date +%F).tar.gz containing the /etc/app configuration directory.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "date +%F",
+      "content": "`date +%F` prints the current date as YYYY-MM-DD — exactly the convention the rotation script expects."
+    },
+    {
+      "number": 2,
+      "title": "Command substitution",
+      "content": "`$(command)` runs the command and pastes its output into the surrounding line — that is how today's date lands in the filename."
+    },
+    {
+      "number": 3,
+      "title": "Quotes matter",
+      "content": "Put quotes around the path but NOT around the substitution: `tar -czf \"/tmp/backups/etc-$(date +%F).tar.gz\"` — quoted '$(date)' would stay literal text."
+    },
+    {
+      "number": 4,
+      "title": "Verify the name",
+      "content": "`ls /tmp/backups/` must show etc-2026-06-17-style naming matching TODAY's date."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/tmp/backups directory exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "etc-<today>.tar.gz exists in /tmp/backups (name matches today's date)",
+      "weight": 45
+    },
+    {
+      "id": "check_3",
+      "description": "the backup is a valid gzipped archive",
+      "weight": 20
+    },
+    {
+      "id": "check_4",
+      "description": "the archive contains db.conf",
+      "weight": 15
+    }
+  ]
+}

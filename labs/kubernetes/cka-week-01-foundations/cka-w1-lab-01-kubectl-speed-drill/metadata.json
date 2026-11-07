@@ -1,0 +1,263 @@
+{
+ "id": "cka-w1-lab-01-kubectl-speed-drill",
+ "module_number": 21,
+ "module_title": "CKA Week 1 - Foundations and kubectl Speed",
+ "title": "CKA Week 1 Speed Drill - 34 kubectl Tasks",
+ "difficulty": "advanced",
+ "estimated_minutes": 240,
+ "points": 340,
+ "category": "kubernetes",
+ "subcategory": "cka-week-1",
+ "skills": [
+  "kubectl run",
+  "kubectl create",
+  "kubectl expose",
+  "kubectl scale",
+  "kubectl set image",
+  "rollout history/undo",
+  "dry-run=client -o yaml",
+  "namespaces",
+  "labels",
+  "annotations"
+ ],
+ "description": "A 34-task speed drill over the Week 1 CKA domains: namespaces, pods, deployments, rollouts, services, config objects and fast exports. The exam shell (k, kn, $do, $now) is already configured - every task is real cluster work.",
+ "scenario": "It is the Wednesday lab day of Week 1: 34 tasks, exam conditions. Everything you create here is something the CKA exam asks you to produce in under 60 seconds. No copy-paste from the browser: type every command.",
+ "symptoms": [
+  "The clock is the opponent: each task should cost under 60 seconds after warm-up",
+  "Checks verify live cluster state, so how you build each object does not matter"
+ ],
+ "mission": "Complete all 40 tasks: set up the exam shell, create namespaces, pods, deployments, services, config objects and export YAML - at speed, from memory, with the docs closed.",
+ "hints": [
+  {
+   "number": 1,
+   "title": "Do the shell setup first",
+   "content": "Tasks 1-6 are pure exam muscle memory: alias k, $do, $now, kn, completion, vim settings. Every later task gets faster once these exist. Persist them with >> so the checks find them in ~/.bashrc."
+  },
+  {
+   "number": 2,
+   "title": "Imperative first, YAML only when forced",
+   "content": "create deploy/expose/scale/set image cover most tasks. Only env vars, labels beyond -l, resources and multi-container pods need $do + edit + apply."
+  },
+  {
+   "number": 3,
+   "title": "Rollouts are annotations",
+   "content": "kubectl rollout history/undo is tracked in the deployment.kubernetes.io/revision annotation. set image bumps it, undo bumps it again - task 21 checks revision >= 2, task 22 wants >= 3."
+  },
+  {
+   "number": 4,
+   "title": "Seeded pod",
+   "content": "A pod named doomed is pre-created in the default namespace. Task 33 just wants it gone - use your $now alias for practice."
+  },
+  {
+   "number": 5,
+   "title": "Export with $do",
+   "content": "kubectl run x --image=... $do > file.yaml is the exam way to produce YAML. sed or vim the file when the task asks for a different image or field."
+  }
+ ],
+ "verification_command": "bash /check.sh",
+ "resource_limits": {
+  "privileged": true
+ },
+ "acceptance_criteria": [
+  {
+   "id": "task_01",
+   "description": "alias k=kubectl persisted in /root/.bashrc",
+   "weight": 10
+  },
+  {
+   "id": "task_02",
+   "description": "$do dry-run helper (dry-run=client -o yaml) persisted in /root/.bashrc",
+   "weight": 10
+  },
+  {
+   "id": "task_03",
+   "description": "$now force-delete helper (--force --grace-period=0) persisted in /root/.bashrc",
+   "weight": 10
+  },
+  {
+   "id": "task_04",
+   "description": "kn namespace-switch helper persisted in /root/.bashrc",
+   "weight": 10
+  },
+  {
+   "id": "task_05",
+   "description": "kubectl bash completion wired for k (__start_kubectl) in /root/.bashrc",
+   "weight": 10
+  },
+  {
+   "id": "task_06",
+   "description": "~/.vimrc has expandtab and tabstop=2",
+   "weight": 10
+  },
+  {
+   "id": "task_07",
+   "description": "Namespace stage exists",
+   "weight": 10
+  },
+  {
+   "id": "task_08",
+   "description": "Namespace billing exists",
+   "weight": 10
+  },
+  {
+   "id": "task_09",
+   "description": "Namespace stage carries label env=dev",
+   "weight": 10
+  },
+  {
+   "id": "task_10",
+   "description": "Pod utils runs in stage with busybox:1.36 and a sleep command",
+   "weight": 10
+  },
+  {
+   "id": "task_11",
+   "description": "Pod web-pod runs image nginx:1.27 in stage",
+   "weight": 10
+  },
+  {
+   "id": "task_12",
+   "description": "Pod env-demo in stage has env APP_ENV=production",
+   "weight": 10
+  },
+  {
+   "id": "task_13",
+   "description": "Pod api-pod in stage carries labels app=api and tier=backend",
+   "weight": 10
+  },
+  {
+   "id": "task_14",
+   "description": "Pod redis-pod runs redis:7-alpine in billing",
+   "weight": 10
+  },
+  {
+   "id": "task_15",
+   "description": "Pod res-demo in stage requests cpu=100m memory=128Mi",
+   "weight": 10
+  },
+  {
+   "id": "task_16",
+   "description": "Pod res-demo limits cpu=250m memory=256Mi",
+   "weight": 10
+  },
+  {
+   "id": "task_17",
+   "description": "Pod multi in stage has exactly 2 containers (one nginx, one busybox)",
+   "weight": 10
+  },
+  {
+   "id": "task_18",
+   "description": "Pod anno-pod in stage carries annotation description=week1-drill",
+   "weight": 10
+  },
+  {
+   "id": "task_19",
+   "description": "Deployment web-dep in stage runs nginx:1.27 with >= 3 replicas",
+   "weight": 10
+  },
+  {
+   "id": "task_20",
+   "description": "Deployment web-dep scaled to exactly 5 replicas",
+   "weight": 10
+  },
+  {
+   "id": "task_21",
+   "description": "Deployment canary (seeded at 1.26) updated to nginx:1.27 with revision >= 2",
+   "weight": 10
+  },
+  {
+   "id": "task_22",
+   "description": "Deployment rollback-me shows >= 3 revisions (1.26 -> 1.28 -> undo)",
+   "weight": 10
+  },
+  {
+   "id": "task_23",
+   "description": "rollback-me image is back to nginx:1.26 after the undo",
+   "weight": 10
+  },
+  {
+   "id": "task_24",
+   "description": "Service web-svc in stage: ClusterIP, port 80, targetPort 80",
+   "weight": 10
+  },
+  {
+   "id": "task_25",
+   "description": "Service web-np in stage is a NodePort on 30080",
+   "weight": 10
+  },
+  {
+   "id": "task_26",
+   "description": "Service web-svc has at least 1 ready endpoint",
+   "weight": 10
+  },
+  {
+   "id": "task_27",
+   "description": "ConfigMap app-cm in stage has data KEY=value",
+   "weight": 10
+  },
+  {
+   "id": "task_28",
+   "description": "Secret app-sec in stage carries PASS=s3cr3t",
+   "weight": 10
+  },
+  {
+   "id": "task_29",
+   "description": "/root/secret-value.txt contains the decoded PASS value s3cr3t",
+   "weight": 10
+  },
+  {
+   "id": "task_30",
+   "description": "ServiceAccount pipeline-sa exists in stage",
+   "weight": 10
+  },
+  {
+   "id": "task_31",
+   "description": "Deployment web-dep carries annotation owner=team-x",
+   "weight": 10
+  },
+  {
+   "id": "task_32",
+   "description": "Job seed-job exists in stage",
+   "weight": 10
+  },
+  {
+   "id": "task_33",
+   "description": "CronJob report-cron in stage runs every 5 minutes",
+   "weight": 10
+  },
+  {
+   "id": "task_34",
+   "description": "Seeded pod doomed (default ns) is deleted",
+   "weight": 10
+  },
+  {
+   "id": "task_35",
+   "description": "/root/pod.yaml is a Pod manifest using an nginx image",
+   "weight": 10
+  },
+  {
+   "id": "task_36",
+   "description": "/root/dep.yaml is a Deployment manifest with replicas: 3",
+   "weight": 10
+  },
+  {
+   "id": "task_37",
+   "description": "/root/pod-names.txt lists >= 3 real pod names from stage",
+   "weight": 10
+  },
+  {
+   "id": "task_38",
+   "description": "Some node carries label env=training",
+   "weight": 10
+  },
+  {
+   "id": "task_39",
+   "description": "Pod applied-pod runs httpd:2.4 in stage (export, edit, apply)",
+   "weight": 10
+  },
+  {
+   "id": "task_40",
+   "description": "/root/events.txt captures cluster events (non-empty)",
+   "weight": 10
+  }
+ ]
+}

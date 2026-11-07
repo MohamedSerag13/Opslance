@@ -1,0 +1,105 @@
+schema_version: 2
+lab: module-08-lab-01-first-script
+title: Your First Script
+category: linux
+domain: scripting
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: scripting
+  weight: 25
+  prompt: /home/intern/hello.sh exists
+  context: null
+  hints:
+  - title: The shebang line
+    content: The first line `#!/bin/bash` tells the kernel which interpreter to use. Without it, ./hello.sh
+      may run under sh with different behaviour.
+  - title: Create and edit
+    content: Use `nano /home/intern/hello.sh` to write the two lines, or `printf`/`cat` from the shell.
+  - title: The executable bit
+    content: '`chmod +x /home/intern/hello.sh` adds execute permission so `./hello.sh` works, not just
+      `bash hello.sh`.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/hello.sh exists
+  time_target_minutes: 2
+- id: check_2
+  order: 2
+  domain: scripting
+  weight: 25
+  prompt: 'first line of the script is the shebang #!/bin/bash'
+  context: null
+  hints:
+  - title: The shebang line
+    content: The first line `#!/bin/bash` tells the kernel which interpreter to use. Without it, ./hello.sh
+      may run under sh with different behaviour.
+  - title: Create and edit
+    content: Use `nano /home/intern/hello.sh` to write the two lines, or `printf`/`cat` from the shell.
+  - title: The executable bit
+    content: '`chmod +x /home/intern/hello.sh` adds execute permission so `./hello.sh` works, not just
+      `bash hello.sh`.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: 'first line of the script is the shebang #!/bin/bash'
+  time_target_minutes: 2
+- id: check_3
+  order: 3
+  domain: scripting
+  weight: 20
+  prompt: script has the executable bit set
+  context: null
+  hints:
+  - title: The shebang line
+    content: The first line `#!/bin/bash` tells the kernel which interpreter to use. Without it, ./hello.sh
+      may run under sh with different behaviour.
+  - title: Create and edit
+    content: Use `nano /home/intern/hello.sh` to write the two lines, or `printf`/`cat` from the shell.
+  - title: The executable bit
+    content: '`chmod +x /home/intern/hello.sh` adds execute permission so `./hello.sh` works, not just
+      `bash hello.sh`.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: script has the executable bit set
+  time_target_minutes: 2
+- id: check_4
+  order: 4
+  domain: scripting
+  weight: 30
+  prompt: running the script prints exactly 'Opslance boot OK'
+  context: null
+  hints:
+  - title: The shebang line
+    content: The first line `#!/bin/bash` tells the kernel which interpreter to use. Without it, ./hello.sh
+      may run under sh with different behaviour.
+  - title: Create and edit
+    content: Use `nano /home/intern/hello.sh` to write the two lines, or `printf`/`cat` from the shell.
+  - title: The executable bit
+    content: '`chmod +x /home/intern/hello.sh` adds execute permission so `./hello.sh` works, not just
+      `bash hello.sh`.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: running the script prints exactly 'Opslance boot OK'
+  time_target_minutes: 2

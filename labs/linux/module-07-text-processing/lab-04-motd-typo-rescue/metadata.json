@@ -1,0 +1,72 @@
+{
+  "id": "module-07-lab-04-motd-typo-rescue",
+  "module_number": 7,
+  "module_title": "Text Processing & Pipelines",
+  "title": "Message-of-the-Day Rescue",
+  "difficulty": "beginner",
+  "estimated_minutes": 10,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "text-processing",
+  "skills": [
+    "nano",
+    "vim basics",
+    "tee -a",
+    "sed",
+    "tail"
+  ],
+  "description": "Repair a typo in /etc/motd and append a management line using any editor or sed.",
+  "scenario": "Someone fat-fingered the message of the day: every user who logs in sees 'Welcom to the Opslance staging server.' Corporate comms also require a 'Managed by Opslance.' line as the LAST line of the banner. Fix both — with the terminal editor of your choice (nano or vim), or with sed if you prefer to stay hands-off.",
+  "symptoms": [
+    "Login banner greets users with 'Welcom' instead of 'Welcome'",
+    "The required 'Managed by Opslance.' footer line is missing",
+    "The banner lives in /etc/motd and is root-owned",
+    "Users notice before managers do — fix it fast"
+  ],
+  "mission": "Correct 'Welcom' to 'Welcome' in /etc/motd and append a final line reading exactly 'Managed by Opslance.' without changing anything else.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "nano in 10 seconds",
+      "content": "Open with sudo nano /etc/motd, move with arrows, type your fix, then Ctrl+O Enter to save and Ctrl+X to exit."
+    },
+    {
+      "number": 2,
+      "title": "vim in 10 seconds",
+      "content": "Open with sudo vi /etc/motd, press i to insert, fix the text, press Esc, then type :wq and Enter to save and quit."
+    },
+    {
+      "number": 3,
+      "title": "No-editor option",
+      "content": "Fix the typo with `sudo sed -i 's/Welcom/Welcome/' /etc/motd` and append with `echo 'Managed by Opslance.' | sudo tee -a /etc/motd`."
+    },
+    {
+      "number": 4,
+      "title": "Verify the tail",
+      "content": "`tail -1 /etc/motd` must print exactly: Managed by Opslance."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "the 'Welcom' typo is gone from /etc/motd",
+      "weight": 25
+    },
+    {
+      "id": "check_2",
+      "description": "banner correctly reads 'Welcome to the Opslance staging server.'",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "existing banner lines were preserved",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "last line of /etc/motd is exactly 'Managed by Opslance.'",
+      "weight": 25
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "id": "module-06-lab-04-sudo-access-audit",
+  "module_number": 6,
+  "module_title": "Users, Groups & Sudo",
+  "title": "The Missing Sudo Grant",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "users",
+  "skills": [
+    "sudo",
+    "usermod",
+    "groups",
+    "sudo -l",
+    "privilege audit"
+  ],
+  "description": "Add a colleague to the sudo group and produce a written audit of what they may run.",
+  "scenario": "Jordan from the on-call rotation was promised sudo access on this staging box, but every elevated command he runs fails with 'permission denied'. On Debian/Ubuntu systems sudo is granted by membership of the sudo group — and he is not in it. Fix the membership, then write down exactly what he is now allowed to run so the change is auditable.",
+  "symptoms": [
+    "jordan's sudo commands fail even though he knows his password",
+    "`groups jordan` does not list the sudo group",
+    "The operations handbook requires a written record of every sudo grant",
+    "No audit file exists for this change yet"
+  ],
+  "mission": "Add jordan to the sudo group, then save `groups jordan` and the `sudo -l -U jordan` privilege listing into /home/intern/sudo-audit.txt.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "The sudo group",
+      "content": "On Ubuntu, membership of the sudo group is what allows a user to escalate. Check it with `groups jordan`."
+    },
+    {
+      "number": 2,
+      "title": "Grant it",
+      "content": "`sudo usermod -aG sudo jordan` — the same -aG pattern as any other group."
+    },
+    {
+      "number": 3,
+      "title": "Ask sudo itself",
+      "content": "`sudo -l -U jordan` shows exactly which commands the user may run — ideal evidence for an audit record. You can run it because your intern account has passwordless sudo in this lab."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "jordan account exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "jordan is a member of the sudo group",
+      "weight": 40
+    },
+    {
+      "id": "check_3",
+      "description": "/home/intern/sudo-audit.txt exists and mentions jordan",
+      "weight": 20
+    },
+    {
+      "id": "check_4",
+      "description": "audit file records the sudo privilege listing",
+      "weight": 20
+    }
+  ]
+}

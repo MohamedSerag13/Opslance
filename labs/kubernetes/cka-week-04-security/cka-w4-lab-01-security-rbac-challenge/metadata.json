@@ -1,0 +1,117 @@
+{
+  "id": "cka-w4-lab-01-security-rbac-challenge",
+  "module_number": 24,
+  "module_title": "CKA Week 4 - Security, RBAC and Certificates",
+  "title": "CKA Week 4 Challenge - RBAC, Certificates, Security Contexts",
+  "difficulty": "advanced",
+  "estimated_minutes": 150,
+  "points": 120,
+  "category": "kubernetes",
+  "subcategory": "cka-week-4",
+  "skills": [
+    "ServiceAccounts",
+    "Role/RoleBinding",
+    "ClusterRole/ClusterRoleBinding",
+    "kubectl auth can-i --as",
+    "CertificateSigningRequest",
+    "kubeconfig",
+    "securityContext",
+    "Pod Security Admission"
+  ],
+  "description": "End-of-week challenge for security: least-privilege RBAC verified with auth can-i --as, a full CSR certificate flow, a working kubeconfig for a new user, security contexts and Pod Security Admission.",
+  "scenario": "The Week 4 gate: set up access control the way the exam grades it - prove every permission with kubectl auth can-i --as, issue a real client certificate through the CSR API, and harden pods with security contexts.",
+  "symptoms": [
+    "Every RBAC answer must be proven with kubectl auth can-i --as=...",
+    "jane-csr walks the full certificate pipeline: key, CSR, approve, issued cert, kubeconfig",
+    "ns secure starts unlabeled: labeling it enforce=baseline must start rejecting unsafe pods"
+  ],
+  "mission": "Build least-privilege RBAC for a service account, issue and approve a client certificate, create a kubeconfig for jane, run hardened pods, and enforce Pod Security Admission.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Prove, do not assume",
+      "content": "Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails, read the can-i output before touching RBAC again."
+    },
+    {
+      "number": 2,
+      "title": "The CSR pipeline",
+      "content": "openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate approve. The issued cert lands in status.certificate (base64)."
+    },
+    {
+      "number": 3,
+      "title": "jane kubeconfig",
+      "content": "Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything. A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal."
+    },
+    {
+      "number": 4,
+      "title": "PSA baseline",
+      "content": "Label the namespace pod-security.kubernetes.io/enforce=baseline. Baseline forbids hostPath volumes - task 12 applies a hostPath pod and expects the API server to refuse it."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "resource_limits": {
+    "privileged": true
+  },
+  "acceptance_criteria": [
+    {
+      "id": "task_01",
+      "description": "ServiceAccount dev-sa exists in ns dev",
+      "weight": 10
+    },
+    {
+      "id": "task_02",
+      "description": "Role pods-reader in dev allows get,list,watch on pods",
+      "weight": 10
+    },
+    {
+      "id": "task_03",
+      "description": "RoleBinding pods-reader-binding binds pods-reader to SA dev:dev-sa",
+      "weight": 10
+    },
+    {
+      "id": "task_04",
+      "description": "auth can-i: the SA CAN list pods in dev",
+      "weight": 10
+    },
+    {
+      "id": "task_05",
+      "description": "auth can-i: the SA CANNOT delete pods in dev (least privilege)",
+      "weight": 10
+    },
+    {
+      "id": "task_06",
+      "description": "ClusterRole node-reader allows get,list,watch on nodes",
+      "weight": 10
+    },
+    {
+      "id": "task_07",
+      "description": "ClusterRoleBinding grants node-reader to dev-sa; can-i get nodes -> yes",
+      "weight": 10
+    },
+    {
+      "id": "task_08",
+      "description": "CSR jane-csr Approved with certificate issued",
+      "weight": 10
+    },
+    {
+      "id": "task_09",
+      "description": "/home/intern/jane.kubeconfig authenticates jane (can-i prints no)",
+      "weight": 10
+    },
+    {
+      "id": "task_10",
+      "description": "Pod sc-pod runs as non-root (runAsNonRoot=true, runAsUser=1000)",
+      "weight": 10
+    },
+    {
+      "id": "task_11",
+      "description": "Pod sc-pod drops ALL capabilities and adds NET_BIND_SERVICE",
+      "weight": 10
+    },
+    {
+      "id": "task_12",
+      "description": "ns secure enforces PSA baseline; a hostPath pod is rejected there",
+      "weight": 10
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-13-lab-03-ssh-client-config
+title: Tame the Hostnames
+category: linux
+domain: ssh
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: ssh
+  weight: 20
+  prompt: ~/.ssh/config exists
+  context: null
+  hints:
+  - title: The block
+    content: '`Host staging` on its own line, then indented settings — HostName, User, Port, IdentityFile.
+      Everything indented applies until the next Host line.'
+  - title: ssh -G is the oracle
+    content: '`ssh -G staging` prints the FULL effective configuration for that alias — the definitive
+      way to check your file without connecting anywhere.'
+  - title: One alias, many settings
+    content: The point of the alias is that `ssh staging` now carries the port, user and identity for
+      you — no flags to misremember.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: ~/.ssh/config exists
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: ssh
+  weight: 25
+  prompt: a 'Host staging' block is defined
+  context: null
+  hints:
+  - title: The block
+    content: '`Host staging` on its own line, then indented settings — HostName, User, Port, IdentityFile.
+      Everything indented applies until the next Host line.'
+  - title: ssh -G is the oracle
+    content: '`ssh -G staging` prints the FULL effective configuration for that alias — the definitive
+      way to check your file without connecting anywhere.'
+  - title: One alias, many settings
+    content: The point of the alias is that `ssh staging` now carries the port, user and identity for
+      you — no flags to misremember.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: a 'Host staging' block is defined
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: ssh
+  weight: 20
+  prompt: HostName is set to 10.20.0.5
+  context: null
+  hints:
+  - title: The block
+    content: '`Host staging` on its own line, then indented settings — HostName, User, Port, IdentityFile.
+      Everything indented applies until the next Host line.'
+  - title: ssh -G is the oracle
+    content: '`ssh -G staging` prints the FULL effective configuration for that alias — the definitive
+      way to check your file without connecting anywhere.'
+  - title: One alias, many settings
+    content: The point of the alias is that `ssh staging` now carries the port, user and identity for
+      you — no flags to misremember.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: HostName is set to 10.20.0.5
+  time_target_minutes: 5
+- id: check_4
+  order: 4
+  domain: ssh
+  weight: 35
+  prompt: the block sets User deploy, Port 2222 and an IdentityFile
+  context: null
+  hints:
+  - title: The block
+    content: '`Host staging` on its own line, then indented settings — HostName, User, Port, IdentityFile.
+      Everything indented applies until the next Host line.'
+  - title: ssh -G is the oracle
+    content: '`ssh -G staging` prints the FULL effective configuration for that alias — the definitive
+      way to check your file without connecting anywhere.'
+  - title: One alias, many settings
+    content: The point of the alias is that `ssh staging` now carries the port, user and identity for
+      you — no flags to misremember.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: the block sets User deploy, Port 2222 and an IdentityFile
+  time_target_minutes: 5

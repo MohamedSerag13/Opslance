@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, DateTime, Text, Index
+from sqlalchemy import Column, String, Boolean, Integer, ForeignKey, DateTime, Text, Index, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -179,3 +179,63 @@ class CommandHistory(Base):
     ran_at = Column(DateTime(timezone=True), server_default=func.now())
 
     session = relationship("LabSession", back_populates="commands")
+
+
+class ExamAttempt(Base):
+    """A question-by-question run of one lab session (runner, schema v2).
+
+    mode: practice (hints, no timer) | exam (server-side timer, no hints)
+    status: active | completed
+    question_ids: JSON list — the participating subset of the lab's questions
+    (retry-failed attempts contain only the failed questions).
+    """
+    __tablename__ = "exam_attempts"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    session_id = Column(UUID(as_uuid=True), ForeignKey("lab_sessions.id", ondelete="CASCADE"), nullable=False)
+    student_id = Column(UUID(as_uuid=True), ForeignKey("students.id"), nullable=False)
+    lab_id = Column(String, ForeignKey("labs.id"), nullable=False)
+    mode = Column(String, default="practice", nullable=False)
+    status = Column(String, default="active", nullable=False)
+    question_ids = Column(Text, default="[]", nullable=False)
+    current_index = Column(Integer, default=0, nullable=False)
+
+    started_at = Column(DateTime(timezone=True), server_default=func.now())
+    expires_at = Column(DateTime(timezone=True), nullable=True)
+    finished_at = Column(DateTime(timezone=True), nullable=True)
+    duration_seconds = Column(Integer, nullable=True)
+
+    pass_mark = Column(Integer, nullable=False, default=70)
+    score_total = Column(Integer, nullable=False, default=100)
+    score_earned = Column(Integer, default=0)
+    passed = Column(Boolean, nullable=True)
+
+    question_states = relationship("QuestionState", back_populates="attempt", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("idx_attempts_session_status", "session_id", "status"),
+    )
+
+
+class QuestionState(Base):
+    """Persisted per-question state of an attempt (survives refresh/reload)."""
+    __tablename__ = "question_states"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    attempt_id = Column(UUID(as_uuid=True), ForeignKey("exam_attempts.id", ondelete="CASCADE"), nullable=False)
+    question_id = Column(String, nullable=False)
+
+    status = Column(String, default="unanswered", nullable=False)  # unanswered | passed | failed
+    checks_run = Column(Integer, default=0, nullable=False)
+    last_passed = Column(Boolean, nullable=True)
+    last_output = Column(Text, nullable=True)
+    hints_revealed = Column(Integer, default=0, nullable=False)
+    flagged = Column(Boolean, default=False, nullable=False)
+    first_passed_at = Column(DateTime(timezone=True), nullable=True)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    attempt = relationship("ExamAttempt", back_populates="question_states")
+
+    __table_args__ = (
+        UniqueConstraint("attempt_id", "question_id", name="uq_attempt_question"),
+    )

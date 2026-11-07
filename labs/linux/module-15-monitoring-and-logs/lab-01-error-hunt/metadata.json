@@ -1,0 +1,61 @@
+{
+  "id": "module-15-lab-01-error-hunt",
+  "module_number": 15,
+  "module_title": "System Monitoring & Logs",
+  "title": "The Error Hunt",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "monitoring",
+  "skills": [
+    "grep -c",
+    "tail",
+    "awk timestamp extraction",
+    "log triage"
+  ],
+  "description": "Count today's ERROR lines in app.log and timestamp the last one for the incident ticket.",
+  "scenario": "Users report intermittent failures on the staging API. Before escalating, the incident template requires two hard numbers from /var/log/app/app.log: how many ERROR lines occurred today, and the exact timestamp of the LAST error. Produce /home/intern/error-report.txt with `error-count=<n>` and `last-error=<YYYY-MM-DD HH:MM:SS>`.",
+  "symptoms": [
+    "Users report intermittent API failures",
+    "app.log mixes INFO, WARN and ERROR lines",
+    "The incident template demands an error count and the last error's timestamp",
+    "No monitoring dashboard covers this app yet"
+  ],
+  "mission": "Create /home/intern/error-report.txt containing `error-count=7` and `last-error=2026-06-17 09:42:11`, both derived from the real log.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Count with grep -c",
+      "content": "`grep -c ERROR file` prints only the number of matching lines — exactly the incident template's error-count."
+    },
+    {
+      "number": 2,
+      "title": "Log lines are chronological",
+      "content": "The LAST error is the last matching line: pipe the matches through `tail -1`."
+    },
+    {
+      "number": 3,
+      "title": "Extract the timestamp",
+      "content": "Each line starts 'YYYY-MM-DD HH:MM:SS LEVEL ...', so `awk '{print $1, $2}'` on that one line gives '2026-06-17 09:42:11'."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/error-report.txt exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "report states error-count=7",
+      "weight": 40
+    },
+    {
+      "id": "check_3",
+      "description": "report states last-error=2026-06-17 09:42:11",
+      "weight": 40
+    }
+  ]
+}

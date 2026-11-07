@@ -1,0 +1,129 @@
+schema_version: 2
+lab: module-01-lab-04-copy-move-remove
+title: Copy, Move, Remove
+category: linux
+domain: fundamentals
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: fundamentals
+  weight: 25
+  prompt: /etc/app/staging.conf exists
+  context: null
+  hints:
+  - title: Where to look
+    content: Run ls -l in your home directory to find staging.conf and the backup files.
+  - title: What to check
+    content: Use mkdir -p to create /etc/app/ before you try to move the config file there.
+  - title: The fix
+    content: 'sudo mkdir -p /etc/app
+
+      mv ~/staging.conf /etc/app/staging.conf
+
+      cp /etc/app/staging.conf /etc/app/production.conf
+
+      rm ~/backup-*.tar.gz
+
+      sudo mkdir -p /var/app/data'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /etc/app/staging.conf exists
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: fundamentals
+  weight: 25
+  prompt: /etc/app/production.conf exists
+  context: null
+  hints:
+  - title: Where to look
+    content: Run ls -l in your home directory to find staging.conf and the backup files.
+  - title: What to check
+    content: Use mkdir -p to create /etc/app/ before you try to move the config file there.
+  - title: The fix
+    content: 'sudo mkdir -p /etc/app
+
+      mv ~/staging.conf /etc/app/staging.conf
+
+      cp /etc/app/staging.conf /etc/app/production.conf
+
+      rm ~/backup-*.tar.gz
+
+      sudo mkdir -p /var/app/data'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: /etc/app/production.conf exists
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: fundamentals
+  weight: 25
+  prompt: no backup-*.tar.gz files remain in /home/intern
+  context: null
+  hints:
+  - title: Where to look
+    content: Run ls -l in your home directory to find staging.conf and the backup files.
+  - title: What to check
+    content: Use mkdir -p to create /etc/app/ before you try to move the config file there.
+  - title: The fix
+    content: 'sudo mkdir -p /etc/app
+
+      mv ~/staging.conf /etc/app/staging.conf
+
+      cp /etc/app/staging.conf /etc/app/production.conf
+
+      rm ~/backup-*.tar.gz
+
+      sudo mkdir -p /var/app/data'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: no backup-*.tar.gz files remain in /home/intern
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: fundamentals
+  weight: 25
+  prompt: /var/app/data directory exists
+  context: null
+  hints:
+  - title: Where to look
+    content: Run ls -l in your home directory to find staging.conf and the backup files.
+  - title: What to check
+    content: Use mkdir -p to create /etc/app/ before you try to move the config file there.
+  - title: The fix
+    content: 'sudo mkdir -p /etc/app
+
+      mv ~/staging.conf /etc/app/staging.conf
+
+      cp /etc/app/staging.conf /etc/app/production.conf
+
+      rm ~/backup-*.tar.gz
+
+      sudo mkdir -p /var/app/data'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: /var/app/data directory exists
+  time_target_minutes: 4

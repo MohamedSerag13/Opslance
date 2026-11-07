@@ -1,11 +1,62 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DevOps Lab Platform</title>
+    <title>Opslance — Hands-on DevOps & Kubernetes Labs</title>
+    <meta name="description" content="Practice real DevOps skills in isolated, browser-based lab environments. Linux, Docker, Kubernetes and CKA mock exams — graded live against real clusters, not multiple choice." />
+    <meta name="theme-color" content="#0A0F1C" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- OpenGraph / social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Opslance" />
+    <meta property="og:title" content="Opslance — Hands-on DevOps & Kubernetes Labs" />
+    <meta property="og:description" content="Isolated lab environments, real k3s clusters, live-state grading. The CKA-style exam simulator for teams and self-paced learners." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Opslance — Hands-on DevOps & Kubernetes Labs" />
+    <meta name="twitter:description" content="Isolated lab environments, real k3s clusters, live-state grading. The CKA-style exam simulator for teams and self-paced learners." />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Opslance",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "description": "Hands-on DevOps and Kubernetes learning platform with isolated browser lab environments, real k3s clusters and live-state grading, including CKA-style mock exams.",
+      "offers": [
+        { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD" },
+        { "@type": "Offer", "name": "Pro", "priceCurrency": "USD" },
+        { "@type": "Offer", "name": "Enterprise", "priceCurrency": "USD" }
+      ]
+    }
+    </script>
+
+    <!-- Fonts (self-hosted) -->
+    <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/inter-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/space-grotesk-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!-- Set theme before first paint to avoid a flash of the wrong theme -->
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('ops-theme');
+          if (t !== 'light' && t !== 'dark') {
+            t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+        }
+      })();
+    </script>
   </head>
-  <body class="bg-gray-50 text-gray-900 min-h-screen">
+  <body class="min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

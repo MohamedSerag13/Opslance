@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-12-lab-04-login-shell-fix:
+    build: .
+    container_name: lab-12-04-login-shell-fix
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 12"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=The Silent Login Shell"
+      - "lab.id=module-12-lab-04-login-shell-fix"

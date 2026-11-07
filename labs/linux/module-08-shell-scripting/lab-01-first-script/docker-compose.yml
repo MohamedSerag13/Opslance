@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-08-lab-01-first-script:
+    build: .
+    container_name: lab-08-01-first-script
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 08"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Your First Script"
+      - "lab.id=module-08-lab-01-first-script"

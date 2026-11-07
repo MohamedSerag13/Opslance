@@ -1,0 +1,72 @@
+{
+  "id": "module-11-lab-01-whats-eating-the-disk",
+  "module_number": 11,
+  "module_title": "Storage & Disk Usage",
+  "title": "What's Eating the Disk?",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "storage",
+  "skills": [
+    "du",
+    "du -ah",
+    "sort -rh",
+    "find -size",
+    "rm"
+  ],
+  "description": "Find the largest file under /var, record its size, delete it, and confirm the real backups survive.",
+  "scenario": "A monitoring alert says the data volume is nearly full. Your lead suspects a runaway core dump under /var. Find the biggest file below /var (du + sort is the classic pipeline), record its size in /home/intern/findings.txt as largest=40MB, delete the culprit — and only the culprit. The legitimate old-2024.tar.gz backup must survive.",
+  "symptoms": [
+    "Disk usage on the volume is at the alert threshold",
+    "A huge core dump is rumoured to live somewhere under /var",
+    "The team wants the size recorded in /home/intern/findings.txt before deletion",
+    "The legitimate backup /var/backups/old-2024.tar.gz must NOT be deleted"
+  ],
+  "mission": "Identify the largest file under /var, write `largest=40MB` into /home/intern/findings.txt, delete core.dump, and leave old-2024.tar.gz in place.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "The du pipeline",
+      "content": "`du -ah /var` lists every file and directory with its size; `sort -rh` sorts human-readable sizes biggest-first; `head -5` shows the worst offenders."
+    },
+    {
+      "number": 2,
+      "title": "Alternative: find by size",
+      "content": "`sudo find /var -type f -size +20M` lists files bigger than 20 MB — often faster when you already know the threshold."
+    },
+    {
+      "number": 3,
+      "title": "Record, then delete",
+      "content": "Write findings.txt BEFORE rm — the ticket needs the evidence even after the file is gone."
+    },
+    {
+      "number": 4,
+      "title": "Surgical deletion",
+      "content": "Delete the exact path `sudo rm /var/backups/core.dump`. Never wildcard /var/backups/* — that would take the legitimate backup with it."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/findings.txt exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "findings records largest=40MB",
+      "weight": 40
+    },
+    {
+      "id": "check_3",
+      "description": "the 40MB core.dump has been deleted",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "the legitimate backup old-2024.tar.gz survived",
+      "weight": 15
+    }
+  ]
+}

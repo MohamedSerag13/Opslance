@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-15-lab-02-crash-timeline:
+    build: .
+    container_name: lab-15-02-crash-timeline
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 15"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Build the Crash Timeline"
+      - "lab.id=module-15-lab-02-crash-timeline"

@@ -6,14 +6,18 @@ import models
 def sync_labs():
     db = SessionLocal()
     
-    # Robust path lookup fallback
-    labs_dir = os.environ.get("LABS_HOST_PATH", "/labs-repo")
-    if not os.path.exists(labs_dir):
-        possible_paths = ["./labs", "../labs", "../../labs", "./labs-repo", "../labs-repo", "../../labs/linux/module-01-linux-fundamentals"]
-        for path in possible_paths:
-            if os.path.exists(path):
-                labs_dir = path
-                break
+    # Prefer the container mount; LABS_HOST_PATH is a host path (only used by
+    # the lab-manager to rewrite bind mounts) and usually does not exist here.
+    if os.path.exists("/labs-repo"):
+        labs_dir = "/labs-repo"
+    else:
+        labs_dir = os.environ.get("LABS_HOST_PATH") or "./labs"
+        if not os.path.exists(labs_dir):
+            possible_paths = ["./labs", "../labs", "../../labs", "./labs-repo", "../labs-repo"]
+            for path in possible_paths:
+                if os.path.exists(path):
+                    labs_dir = path
+                    break
 
     print(f"🔍 Starting synchronization from: {labs_dir}")
 

@@ -1,0 +1,60 @@
+{
+  "id": "module-15-lab-03-resource-snapshot",
+  "module_number": 15,
+  "module_title": "System Monitoring & Logs",
+  "title": "Health Snapshot",
+  "difficulty": "beginner",
+  "estimated_minutes": 10,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "monitoring",
+  "skills": [
+    "free -m",
+    "uptime",
+    "load average",
+    "health checks"
+  ],
+  "description": "Capture the box's memory and load-average snapshot into a health report file.",
+  "scenario": "Morning standup needs today's health snapshot of the staging box: memory state and the load averages. Produce /home/intern/health-report.txt containing the full output of `free -m` (memory in megabytes) and `uptime` (load averages) — the two commands behind every 'how is the box doing?' conversation.",
+  "symptoms": [
+    "Standup asks 'how is staging actually doing?' and nobody has numbers",
+    "The health report file does not exist yet",
+    "The team standard: free -m for memory, uptime for load average"
+  ],
+  "mission": "Create /home/intern/health-report.txt containing both `free -m` and `uptime` output.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "free -m",
+      "content": "Shows total/used/free memory in MEGABYTES (-m). The Mem: row is the one everyone quotes."
+    },
+    {
+      "number": 2,
+      "title": "uptime",
+      "content": "The three load averages (1/5/15-minute) appear after 'load average:' — the quick pulse of CPU pressure."
+    },
+    {
+      "number": 3,
+      "title": "Group redirection",
+      "content": "`{ free -m; uptime; } > file` runs both commands and sends their COMBINED output to one file."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/health-report.txt exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "report contains the free -m Mem: row",
+      "weight": 40
+    },
+    {
+      "id": "check_3",
+      "description": "report contains the uptime load average line",
+      "weight": 40
+    }
+  ]
+}

@@ -1,0 +1,117 @@
+{
+  "id": "cka-w2-lab-01-workloads-scheduling-challenge",
+  "module_number": 22,
+  "module_title": "CKA Week 2 - Workloads and Scheduling",
+  "title": "CKA Week 2 Challenge - Workloads and Scheduling",
+  "difficulty": "advanced",
+  "estimated_minutes": 150,
+  "points": 120,
+  "category": "kubernetes",
+  "subcategory": "cka-week-2",
+  "skills": [
+    "rollout undo --to-revision",
+    "RollingUpdate strategy",
+    "HPA",
+    "ConfigMaps/Secrets injection",
+    "init containers",
+    "Jobs/CronJobs",
+    "nodeSelector",
+    "taints and tolerations"
+  ],
+  "description": "End-of-week challenge for workloads and scheduling: rollouts, config injection, init containers, Jobs, placement with labels, taints and tolerations, and an HPA.",
+  "scenario": "The Week 2 gate from your plan: roll out, configure and place workloads exactly where asked. Twelve mixed tasks in exam style - each one is a real question pattern from the scheduling and application-lifecycle domains.",
+  "symptoms": [
+    "Two seeded deployments let you practice update and rollback without breaking each other",
+    "Placement tasks must end with pods Running on the (single) node",
+    "Spec tasks check the object definition, behavior tasks check the live result"
+  ],
+  "mission": "Master Week 2: update and roll back deployments with strategy control, inject configuration, run init containers and Jobs, place pods via labels and tolerations, and autoscale.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Two seeds, two flows",
+      "content": "upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates then undoes. The revision annotation proves both steps happened."
+    },
+    {
+      "number": 2,
+      "title": "Patch for strategies",
+      "content": "kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge cleanly."
+    },
+    {
+      "number": 3,
+      "title": "$do + edit for pods",
+      "content": "Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client -o yaml, edit, apply. This is the exact exam workflow."
+    },
+    {
+      "number": 4,
+      "title": "Taint first",
+      "content": "Taint the node BEFORE creating tol-pod, or the pod may be unschedulable when you check. The toleration must match key, value and effect exactly."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "resource_limits": {
+    "privileged": true
+  },
+  "acceptance_criteria": [
+    {
+      "id": "task_01",
+      "description": "upgrade-me updated to nginx:1.27 (revision >= 2)",
+      "weight": 10
+    },
+    {
+      "id": "task_02",
+      "description": "rollback-me back on nginx:1.26 after update to 1.28 + undo (revision >= 3)",
+      "weight": 10
+    },
+    {
+      "id": "task_03",
+      "description": "upgrade-me strategy: maxUnavailable=0, maxSurge=1 (no-downtime rolling update)",
+      "weight": 10
+    },
+    {
+      "id": "task_04",
+      "description": "HPA web-hpa on upgrade-me: min 2, max 6, CPU target 70%",
+      "weight": 10
+    },
+    {
+      "id": "task_05",
+      "description": "ConfigMap w2-config (MODE=fast) consumed as env by pod cm-env via envFrom",
+      "weight": 10
+    },
+    {
+      "id": "task_06",
+      "description": "Secret w2-secret mounted at /etc/creds in pod sec-mount",
+      "weight": 10
+    },
+    {
+      "id": "task_07",
+      "description": "Pod bootstrapper: init container writes index.html into emptyDir served by nginx",
+      "weight": 10
+    },
+    {
+      "id": "task_08",
+      "description": "Pod logger: busybox sidecar shares an emptyDir at /logs with the main container",
+      "weight": 10
+    },
+    {
+      "id": "task_09",
+      "description": "Job batch-job: completions 3, parallelism 2, backoffLimit 4",
+      "weight": 10
+    },
+    {
+      "id": "task_10",
+      "description": "CronJob nightly: schedule 30 2 * * *, not suspended",
+      "weight": 10
+    },
+    {
+      "id": "task_11",
+      "description": "Node labeled disk=fast and pod pin-node lands there via nodeSelector",
+      "weight": 10
+    },
+    {
+      "id": "task_12",
+      "description": "Node tainted dedicated=cka:NoSchedule; pod tol-pod tolerates it and still runs",
+      "weight": 10
+    }
+  ]
+}

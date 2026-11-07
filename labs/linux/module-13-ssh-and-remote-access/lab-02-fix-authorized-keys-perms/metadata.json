@@ -1,0 +1,72 @@
+{
+  "id": "module-13-lab-02-fix-authorized-keys-perms",
+  "module_number": 13,
+  "module_title": "SSH & Remote Access",
+  "title": "SSH Ignores My Key",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "ssh",
+  "skills": [
+    "authorized_keys",
+    "chmod",
+    "chown",
+    "sshd strict modes",
+    "stat"
+  ],
+  "description": "sshd silently ignores authorized_keys because the .ssh directory and file have unsafe permissions and wrong ownership.",
+  "scenario": "A teammate tried to install your public key for passwordless access but made a mess: ~/.ssh is world -writable (777), authorized_keys is world-writable (666) AND owned by root instead of by you. sshd's StrictModes refuses to trust such files and silently ignores them, so key login fails with no obvious error. Repair the permissions and ownership to what sshd requires.",
+  "symptoms": [
+    "Key-based login attempts fail with 'Permission denied (publickey)'",
+    "~/.ssh permissions are 777 (world-writable)",
+    "authorized_keys is 666 and owned by root:root",
+    "Server logs mention 'Authentication refused: bad ownership or modes'"
+  ],
+  "mission": "Fix ~/.ssh to 700, authorized_keys to 600 and make intern its owner, so sshd's StrictModes accepts the file.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "sshd is strict",
+      "content": "sshd refuses authorized_keys that are writable by others or owned by another user — StrictModes protects you from a tampered file. No error reaches the client; the key is just ignored."
+    },
+    {
+      "number": 2,
+      "title": "Two chmods",
+      "content": "Directory: `chmod 700 ~/.ssh`. File: `chmod 600 ~/.ssh/authorized_keys`."
+    },
+    {
+      "number": 3,
+      "title": "Ownership matters too",
+      "content": "The file must belong to the LOGIN user: `sudo chown intern:intern ~/.ssh/authorized_keys` — chown needs root even for your own file."
+    },
+    {
+      "number": 4,
+      "title": "Verify with stat",
+      "content": "`stat -c '%U %G %a'` prints owner, group and mode in one line — all three must be right."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": ".ssh directory permissions are 700",
+      "weight": 30
+    },
+    {
+      "id": "check_2",
+      "description": "authorized_keys permissions are 600",
+      "weight": 30
+    },
+    {
+      "id": "check_3",
+      "description": "authorized_keys is owned by intern",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "authorized_keys still contains the public key",
+      "weight": 15
+    }
+  ]
+}

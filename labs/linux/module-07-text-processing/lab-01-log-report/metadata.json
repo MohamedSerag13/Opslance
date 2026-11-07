@@ -1,0 +1,68 @@
+{
+  "id": "module-07-lab-01-log-report",
+  "module_number": 7,
+  "module_title": "Text Processing & Pipelines",
+  "title": "Traffic Report from Raw Logs",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "text-processing",
+  "skills": [
+    "grep",
+    "wc",
+    "sort",
+    "uniq",
+    "awk",
+    "pipes"
+  ],
+  "description": "Answer three questions about web traffic by combining small text tools into pipelines.",
+  "scenario": "The monitoring dashboard is down, but the product team needs traffic numbers right now for the staging API. The raw access log is at /var/log/app/access.log. Everything they asked for can be answered by chaining small text tools — the classic Unix way — and writing the answers into a report file.",
+  "symptoms": [
+    "The dashboard is unavailable, so numbers must be pulled from raw logs",
+    "/var/log/app/access.log holds one line per HTTP request",
+    "The product team wants: total requests, how many were 404s, and the noisiest client IP",
+    "The answers must land in /home/intern/report.txt in key=value form"
+  ],
+  "mission": "Create /home/intern/report.txt with exactly three lines: total=40, errors_404=14 and top_client=10.0.0.5, computed from the real log with shell pipelines.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Count lines",
+      "content": "`wc -l` counts lines. The report format is total=<number>, e.g. total=42."
+    },
+    {
+      "number": 2,
+      "title": "Filter then count",
+      "content": "`grep -c ' 404 '` prints only a count of matching lines. The status is surrounded by spaces in the log, which keeps the match exact."
+    },
+    {
+      "number": 3,
+      "title": "Top talker pipeline",
+      "content": "`awk '{print $1}'` takes the first column (the IP). Piping through `sort | uniq -c | sort -rn | head -1` yields the most frequent one. Prefix the report line as top_client=<ip>."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/report.txt exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "report states total=40",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "report states errors_404=14",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "report states top_client=10.0.0.5",
+      "weight": 30
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+Jun 16 14:00:01 srv1 systemd[1]: Started daily cleanup.
+Jun 16 14:05:30 srv1 systemd[1]: Started orders-api service.
+Jun 16 14:05:32 srv1 orders-api[2311]: Segmentation fault at address 0x7f31
+Jun 16 14:05:33 srv1 systemd[1]: orders-api.service: Failed with result 'signal'.
+Jun 16 14:05:34 srv1 systemd[1]: orders-api.service: Scheduled restart job.
+Jun 16 16:44:12 srv1 kernel: [12345.678] eth0: link becomes ready
+Jun 16 18:22:46 srv1 systemd[1]: Stopped orders-api service.
+Jun 16 18:22:47 srv1 orders-api[2507]: Segmentation fault at address 0x9a2c
+Jun 16 18:22:48 srv1 systemd[1]: orders-api.service: Failed with result 'signal'.
+Jun 16 19:00:00 srv1 CRON[3101]: (root) CMD (/usr/local/bin/backup.sh)
+Jun 16 21:40:14 srv1 systemd[1]: Started orders-api service.
+Jun 16 21:40:15 srv1 orders-api[2844]: Segmentation fault at address 0x0
+Jun 16 21:40:16 srv1 systemd[1]: orders-api.service: Failed with result 'signal'.
+Jun 16 22:15:00 srv1 systemd[1]: Started orders-api service.
+Jun 16 22:15:01 srv1 orders-api[2900]: listening on 0.0.0.0:8080

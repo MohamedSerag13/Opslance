@@ -1,0 +1,79 @@
+schema_version: 2
+lab: module-07-lab-03-awk-column-report
+title: Sales Totals with awk
+category: linux
+domain: text-processing
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: text-processing
+  weight: 20
+  prompt: /home/intern/sales-total.txt exists
+  context: null
+  hints:
+  - title: Choose a field separator
+    content: '`awk -F,` splits each line on commas, so $1 is the date, $2 the region and $3 the amount.'
+  - title: Skip the header
+    content: '`NR>1` is true from the second record on — the header never enters the sum.'
+  - title: Accumulate and print at END
+    content: The pattern `{s+=$3}` accumulates; the `END {…}` block runs after the last line and prints
+      the result. Use `printf "%.2f"` for two decimals.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/sales-total.txt exists
+  time_target_minutes: 7
+- id: check_2
+  order: 2
+  domain: text-processing
+  weight: 45
+  prompt: report states total=3373.51
+  context: null
+  hints:
+  - title: Choose a field separator
+    content: '`awk -F,` splits each line on commas, so $1 is the date, $2 the region and $3 the amount.'
+  - title: Skip the header
+    content: '`NR>1` is true from the second record on — the header never enters the sum.'
+  - title: Accumulate and print at END
+    content: The pattern `{s+=$3}` accumulates; the `END {…}` block runs after the last line and prints
+      the result. Use `printf "%.2f"` for two decimals.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: report states total=3373.51
+  time_target_minutes: 7
+- id: check_3
+  order: 3
+  domain: text-processing
+  weight: 35
+  prompt: report states rows=20
+  context: null
+  hints:
+  - title: Choose a field separator
+    content: '`awk -F,` splits each line on commas, so $1 is the date, $2 the region and $3 the amount.'
+  - title: Skip the header
+    content: '`NR>1` is true from the second record on — the header never enters the sum.'
+  - title: Accumulate and print at END
+    content: The pattern `{s+=$3}` accumulates; the `END {…}` block runs after the last line and prints
+      the result. Use `printf "%.2f"` for two decimals.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: report states rows=20
+  time_target_minutes: 7

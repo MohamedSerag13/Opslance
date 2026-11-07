@@ -1,0 +1,62 @@
+{
+  "id": "module-15-lab-02-crash-timeline",
+  "module_number": 15,
+  "module_title": "System Monitoring & Logs",
+  "title": "Build the Crash Timeline",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "monitoring",
+  "skills": [
+    "log correlation",
+    "grep",
+    "awk",
+    "systemd log lines",
+    "incident timeline"
+  ],
+  "description": "Correlate orders-api crashes in /var/log/syslog: count them and timestamp the first.",
+  "scenario": "orders-api keeps dying on the staging box and the post-mortem needs a timeline. In the extracted system log /var/log/syslog, every crash of the service appears as an 'orders-api[N]: Segmentation fault' line. Count the crashes and timestamp the first one, writing `crash-count=<n>` and `first-crash=<timestamp>` to /home/intern/crash-report.txt.",
+  "symptoms": [
+    "orders-api restarts repeatedly on staging",
+    "/var/log/syslog contains systemd unit failures and the app's own output",
+    "Crashes manifest as 'Segmentation fault' lines from the orders-api process",
+    "The post-mortem needs the crash count and the first crash timestamp"
+  ],
+  "mission": "Create /home/intern/crash-report.txt with `crash-count=3` and `first-crash=Jun 16 14:05:32`, derived from /var/log/syslog.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Correlate two log sources",
+      "content": "systemd's 'Failed with result' lines and the app's own 'Segmentation fault' lines tell one story — grep each and compare timestamps."
+    },
+    {
+      "number": 2,
+      "title": "Count precisely",
+      "content": "`grep -c 'Segmentation fault' /var/log/syslog` counts the crashes. Check the preceding lines to confirm the process is orders-api."
+    },
+    {
+      "number": 3,
+      "title": "First occurrence",
+      "content": "Syslog is chronological: the first crash is `grep 'Segmentation fault' /var/log/syslog | head -1`, and its timestamp is the first three fields."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/crash-report.txt exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "report states crash-count=3",
+      "weight": 40
+    },
+    {
+      "id": "check_3",
+      "description": "report states first-crash=Jun 16 14:05:32",
+      "weight": 40
+    }
+  ]
+}

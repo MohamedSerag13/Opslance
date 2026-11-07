@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-06-lab-02-onboard-developer:
+    build: .
+    container_name: lab-06-02-onboard-developer
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 06"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Onboard a New Developer"
+      - "lab.id=module-06-lab-02-onboard-developer"

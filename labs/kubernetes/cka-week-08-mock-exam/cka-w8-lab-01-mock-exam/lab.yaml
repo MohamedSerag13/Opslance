@@ -1,0 +1,481 @@
+schema_version: 2
+lab: cka-w8-lab-01-mock-exam
+title: CKA Week 8 Mock Exam - 18 Questions, 120 Minutes
+category: kubernetes
+domain: CKA Week 8 - Mock Exam Simulation
+pass_mark: 66
+grading_scale: points
+total: 180
+time_limit_minutes: 120
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: task_01
+  order: 1
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: Namespace exam created and set as the current-context namespace
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: task
+    description: Namespace exam created and set as the current-context namespace
+  time_target_minutes: 7
+  description: Create namespace exam and set it as the current context's default namespace (`kubectl config
+    set-context --current --namespace=exam`). The check verifies both.
+- id: task_02
+  order: 2
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: Pod fast runs nginx:1.27 in exam and is Running
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: task
+    description: Pod fast runs nginx:1.27 in exam and is Running
+  time_target_minutes: 7
+  description: Run a pod fast with image nginx:1.27 in exam; it must be Running. The check verifies image
+    and phase.
+- id: task_03
+  order: 3
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: 'Deployment api: 4 replicas of nginx:1.27, all Ready'
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: task
+    description: 'Deployment api: 4 replicas of nginx:1.27, all Ready'
+  time_target_minutes: 7
+  description: Create Deployment api in exam with 4 replicas of nginx:1.27, all Ready. The check verifies
+    replicas and readiness.
+- id: task_04
+  order: 4
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: legacy-app updated to nginx:1.27 (revision >= 2)
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: task
+    description: legacy-app updated to nginx:1.27 (revision >= 2)
+  time_target_minutes: 7
+  description: Update the seeded legacy-app to nginx:1.27, recording a new revision. The check verifies
+    image and revision >= 2.
+- id: task_05
+  order: 5
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: ConfigMap exam-cm (KEY1=val1) and Secret exam-sec (PASS=topsecret) in exam
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 5
+    kind: task
+    description: ConfigMap exam-cm (KEY1=val1) and Secret exam-sec (PASS=topsecret) in exam
+  time_target_minutes: 7
+  description: Create ConfigMap exam-cm (KEY1=val1) and Secret exam-sec (PASS=topsecret) in exam. The
+    check verifies both objects' data.
+- id: task_06
+  order: 6
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: CronJob backup-cron runs daily at 01:00 (0 1 * * *)
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 6
+    kind: task
+    description: CronJob backup-cron runs daily at 01:00 (0 1 * * *)
+  time_target_minutes: 7
+  description: Create CronJob backup-cron in exam with schedule 0 1 * * * (daily 01:00). The check verifies
+    .spec.schedule.
+- id: task_07
+  order: 7
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: Service api-svc (80) exposes deploy api with ready endpoints
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 7
+    kind: task
+    description: Service api-svc (80) exposes deploy api with ready endpoints
+  time_target_minutes: 7
+  description: Create Service api-svc (port 80) exposing deployment api, with ready endpoints. The check
+    verifies the Service and Endpoints.
+- id: task_08
+  order: 8
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: Node tainted exam=drain:NoSchedule; pod tol-pod tolerates it and runs
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 8
+    kind: task
+    description: Node tainted exam=drain:NoSchedule; pod tol-pod tolerates it and runs
+  time_target_minutes: 7
+  description: Taint a node exam=drain:NoSchedule, then create pod tol-pod that tolerates it and runs.
+    The check verifies the taint and the pod.
+- id: task_09
+  order: 9
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: 'RBAC: SA deployer + Role deployer-role (create deployments) + RoleBinding in exam'
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 9
+    kind: task
+    description: 'RBAC: SA deployer + Role deployer-role (create deployments) + RoleBinding in exam'
+  time_target_minutes: 7
+  description: 'RBAC: create ServiceAccount deployer, Role deployer-role allowing create on deployments,
+    and a RoleBinding for it — all in exam. The check verifies the three objects.'
+- id: task_10
+  order: 10
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: 'auth can-i: deployer SA CAN create deployments in exam'
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 10
+    kind: task
+    description: 'auth can-i: deployer SA CAN create deployments in exam'
+  time_target_minutes: 7
+  description: '`kubectl auth can-i create deployments -n exam --as=system:serviceaccount:exam:deployer`
+    must answer yes. The check runs it.'
+- id: task_11
+  order: 11
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: 'NetworkPolicy in exam: client cannot reach protected, DNS still works'
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 11
+    kind: task
+    description: 'NetworkPolicy in exam: client cannot reach protected, DNS still works'
+  time_target_minutes: 7
+  description: Create a NetworkPolicy in exam so the seeded client cannot reach pod protected while DNS
+    still works. The check verifies both live conditions.
+- id: task_12
+  order: 12
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: 'Storage: PVC exam-pvc (1Gi, local-path) Bound and mounted in pod pvc-pod'
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 12
+    kind: task
+    description: 'Storage: PVC exam-pvc (1Gi, local-path) Bound and mounted in pod pvc-pod'
+  time_target_minutes: 7
+  description: Create PVC exam-pvc (1Gi, storageClassName local-path), wait for Bound, and mount it in
+    a pod pvc-pod. The check verifies binding and the mount.
+- id: task_13
+  order: 13
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: 'etcd backup: snapshot copied to /root/exam-snap.db and verified'
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 13
+    kind: task
+    description: 'etcd backup: snapshot copied to /root/exam-snap.db and verified'
+  time_target_minutes: 7
+  description: Take an etcd snapshot through the helper and copy it to /root/exam-snap.db; it must be
+    a valid snapshot file. The check verifies the file.
+- id: task_14
+  order: 14
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: Helm release exam-rel installed in exam with replicaCount 2
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 14
+    kind: task
+    description: Helm release exam-rel installed in exam with replicaCount 2
+  time_target_minutes: 7
+  description: Install the chart as Helm release exam-rel in exam with replicaCount=2. The check verifies
+    the release.
+- id: task_15
+  order: 15
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: 'Kustomize overlay applied: kust-web at 2 replicas on nginx:1.28 in exam'
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 15
+    kind: task
+    description: 'Kustomize overlay applied: kust-web at 2 replicas on nginx:1.28 in exam'
+  time_target_minutes: 7
+  description: Apply the kustomize overlay so deployment kust-web runs 2 replicas on nginx:1.28 in exam.
+    The check verifies the live deployment.
+- id: task_16
+  order: 16
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: 'Ingress exam-ing: exam.example.com -> api-svc verified with curl'
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 16
+    kind: task
+    description: 'Ingress exam-ing: exam.example.com -> api-svc verified with curl'
+  time_target_minutes: 7
+  description: Create Ingress exam-ing routing exam.example.com to api-svc; verify with curl. The check
+    performs the request.
+- id: task_17
+  order: 17
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: 'fixme repaired: 2 replicas of nginx:1.27 all Ready (was 0 replicas, broken image)'
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 17
+    kind: task
+    description: 'fixme repaired: 2 replicas of nginx:1.27 all Ready (was 0 replicas, broken image)'
+  time_target_minutes: 7
+  description: Deployment fixme is broken (0 replicas, bad image) — repair it to 2 replicas of nginx:1.27,
+    all Ready. The check verifies the live state.
+- id: task_18
+  order: 18
+  domain: CKA Week 8 - Mock Exam Simulation
+  weight: 10
+  prompt: /root/pod-ips.txt contains the live IP of pod fast
+  context: null
+  hints:
+  - title: Exam protocol
+    content: 'Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question:
+      verify your context and namespace. Flag anything over 6 minutes and come back.'
+  - title: Weight your time
+    content: All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are
+      fast wins - bank them before touching the etcd question.
+  - title: The seeded helpers
+    content: etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is
+      pre-installed; fixme is your one troubleshooting question.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 18
+    kind: task
+    description: /root/pod-ips.txt contains the live IP of pod fast
+  time_target_minutes: 7
+  description: Save the live IP address of pod fast to /root/pod-ips.txt (e.g. via jsonpath or -o wide).
+    The check compares against the real pod IP.

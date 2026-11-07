@@ -1,0 +1,8 @@
+# Runtime deps first, then test-only tooling
+-r requirements.txt
+
+# Backend API test suite (see tests/ and docs/TESTING.md)
+pytest>=8
+pgserver>=0.1.4
+fakeredis>=2.30
+httpx>=0.27

@@ -1,0 +1,85 @@
+schema_version: 2
+lab: module-04-lab-03-recover-crashed-service
+title: Recover a Crashed Service
+category: linux
+domain: services
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: services
+  weight: 35
+  prompt: nginx is serving HTTP responses on localhost:8080
+  context: null
+  hints:
+  - title: Check the service status
+    content: Run 'systemctl status nginx' to see whether the service is active, inactive, or failed. Look
+      at the 'Active:' line.
+  - title: Start the service
+    content: Run 'systemctl start nginx'. If it succeeds, the Active line in 'systemctl status nginx'
+      will change to 'active (running)'.
+  - title: Verify with curl
+    content: Run 'curl http://localhost:8080' to confirm nginx is serving HTTP responses. You should see
+      an HTML page.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: nginx is serving HTTP responses on localhost:8080
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: services
+  weight: 35
+  prompt: systemctl reports nginx as active
+  context: null
+  hints:
+  - title: Check the service status
+    content: Run 'systemctl status nginx' to see whether the service is active, inactive, or failed. Look
+      at the 'Active:' line.
+  - title: Start the service
+    content: Run 'systemctl start nginx'. If it succeeds, the Active line in 'systemctl status nginx'
+      will change to 'active (running)'.
+  - title: Verify with curl
+    content: Run 'curl http://localhost:8080' to confirm nginx is serving HTTP responses. You should see
+      an HTML page.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: systemctl reports nginx as active
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: services
+  weight: 30
+  prompt: nginx is enabled (systemctl enable nginx was run)
+  context: null
+  hints:
+  - title: Check the service status
+    content: Run 'systemctl status nginx' to see whether the service is active, inactive, or failed. Look
+      at the 'Active:' line.
+  - title: Start the service
+    content: Run 'systemctl start nginx'. If it succeeds, the Active line in 'systemctl status nginx'
+      will change to 'active (running)'.
+  - title: Verify with curl
+    content: Run 'curl http://localhost:8080' to confirm nginx is serving HTTP responses. You should see
+      an HTML page.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: nginx is enabled (systemctl enable nginx was run)
+  time_target_minutes: 5

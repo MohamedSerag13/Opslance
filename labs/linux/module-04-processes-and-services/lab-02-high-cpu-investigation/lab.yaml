@@ -1,0 +1,59 @@
+schema_version: 2
+lab: module-04-lab-02-high-cpu-investigation
+title: High CPU Investigation
+category: linux
+domain: processes
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: processes
+  weight: 40
+  prompt: culprit_pid.txt contains the correct yes process PID
+  context: null
+  hints:
+  - title: Launch top and sort by CPU
+    content: Run 'top'. The process list is already sorted by CPU usage by default — the highest consumer
+      appears at the top. Note the PID in the first column. Press 'q' to quit.
+  - title: Try htop for a clearer view
+    content: Run 'htop'. It shows a colour bar graph of CPU usage per core at the top and sorts processes
+      by CPU automatically. The PID column is on the left. Press F10 or 'q' to exit.
+  - title: Record the PID
+    content: 'Write the PID to /home/intern/culprit_pid.txt. For example: echo 1234 > /home/intern/culprit_pid.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: culprit_pid.txt contains the correct yes process PID
+  time_target_minutes: 8
+- id: check_2
+  order: 2
+  domain: processes
+  weight: 60
+  prompt: yes process has been killed (no longer running)
+  context: null
+  hints:
+  - title: Launch top and sort by CPU
+    content: Run 'top'. The process list is already sorted by CPU usage by default — the highest consumer
+      appears at the top. Note the PID in the first column. Press 'q' to quit.
+  - title: Try htop for a clearer view
+    content: Run 'htop'. It shows a colour bar graph of CPU usage per core at the top and sorts processes
+      by CPU automatically. The PID column is on the left. Press F10 or 'q' to exit.
+  - title: Record the PID
+    content: 'Write the PID to /home/intern/culprit_pid.txt. For example: echo 1234 > /home/intern/culprit_pid.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: yes process has been killed (no longer running)
+  time_target_minutes: 8

@@ -1,0 +1,66 @@
+{
+  "id": "module-10-lab-01-tar-the-logs",
+  "module_number": 10,
+  "module_title": "Archiving & Compression",
+  "title": "Tar Up the Logs",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "archiving",
+  "skills": [
+    "tar czf",
+    "tar -t",
+    "gzip",
+    "archive verification"
+  ],
+  "description": "Bundle the five log files in /var/log/app into a single gzipped tarball in your home directory.",
+  "scenario": "Support needs last week's staging logs attached to a ticket, but five separate files violate the attachment policy: everything must travel as ONE gzipped archive. Bundle /var/log/app into /home/intern/app-logs.tar.gz with tar, then prove the archive is intact by listing its contents.",
+  "symptoms": [
+    "/var/log/app holds five separate .log files",
+    "The ticketing system rejects multiple attachments",
+    "The archive must be gzip-compressed, not a plain tar",
+    "Nobody verified the last archive anyone sent — this one must be checked"
+  ],
+  "mission": "Create /home/intern/app-logs.tar.gz containing the five log files from /var/log/app, and verify it with `tar -tzf`.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "The three flags",
+      "content": "tar czf = **c**reate an archive, compress with g**z**ip, write to **f**ile. In that order: `tar -czf out.tar.gz paths...`."
+    },
+    {
+      "number": 2,
+      "title": "Control the paths inside",
+      "content": "`-C /var/log app` first cds to /var/log, then archives the app directory — so entries come out as app/app.log instead of absolute paths."
+    },
+    {
+      "number": 3,
+      "title": "Verify before sending",
+      "content": "`tar -tzf` (t = list) prints the contents without extracting. A truncated or corrupt archive fails here, not at the recipient's end."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/app-logs.tar.gz exists",
+      "weight": 25
+    },
+    {
+      "id": "check_2",
+      "description": "the file is a valid gzipped tar archive",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "the archive contains app.log",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "the archive contains audit.log",
+      "weight": 25
+    }
+  ]
+}

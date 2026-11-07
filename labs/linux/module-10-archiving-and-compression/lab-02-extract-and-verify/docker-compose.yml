@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-10-lab-02-extract-and-verify:
+    build: .
+    container_name: lab-10-02-extract-and-verify
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 10"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Deploy from a Tarball"
+      - "lab.id=module-10-lab-02-extract-and-verify"

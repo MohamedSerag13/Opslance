@@ -1,0 +1,67 @@
+{
+  "id": "module-07-lab-02-sed-config-surgery",
+  "module_number": 7,
+  "module_title": "Text Processing & Pipelines",
+  "title": "Config Surgery with sed",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "text-processing",
+  "skills": [
+    "sed",
+    "sed -i",
+    "backup copies",
+    "cp",
+    "grep"
+  ],
+  "description": "Back up a config file, then flip two settings in place using sed substitutions.",
+  "scenario": "The orders-api is pointing at the wrong port and still has debug mode enabled after yesterday's release. Change control requires that you keep an unmodified backup of any config before editing it. The file is /etc/app/settings.conf and two values must change: port=3000 becomes port=8080, and debug=true becomes debug=false. Everything else must stay byte-identical.",
+  "symptoms": [
+    "The API listens on 3000 but the load balancer forwards to 8080",
+    "debug=true spams verbose logs in production-like runs",
+    "Change control requires a .bak copy of the original config",
+    "The remaining settings must not be touched"
+  ],
+  "mission": "Copy /etc/app/settings.conf to /home/intern/settings.conf.bak, then use sed to change port=3000 to port=8080 and debug=true to debug=false in the original file.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Backup first",
+      "content": "`cp /etc/app/settings.conf ~/settings.conf.bak` — change control wants the original preserved in your home directory."
+    },
+    {
+      "number": 2,
+      "title": "Anchor the match",
+      "content": "In the sed script `s/^port=3000/port=8080/`, the `^` anchors to the start of the line so you never match a comment or another value containing 'port='."
+    },
+    {
+      "number": 3,
+      "title": "In place editing",
+      "content": "`sed -i` edits the file directly instead of printing to the terminal. Editing /etc/app/ needs sudo because the file is root-owned."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "backup copy /home/intern/settings.conf.bak exists",
+      "weight": 25
+    },
+    {
+      "id": "check_2",
+      "description": "port is now 8080",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "debug is now false",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "other settings (app_name, max_connections) are untouched",
+      "weight": 25
+    }
+  ]
+}

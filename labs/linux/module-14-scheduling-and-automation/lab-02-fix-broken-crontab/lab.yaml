@@ -1,0 +1,85 @@
+schema_version: 2
+lab: module-14-lab-02-fix-broken-crontab
+title: Fix the Broken Cron File
+category: linux
+domain: scheduling
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: scheduling
+  weight: 40
+  prompt: the report job line is exactly '30 3 * * * root /usr/local/bin/send-report.sh'
+  context: null
+  hints:
+  - title: Eight fields is one too many
+    content: '/etc/cron.d lines have exactly seven: five time fields, the username, then the command.
+      The broken line has EIGHT — an extra ''*'' shifts everything and cron reads a wrong username.'
+  - title: Step values can't be zero
+    content: '`*/0` means ''every 0 minutes'' — undefined. Valid steps look like */5, */15, */10. Here
+      the runbook simply wants a fixed time: 15 5 * * *.'
+  - title: Rewrite the whole file
+    content: With only two active lines, the safest fix is rewriting the file cleanly with sudo tee rather
+      than surgical seds.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: the report job line is exactly '30 3 * * * root /usr/local/bin/send-report.sh'
+  time_target_minutes: 7
+- id: check_2
+  order: 2
+  domain: scheduling
+  weight: 35
+  prompt: the cleanup job line is exactly '15 5 * * * root /usr/local/bin/cleanup-temp.sh'
+  context: null
+  hints:
+  - title: Eight fields is one too many
+    content: '/etc/cron.d lines have exactly seven: five time fields, the username, then the command.
+      The broken line has EIGHT — an extra ''*'' shifts everything and cron reads a wrong username.'
+  - title: Step values can't be zero
+    content: '`*/0` means ''every 0 minutes'' — undefined. Valid steps look like */5, */15, */10. Here
+      the runbook simply wants a fixed time: 15 5 * * *.'
+  - title: Rewrite the whole file
+    content: With only two active lines, the safest fix is rewriting the file cleanly with sudo tee rather
+      than surgical seds.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: the cleanup job line is exactly '15 5 * * * root /usr/local/bin/cleanup-temp.sh'
+  time_target_minutes: 7
+- id: check_3
+  order: 3
+  domain: scheduling
+  weight: 25
+  prompt: every active line has exactly 7 fields (5 time fields + username + command)
+  context: null
+  hints:
+  - title: Eight fields is one too many
+    content: '/etc/cron.d lines have exactly seven: five time fields, the username, then the command.
+      The broken line has EIGHT — an extra ''*'' shifts everything and cron reads a wrong username.'
+  - title: Step values can't be zero
+    content: '`*/0` means ''every 0 minutes'' — undefined. Valid steps look like */5, */15, */10. Here
+      the runbook simply wants a fixed time: 15 5 * * *.'
+  - title: Rewrite the whole file
+    content: With only two active lines, the safest fix is rewriting the file cleanly with sudo tee rather
+      than surgical seds.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: every active line has exactly 7 fields (5 time fields + username + command)
+  time_target_minutes: 7

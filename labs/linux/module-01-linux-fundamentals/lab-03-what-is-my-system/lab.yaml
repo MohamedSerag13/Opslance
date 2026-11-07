@@ -1,0 +1,173 @@
+schema_version: 2
+lab: module-01-lab-03-what-is-my-system
+title: What is My System?
+category: linux
+domain: fundamentals
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: fundamentals
+  weight: 20
+  prompt: system-report.txt exists and is not empty
+  context: null
+  hints:
+  - title: Where to look
+    content: 'Start by navigating to your home directory using `cd /home/intern`. Then, run basic discovery
+      commands: `whoami` tells you who you are, `pwd` tells you where you are. Run both.'
+  - title: What to check
+    content: The hostname is shown by the hostname command. Use file redirection to construct the report.
+  - title: The fix
+    content: 'Run these commands to build your report:
+
+      cd /home/intern
+
+      echo "Username: $(whoami)" > system-report.txt
+
+      echo "Hostname: $(hostname)" >> system-report.txt
+
+      echo "Home: /home/intern" >> system-report.txt
+
+      echo "PWD: $(pwd)" >> system-report.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: system-report.txt exists and is not empty
+  time_target_minutes: 3
+- id: check_2
+  order: 2
+  domain: fundamentals
+  weight: 20
+  prompt: report contains username
+  context: null
+  hints:
+  - title: Where to look
+    content: 'Start by navigating to your home directory using `cd /home/intern`. Then, run basic discovery
+      commands: `whoami` tells you who you are, `pwd` tells you where you are. Run both.'
+  - title: What to check
+    content: The hostname is shown by the hostname command. Use file redirection to construct the report.
+  - title: The fix
+    content: 'Run these commands to build your report:
+
+      cd /home/intern
+
+      echo "Username: $(whoami)" > system-report.txt
+
+      echo "Hostname: $(hostname)" >> system-report.txt
+
+      echo "Home: /home/intern" >> system-report.txt
+
+      echo "PWD: $(pwd)" >> system-report.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: report contains username 'intern'
+  time_target_minutes: 3
+- id: check_3
+  order: 3
+  domain: fundamentals
+  weight: 20
+  prompt: report contains the system hostname
+  context: null
+  hints:
+  - title: Where to look
+    content: 'Start by navigating to your home directory using `cd /home/intern`. Then, run basic discovery
+      commands: `whoami` tells you who you are, `pwd` tells you where you are. Run both.'
+  - title: What to check
+    content: The hostname is shown by the hostname command. Use file redirection to construct the report.
+  - title: The fix
+    content: 'Run these commands to build your report:
+
+      cd /home/intern
+
+      echo "Username: $(whoami)" > system-report.txt
+
+      echo "Hostname: $(hostname)" >> system-report.txt
+
+      echo "Home: /home/intern" >> system-report.txt
+
+      echo "PWD: $(pwd)" >> system-report.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: report contains system hostname
+  time_target_minutes: 3
+- id: check_4
+  order: 4
+  domain: fundamentals
+  weight: 20
+  prompt: report contains home directory
+  context: null
+  hints:
+  - title: Where to look
+    content: 'Start by navigating to your home directory using `cd /home/intern`. Then, run basic discovery
+      commands: `whoami` tells you who you are, `pwd` tells you where you are. Run both.'
+  - title: What to check
+    content: The hostname is shown by the hostname command. Use file redirection to construct the report.
+  - title: The fix
+    content: 'Run these commands to build your report:
+
+      cd /home/intern
+
+      echo "Username: $(whoami)" > system-report.txt
+
+      echo "Hostname: $(hostname)" >> system-report.txt
+
+      echo "Home: /home/intern" >> system-report.txt
+
+      echo "PWD: $(pwd)" >> system-report.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: report contains home directory '/home/intern'
+  time_target_minutes: 3
+- id: check_5
+  order: 5
+  domain: fundamentals
+  weight: 20
+  prompt: report contains working directory
+  context: null
+  hints:
+  - title: Where to look
+    content: 'Start by navigating to your home directory using `cd /home/intern`. Then, run basic discovery
+      commands: `whoami` tells you who you are, `pwd` tells you where you are. Run both.'
+  - title: What to check
+    content: The hostname is shown by the hostname command. Use file redirection to construct the report.
+  - title: The fix
+    content: 'Run these commands to build your report:
+
+      cd /home/intern
+
+      echo "Username: $(whoami)" > system-report.txt
+
+      echo "Hostname: $(hostname)" >> system-report.txt
+
+      echo "Home: /home/intern" >> system-report.txt
+
+      echo "PWD: $(pwd)" >> system-report.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 5
+    kind: run_check
+    description: report contains working directory '/home/intern'
+  time_target_minutes: 3

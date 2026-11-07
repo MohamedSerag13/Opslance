@@ -130,43 +130,43 @@ export default function StudentDetail() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <Link to="/admin/students" className="text-blue-600 mb-4 inline-block">← Students List</Link>
+      <Link to="/admin/students" className="text-primary-strong mb-4 inline-block">← Students List</Link>
       
       {successBanner && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <div className="bg-success/15 border border-success/40 text-success px-4 py-3 rounded relative mb-4" role="alert">
           <span className="block sm:inline">{successBanner}</span>
         </div>
       )}
 
-      <div className="bg-white p-6 rounded-lg shadow border mb-6 flex justify-between items-start">
+      <div className="bg-surface p-6 rounded-lg shadow border mb-6 flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold">{student.full_name}</h1>
-          <p className="text-gray-600">{student.email}</p>
+          <p className="text-muted">{student.email}</p>
           <div className="mt-4 flex flex-wrap gap-4 text-sm">
-            <span className="bg-gray-100 px-2 py-1 rounded">Joined: {new Date(student.created_at).toLocaleDateString()}</span>
-            <span className={student.is_active ? 'bg-green-100 text-green-800 px-2 py-1 rounded font-medium' : 'bg-red-100 text-red-800 px-2 py-1 rounded font-medium'}>
+            <span className="bg-surface-2 px-2 py-1 rounded">Joined: {new Date(student.created_at).toLocaleDateString()}</span>
+            <span className={student.is_active ? 'bg-success/15 text-success px-2 py-1 rounded font-medium' : 'bg-danger/15 text-danger px-2 py-1 rounded font-medium'}>
               {student.is_active ? 'Active' : 'Inactive'}
             </span>
-            {student.group_id && <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">Group ID: {student.group_id}</span>}
-            <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-medium">XP: {student.xp || 0}</span>
-            <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded font-medium">Level: {student.level || 1}</span>
+            {student.group_id && <span className="bg-primary/15 text-primary-strong px-2 py-1 rounded font-medium">Group ID: {student.group_id}</span>}
+            <span className="bg-warn/15 text-warn px-2 py-1 rounded font-medium">XP: {student.xp || 0}</span>
+            <span className="bg-primary/15 text-primary-strong px-2 py-1 rounded font-medium">Level: {student.level || 1}</span>
           </div>
 
           <div className="mt-4 flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-700">Plan:</span>
+            <span className="text-sm font-medium text-content">Plan:</span>
             {student.subscription_tier === 'enterprise' ? (
-              <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-bold uppercase">Enterprise</span>
+              <span className="bg-primary/15 text-primary-strong px-2 py-1 rounded text-xs font-bold uppercase">Enterprise</span>
             ) : student.subscription_tier === 'pro' ? (
-              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold uppercase">Pro</span>
+              <span className="bg-primary/15 text-primary-strong px-2 py-1 rounded text-xs font-bold uppercase">Pro</span>
             ) : (
-              <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-bold uppercase">Free</span>
+              <span className="bg-surface-2 text-content px-2 py-1 rounded text-xs font-bold uppercase">Free</span>
             )}
             <button 
               onClick={() => {
                 setSelectedPlan(student.subscription_tier || 'free');
                 setShowPlanModal(true);
               }}
-              className="ml-2 text-sm text-blue-600 hover:underline font-medium"
+              className="ml-2 text-sm text-primary-strong hover:underline font-medium"
             >
               Change Plan
             </button>
@@ -178,7 +178,7 @@ export default function StudentDetail() {
               setEditData({ full_name: student.full_name, email: student.email, group_id: student.group_id || '', is_active: student.is_active });
               setIsEditing(true);
             }} 
-            className="px-4 py-2 border text-gray-700 hover:bg-gray-50 rounded font-medium animate-transition"
+            className="px-4 py-2 border text-content hover:bg-surface-2 rounded font-medium animate-transition"
           >
             Edit Profile
           </button>
@@ -188,7 +188,7 @@ export default function StudentDetail() {
               setEditPointsReason('');
               setShowPointsModal(true);
             }}
-            className="px-4 py-2 border text-yellow-700 border-yellow-200 hover:bg-yellow-50 rounded font-medium"
+            className="px-4 py-2 border text-warn border-warn/40 hover:bg-warn/10 rounded font-medium"
           >
             Edit Points
           </button>
@@ -199,7 +199,7 @@ export default function StudentDetail() {
               setResetError('');
               setShowResetModal(true);
             }} 
-            className="px-4 py-2 border text-red-600 border-red-200 hover:bg-red-50 rounded font-medium"
+            className="px-4 py-2 border text-danger border-danger/40 hover:bg-danger/15 rounded font-medium"
           >
             Reset Password
           </button>
@@ -207,14 +207,14 @@ export default function StudentDetail() {
       </div>
       
       {/* Progress and History sections would go here */}
-      <div className="bg-white p-6 rounded-lg shadow border">
+      <div className="bg-surface p-6 rounded-lg shadow border">
         <h2 className="text-xl font-bold mb-4">Activity History</h2>
-        <p className="text-gray-500 italic">Detailed progress and command history API implementation pending in this view.</p>
+        <p className="text-muted italic">Detailed progress and command history API implementation pending in this view.</p>
       </div>
 
       {isEditing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96 max-w-full">
+          <div className="bg-surface p-6 rounded-lg w-96 max-w-full">
             <h2 className="text-xl font-bold mb-4">Edit Student</h2>
             <form onSubmit={handleEdit} className="space-y-4">
               <div>
@@ -227,7 +227,7 @@ export default function StudentDetail() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Group</label>
-                <select className="w-full border p-2 rounded bg-white" value={editData.group_id} onChange={e => setEditData({...editData, group_id: e.target.value})}>
+                <select className="w-full border p-2 rounded bg-surface" value={editData.group_id} onChange={e => setEditData({...editData, group_id: e.target.value})}>
                   <option value="">No Group</option>
                   {groups.map(g => (
                     <option key={g.id} value={g.id}>{g.name}</option>
@@ -239,8 +239,8 @@ export default function StudentDetail() {
                 <label htmlFor="isActive" className="text-sm font-medium">Account is Active</label>
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 text-gray-600 border rounded">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Save Changes</button>
+                <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 text-muted border rounded">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-primary text-white rounded">Save Changes</button>
               </div>
             </form>
           </div>
@@ -249,10 +249,10 @@ export default function StudentDetail() {
 
       {showResetModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96 max-w-full">
+          <div className="bg-surface p-6 rounded-lg w-96 max-w-full">
             <h2 className="text-xl font-bold mb-4">Reset Password</h2>
             <form onSubmit={handleResetPass} className="space-y-4">
-              {resetError && <p className="text-red-600 text-sm font-medium">{resetError}</p>}
+              {resetError && <p className="text-danger text-sm font-medium">{resetError}</p>}
               <div>
                 <label className="block text-sm font-medium mb-1">New Password</label>
                 <input 
@@ -276,8 +276,8 @@ export default function StudentDetail() {
                 />
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowResetModal(false)} className="px-4 py-2 text-gray-600 border rounded" disabled={resetLoading}>Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-red-600 text-white rounded disabled:opacity-50" disabled={resetLoading}>
+                <button type="button" onClick={() => setShowResetModal(false)} className="px-4 py-2 text-muted border rounded" disabled={resetLoading}>Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-danger text-white rounded disabled:opacity-50" disabled={resetLoading}>
                   {resetLoading ? 'Resetting...' : 'Reset Password'}
                 </button>
               </div>
@@ -288,9 +288,9 @@ export default function StudentDetail() {
 
       {showPointsModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96 max-w-full">
+          <div className="bg-surface p-6 rounded-lg w-96 max-w-full">
             <h2 className="text-xl font-bold mb-4">Edit Points</h2>
-            <p className="text-sm text-gray-500 mb-4">Current XP: <span className="font-bold text-gray-800">{student.xp || 0}</span></p>
+            <p className="text-sm text-muted mb-4">Current XP: <span className="font-bold text-content">{student.xp || 0}</span></p>
             <form onSubmit={handleEditPoints} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">New XP Value</label>
@@ -313,8 +313,8 @@ export default function StudentDetail() {
                 />
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowPointsModal(false)} className="px-4 py-2 text-gray-600 border rounded" disabled={pointsLoading}>Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-yellow-600 text-white rounded disabled:opacity-50" disabled={pointsLoading}>
+                <button type="button" onClick={() => setShowPointsModal(false)} className="px-4 py-2 text-muted border rounded" disabled={pointsLoading}>Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-warn text-white rounded disabled:opacity-50" disabled={pointsLoading}>
                   {pointsLoading ? 'Saving...' : 'Save XP'}
                 </button>
               </div>
@@ -325,13 +325,13 @@ export default function StudentDetail() {
 
       {showPlanModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96 max-w-full">
+          <div className="bg-surface p-6 rounded-lg w-96 max-w-full">
             <h2 className="text-xl font-bold mb-4">Change Plan</h2>
             <form onSubmit={handleEditPlan} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Select Subscription Plan</label>
                 <select 
-                  className="w-full border p-2 rounded bg-white" 
+                  className="w-full border p-2 rounded bg-surface" 
                   value={selectedPlan} 
                   onChange={e => setSelectedPlan(e.target.value)}
                   required
@@ -342,8 +342,8 @@ export default function StudentDetail() {
                 </select>
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowPlanModal(false)} className="px-4 py-2 text-gray-600 border rounded" disabled={planLoading}>Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50" disabled={planLoading}>
+                <button type="button" onClick={() => setShowPlanModal(false)} className="px-4 py-2 text-muted border rounded" disabled={planLoading}>Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-primary text-white rounded disabled:opacity-50" disabled={planLoading}>
                   {planLoading ? 'Saving...' : 'Save Plan'}
                 </button>
               </div>

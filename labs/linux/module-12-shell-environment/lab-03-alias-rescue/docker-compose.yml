@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-12-lab-03-alias-rescue:
+    build: .
+    container_name: lab-12-03-alias-rescue
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 12"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Bring Back the Aliases"
+      - "lab.id=module-12-lab-03-alias-rescue"

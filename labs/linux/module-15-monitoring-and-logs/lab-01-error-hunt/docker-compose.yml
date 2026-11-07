@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-15-lab-01-error-hunt:
+    build: .
+    container_name: lab-15-01-error-hunt
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 15"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=The Error Hunt"
+      - "lab.id=module-15-lab-01-error-hunt"

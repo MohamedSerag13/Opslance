@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  # FIRST service = terminal + verification container (worker picks it)
+  cka-workstation:
+    build: .
+    container_name: lab-cka-workstation
+    restart: "no"
+    tty: true
+    stdin_open: true
+    depends_on:
+      - k3s-server
+    environment:
+      - K3S_SERVER=k3s-server
+    volumes:
+      - k3s-cfg:/output:ro
+      - k3s-tls:/etcd-tls:ro
+      - k3s-manifests:/k3s-manifests:ro
+    labels:
+      - "lab.category=kubernetes"
+      - "lab.id=cka-w8-lab-01-mock-exam"
+      - "lab.title=CKA Week 8 Mock Exam - 18 Questions, 120 Minutes"
+      - "lab.difficulty=advanced"
+  k3s-server:
+    image: rancher/k3s:v1.31.2-k3s1
+    container_name: lab-cka-k3s
+    command: server --disable traefik --tls-san=k3s-server --write-kubeconfig /output/k3s.yaml --write-kubeconfig-mode 644 --cluster-init
+    privileged: true
+    restart: "no"
+    tmpfs:
+      - /run
+      - /var/run
+    volumes:
+      - k3s-cfg:/output
+      - k3s-tls:/var/lib/rancher/k3s/server/tls
+      - k3s-manifests:/var/lib/rancher/k3s/server/manifests
+      - k3s-state:/var/lib/rancher/k3s
+volumes:
+  k3s-cfg:
+  k3s-tls:
+  k3s-manifests:
+  k3s-state:

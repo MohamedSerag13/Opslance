@@ -1,0 +1,72 @@
+{
+  "id": "module-08-lab-03-fix-backup-script",
+  "module_number": 8,
+  "module_title": "Shell Scripting Basics",
+  "title": "Debug the Backup Script",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "scripting",
+  "skills": [
+    "bash -n",
+    "debugging",
+    "tar in scripts",
+    "conditionals",
+    "quoting"
+  ],
+  "description": "Repair /usr/local/bin/backup.sh: wrong shebang, no gzip, wrong output path and no proper exit status.",
+  "scenario": "Last night's backup did not produce a usable archive. The previous admin's script at /usr/local/bin/backup.sh is a mess: the shebang is mangled, it creates a plain .tar instead of the documented .tar.gz, and it does not exit with a meaningful status. The web app it should back up lives in /var/www/app. Fix the script so a run produces /tmp/backups/app-backup.tar.gz containing the app files.",
+  "symptoms": [
+    "After running, /tmp/backups contains app-backup.tar instead of app-backup.tar.gz",
+    "The script's first line is the nonsense '#bash/bin' so direct execution picks the wrong interpreter",
+    "The final echo prints a path built from a different variable than the tar command used",
+    "The script never sets an explicit exit status for the scheduler to check"
+  ],
+  "mission": "Repair backup.sh so that: `bash -n` passes, it creates /tmp/backups/app-backup.tar.gz (gzipped tar) from /var/www/app, prints that path, and exits 0 on success.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Syntax check first",
+      "content": "`bash -n script` parses the script without executing it — the fastest way to catch mangled lines."
+    },
+    {
+      "number": 2,
+      "title": "The shebang",
+      "content": "It must read exactly `#!/bin/bash`. Anything else (like #bash/bin) is just a comment to sh and the script runs under the wrong shell."
+    },
+    {
+      "number": 3,
+      "title": "Compress while archiving",
+      "content": "`tar czf <file>.tar.gz <dir>` compresses with gzip in one step — the 'z' flag is what the current script is missing."
+    },
+    {
+      "number": 4,
+      "title": "Exit status",
+      "content": "Finish with `exit 0` so the cron/scheduler sees success; after a failed tar you would `exit 1`."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "backup.sh passes a bash syntax check (bash -n)",
+      "weight": 25
+    },
+    {
+      "id": "check_2",
+      "description": "backup.sh is executable",
+      "weight": 20
+    },
+    {
+      "id": "check_3",
+      "description": "running backup.sh produces /tmp/backups/app-backup.tar.gz",
+      "weight": 35
+    },
+    {
+      "id": "check_4",
+      "description": "the archive contains the app's index.html",
+      "weight": 20
+    }
+  ]
+}

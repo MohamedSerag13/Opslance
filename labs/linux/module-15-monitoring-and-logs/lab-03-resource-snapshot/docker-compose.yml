@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-15-lab-03-resource-snapshot:
+    build: .
+    container_name: lab-15-03-resource-snapshot
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 15"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Health Snapshot"
+      - "lab.id=module-15-lab-03-resource-snapshot"

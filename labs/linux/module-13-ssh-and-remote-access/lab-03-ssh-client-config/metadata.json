@@ -1,0 +1,67 @@
+{
+  "id": "module-13-lab-03-ssh-client-config",
+  "module_number": 13,
+  "module_title": "SSH & Remote Access",
+  "title": "Tame the Hostnames",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "ssh",
+  "skills": [
+    "~/.ssh/config",
+    "Host aliases",
+    "HostName",
+    "IdentityFile",
+    "Port"
+  ],
+  "description": "Replace a long ssh command line with a ~/.ssh/config host alias for the staging server.",
+  "scenario": "Everyone on the team types the same 120-character ssh command for the staging box: ssh -p 2222 -i ~/.ssh/id_ed25519 deploy@10.20.0.5. Create a ~/.ssh/config entry so `ssh staging` does the same thing: host alias staging, HostName 10.20.0.5, user deploy, port 2222, identity file ~/.ssh/id_ed25519.",
+  "symptoms": [
+    "The team shares the long ssh command in chat instead of using config files",
+    "~/.ssh/config does not exist on this box",
+    "The staging box runs sshd on port 2222, not 22",
+    "Connections must use the id_ed25519 identity, not password prompts"
+  ],
+  "mission": "Create ~/.ssh/config with a `Host staging` block setting HostName 10.20.0.5, User deploy, Port 2222 and IdentityFile ~/.ssh/id_ed25519.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "The block",
+      "content": "`Host staging` on its own line, then indented settings — HostName, User, Port, IdentityFile. Everything indented applies until the next Host line."
+    },
+    {
+      "number": 2,
+      "title": "ssh -G is the oracle",
+      "content": "`ssh -G staging` prints the FULL effective configuration for that alias — the definitive way to check your file without connecting anywhere."
+    },
+    {
+      "number": 3,
+      "title": "One alias, many settings",
+      "content": "The point of the alias is that `ssh staging` now carries the port, user and identity for you — no flags to misremember."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "~/.ssh/config exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "a 'Host staging' block is defined",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "HostName is set to 10.20.0.5",
+      "weight": 20
+    },
+    {
+      "id": "check_4",
+      "description": "the block sets User deploy, Port 2222 and an IdentityFile",
+      "weight": 35
+    }
+  ]
+}

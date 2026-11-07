@@ -1,0 +1,65 @@
+{
+  "id": "module-11-lab-02-read-df-output",
+  "module_number": 11,
+  "module_title": "Storage & Disk Usage",
+  "title": "Read the Filesystem Report",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "storage",
+  "skills": [
+    "df -h",
+    "df -i",
+    "awk column extraction",
+    "report writing"
+  ],
+  "description": "Save a df -h snapshot and extract the root filesystem's usage percentage into a report.",
+  "scenario": "The capacity-review meeting starts in ten minutes and nobody has a current snapshot of the staging box's filesystems. Produce /home/intern/df-report.txt containing a full `df -h` output plus one machine-readable line: root-use=<used%> for the root filesystem, extracted from the df output itself.",
+  "symptoms": [
+    "The capacity review has no current filesystem snapshot",
+    "The root filesystem's used-percentage must be machine-readable for the slide deck",
+    "The report file must contain the full df -h table as evidence"
+  ],
+  "mission": "Create /home/intern/df-report.txt containing the full df -h output plus a `root-use=<N>%` line with the root filesystem's used percentage.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Human-readable units",
+      "content": "`df -h` prints sizes in K/M/G instead of 1K-blocks — the version humans (and slides) want."
+    },
+    {
+      "number": 2,
+      "title": "One filesystem, one line",
+      "content": "`df -h /` limits output to the root filesystem; `tail -1` drops the header; awk's $5 is the Use% column."
+    },
+    {
+      "number": 3,
+      "title": "Append, don't overwrite",
+      "content": "Save the table with `>` first, then append the root-use line with `>>` — the order matters."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/df-report.txt exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "report contains the df header line",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "report contains a machine-readable root-use=<N>% line",
+      "weight": 35
+    },
+    {
+      "id": "check_4",
+      "description": "report contains the root filesystem row (ending in /)",
+      "weight": 20
+    }
+  ]
+}

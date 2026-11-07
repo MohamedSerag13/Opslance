@@ -1,0 +1,55 @@
+schema_version: 2
+lab: module-01-lab-02-command-not-found
+title: Command Not Found
+category: linux
+domain: fundamentals
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: fundamentals
+  weight: 50
+  prompt: ll alias exists in .bashrc
+  context: null
+  hints:
+  - title: Where to look
+    content: You will need to edit the `~/.bashrc` file to fix aliases and environment variables.
+  - title: Adding Aliases
+    content: 'Append the alias declaration: `alias ll=''ls -la''` to `~/.bashrc`.'
+  - title: Exporting Variables
+    content: Export the variable by appending `export APP_ENV=staging` to `~/.bashrc`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: ll alias exists in .bashrc
+  time_target_minutes: 8
+- id: check_2
+  order: 2
+  domain: fundamentals
+  weight: 50
+  prompt: APP_ENV is exported in .bashrc with value staging
+  context: null
+  hints:
+  - title: Where to look
+    content: You will need to edit the `~/.bashrc` file to fix aliases and environment variables.
+  - title: Adding Aliases
+    content: 'Append the alias declaration: `alias ll=''ls -la''` to `~/.bashrc`.'
+  - title: Exporting Variables
+    content: Export the variable by appending `export APP_ENV=staging` to `~/.bashrc`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: APP_ENV is exported in .bashrc with value staging
+  time_target_minutes: 8

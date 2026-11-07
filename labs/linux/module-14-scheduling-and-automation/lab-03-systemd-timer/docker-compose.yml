@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-14-lab-03-systemd-timer:
+    build: .
+    container_name: lab-14-03-systemd-timer
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 14"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Modern Scheduling with systemd Timers"
+      - "lab.id=module-14-lab-03-systemd-timer"

@@ -1,0 +1,377 @@
+schema_version: 2
+lab: cka-w7-lab-01-troubleshooting-challenge
+title: CKA Week 7 Challenge - Fix the Broken Cluster (14 Scenarios)
+category: kubernetes
+domain: CKA Week 7 - Troubleshooting (30% of the exam)
+pass_mark: 66
+grading_scale: points
+total: 140
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: task_01
+  order: 1
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'ipull: wrong image fixed to nginx:1.27 and pods Ready'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: task
+    description: 'ipull: wrong image fixed to nginx:1.27 and pods Ready'
+  time_target_minutes: 13
+  description: 'Deployment ipull''s pods are in ImagePullBackOff: find the wrong image tag and fix it
+    to nginx:1.27 so the pods go Ready. The check verifies the image and readiness.'
+- id: task_02
+  order: 2
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'crashy: container command fixed to sleep (pods Ready, no more CrashLoopBackOff)'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: task
+    description: 'crashy: container command fixed to sleep (pods Ready, no more CrashLoopBackOff)'
+  time_target_minutes: 13
+  description: Deployment crashy's pods CrashLoopBackOff because the container command is broken — fix
+    it to a sleep command so pods stay Ready. The check verifies readiness and no crash loop.
+- id: task_03
+  order: 3
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'huge: impossible cpu request fixed to 100m and pods Ready'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: task
+    description: 'huge: impossible cpu request fixed to 100m and pods Ready'
+  time_target_minutes: 13
+  description: Deployment huge requests an impossible amount of CPU so pods stay Pending — fix the request
+    to 100m so pods schedule. The check verifies the request and readiness.
+- id: task_04
+  order: 4
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'zero-dep: scaled to 3 with 3 replicas Ready'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: task
+    description: 'zero-dep: scaled to 3 with 3 replicas Ready'
+  time_target_minutes: 13
+  description: Deployment zero-dep should run 3 replicas — scale it up until 3 replicas are Ready. The
+    check verifies replica counts.
+- id: task_05
+  order: 5
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'broken-svc: targetPort corrected to 80; tester reaches the Service'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 5
+    kind: task
+    description: 'broken-svc: targetPort corrected to 80; tester reaches the Service'
+  time_target_minutes: 13
+  description: Service broken-svc has wrong targetPort so the seeded tester cannot connect — correct it
+    to 80. The check connects through the Service.
+- id: task_06
+  order: 6
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'no-ep-svc: selector corrected to app=web; Service has endpoints'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 6
+    kind: task
+    description: 'no-ep-svc: selector corrected to app=web; Service has endpoints'
+  time_target_minutes: 13
+  description: Service no-ep-svc has no endpoints because its selector doesn't match any pod — fix the
+    selector to app=web. The check verifies endpoints appear.
+- id: task_07
+  order: 7
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'oom: memory limit raised to 128Mi; pod Running (was OOMKilled)'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 7
+    kind: task
+    description: 'oom: memory limit raised to 128Mi; pod Running (was OOMKilled)'
+  time_target_minutes: 13
+  description: Pod oom is OOMKilled in a loop — raise its memory limit to 128Mi so it runs. The check
+    verifies the limit and the pod phase.
+- id: task_08
+  order: 8
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'env-app: missing GREETING=hello env added; pod Running'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 8
+    kind: task
+    description: 'env-app: missing GREETING=hello env added; pod Running'
+  time_target_minutes: 13
+  description: Pod env-app is Running but fails because env var GREETING=hello is missing — add it. The
+    check verifies the pod is Running with the variable.
+- id: task_09
+  order: 9
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'stuck-sc: PVC rescued from a missing StorageClass and now Bound'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 9
+    kind: task
+    description: 'stuck-sc: PVC rescued from a missing StorageClass and now Bound'
+  time_target_minutes: 13
+  description: PVC stuck-sc is Pending because its StorageClass doesn't exist — rescue it onto an existing
+    class so it binds. The check verifies Bound status.
+- id: task_10
+  order: 10
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'bad-job: fixed so it completes (status.succeeded >= 1)'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 10
+    kind: task
+    description: 'bad-job: fixed so it completes (status.succeeded >= 1)'
+  time_target_minutes: 13
+  description: Job bad-job never completes — fix its pod spec (image/command) so it completes successfully.
+    The check requires status.succeeded >= 1.
+- id: task_11
+  order: 11
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'sec-reader: reads /creds/password (secret key mapping fixed); pod Running'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 11
+    kind: task
+    description: 'sec-reader: reads /creds/password (secret key mapping fixed); pod Running'
+  time_target_minutes: 13
+  description: Pod sec-reader crashes because the secret key mapping is wrong — fix the mount/key so it
+    can read /creds/password and run. The check verifies the file is read and the pod runs.
+- id: task_12
+  order: 12
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'broken-ing: backend Service corrected; curl with Host header serves nginx'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 12
+    kind: task
+    description: 'broken-ing: backend Service corrected; curl with Host header serves nginx'
+  time_target_minutes: 13
+  description: Ingress broken-ing points at the wrong backend Service — fix it so curl with the right
+    Host header serves nginx. The check performs the request.
+- id: task_13
+  order: 13
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: 'netpol-block: policy removed/relaxed; tester reaches web-svc again'
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 13
+    kind: task
+    description: 'netpol-block: policy removed/relaxed; tester reaches web-svc again'
+  time_target_minutes: 13
+  description: NetworkPolicy netpol-block blocks too much — remove or relax it so the tester reaches web-svc
+    again. The check verifies live traffic.
+- id: task_14
+  order: 14
+  domain: CKA Week 7 - Troubleshooting (30% of the exam)
+  weight: 10
+  prompt: /root/diagnosis.md documents the root causes (mentions ImagePullBackOff)
+  context: null
+  hints:
+  - title: The order
+    content: get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows
+      the event that names the root cause for 10 of these 14 tasks.
+  - title: Immutable fields
+    content: 'Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace
+      --force. Deployments can be patched in place.'
+  - title: Silent Services
+    content: A Service with NO endpoints = selector matches nothing. Endpoints but refused connection
+      = wrong targetPort. Task 5 and 6 are exactly this pair.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 14
+    kind: task
+    description: /root/diagnosis.md documents the root causes (mentions ImagePullBackOff)
+  time_target_minutes: 13
+  description: Write /root/diagnosis.md documenting the root causes you found — it must mention ImagePullBackOff
+    (and ideally every fault class). The check greps for the term.

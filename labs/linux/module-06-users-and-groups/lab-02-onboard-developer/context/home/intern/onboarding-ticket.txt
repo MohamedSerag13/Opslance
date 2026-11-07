@@ -1,0 +1,9 @@
+Ticket OPS-1421 — Onboarding
+=============================
+New starter: Amara Okafor (Platform Team)
+Username:   amara
+Shell:      /bin/bash
+Home:       /home/amara (must be created)
+Groups:     developers (append)
+GECOS:      Amara Okafor - Platform Team
+Password:   set temporary password, force change at first login

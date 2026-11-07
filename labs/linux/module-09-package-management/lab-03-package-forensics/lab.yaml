@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-09-lab-03-package-forensics
+title: Package Forensics
+category: linux
+domain: packages
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: packages
+  weight: 20
+  prompt: /home/intern/forensics.txt exists
+  context: null
+  hints:
+  - title: File → package
+    content: '`dpkg -S /bin/ls` searches the package database for the file. The part before the colon
+      is the package name.'
+  - title: Installed count
+    content: Every installed package has a line starting with 'ii' in `dpkg -l` output, so `dpkg -l |
+      grep -c '^ii'` is the count.
+  - title: Package → details
+    content: '`dpkg -s bash` dumps the record; the Version: line is what the bulletin wants. Grab the
+      second word with awk.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/forensics.txt exists
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: packages
+  weight: 40
+  prompt: report correctly identifies coreutils as the owner of /bin/ls
+  context: null
+  hints:
+  - title: File → package
+    content: '`dpkg -S /bin/ls` searches the package database for the file. The part before the colon
+      is the package name.'
+  - title: Installed count
+    content: Every installed package has a line starting with 'ii' in `dpkg -l` output, so `dpkg -l |
+      grep -c '^ii'` is the count.
+  - title: Package → details
+    content: '`dpkg -s bash` dumps the record; the Version: line is what the bulletin wants. Grab the
+      second word with awk.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: report correctly identifies coreutils as the owner of /bin/ls
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: packages
+  weight: 25
+  prompt: report contains a plausible package-count (at least two digits)
+  context: null
+  hints:
+  - title: File → package
+    content: '`dpkg -S /bin/ls` searches the package database for the file. The part before the colon
+      is the package name.'
+  - title: Installed count
+    content: Every installed package has a line starting with 'ii' in `dpkg -l` output, so `dpkg -l |
+      grep -c '^ii'` is the count.
+  - title: Package → details
+    content: '`dpkg -s bash` dumps the record; the Version: line is what the bulletin wants. Grab the
+      second word with awk.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: report contains a plausible package-count (at least two digits)
+  time_target_minutes: 5
+- id: check_4
+  order: 4
+  domain: packages
+  weight: 15
+  prompt: report records the bash version
+  context: null
+  hints:
+  - title: File → package
+    content: '`dpkg -S /bin/ls` searches the package database for the file. The part before the colon
+      is the package name.'
+  - title: Installed count
+    content: Every installed package has a line starting with 'ii' in `dpkg -l` output, so `dpkg -l |
+      grep -c '^ii'` is the count.
+  - title: Package → details
+    content: '`dpkg -s bash` dumps the record; the Version: line is what the bulletin wants. Grab the
+      second word with awk.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: report records the bash version
+  time_target_minutes: 5

@@ -1,0 +1,4 @@
+# Sends the nightly ops report
+30 3 * * * * root /usr/local/bin/send-report.sh
+# Clears old temp files
+*/0 5 * * * root /usr/local/bin/cleanup-temp.sh

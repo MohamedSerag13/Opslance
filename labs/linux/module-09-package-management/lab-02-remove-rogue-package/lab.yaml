@@ -1,0 +1,85 @@
+schema_version: 2
+lab: module-09-lab-02-remove-rogue-package
+title: Remove the Rogue Package
+category: linux
+domain: packages
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: packages
+  weight: 45
+  prompt: sl is no longer registered in the package database
+  context: null
+  hints:
+  - title: Check before you change
+    content: '`dpkg -s sl` prints the package record including its status; after a successful purge the
+      same command exits non-zero.'
+  - title: remove vs purge
+    content: '`apt-get remove` deletes the program but keeps config files under /etc. `apt-get purge`
+      deletes the program AND its configs.'
+  - title: Verify both layers
+    content: The binary disappearing (`command -v sl`) proves removal; `dpkg -s sl` failing proves the
+      package database is clean too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: sl is no longer registered in the package database
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: packages
+  weight: 35
+  prompt: the sl binary is gone from the PATH
+  context: null
+  hints:
+  - title: Check before you change
+    content: '`dpkg -s sl` prints the package record including its status; after a successful purge the
+      same command exits non-zero.'
+  - title: remove vs purge
+    content: '`apt-get remove` deletes the program but keeps config files under /etc. `apt-get purge`
+      deletes the program AND its configs.'
+  - title: Verify both layers
+    content: The binary disappearing (`command -v sl`) proves removal; `dpkg -s sl` failing proves the
+      package database is clean too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: the sl binary is gone from the PATH
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: packages
+  weight: 20
+  prompt: the dpkg package database is still readable and has installed packages
+  context: null
+  hints:
+  - title: Check before you change
+    content: '`dpkg -s sl` prints the package record including its status; after a successful purge the
+      same command exits non-zero.'
+  - title: remove vs purge
+    content: '`apt-get remove` deletes the program but keeps config files under /etc. `apt-get purge`
+      deletes the program AND its configs.'
+  - title: Verify both layers
+    content: The binary disappearing (`command -v sl`) proves removal; `dpkg -s sl` failing proves the
+      package database is clean too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: the dpkg package database is still readable and has installed packages
+  time_target_minutes: 5

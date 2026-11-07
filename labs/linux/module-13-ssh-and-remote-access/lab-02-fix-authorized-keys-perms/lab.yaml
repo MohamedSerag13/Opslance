@@ -1,0 +1,105 @@
+schema_version: 2
+lab: module-13-lab-02-fix-authorized-keys-perms
+title: SSH Ignores My Key
+category: linux
+domain: ssh
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: ssh
+  weight: 30
+  prompt: .ssh directory permissions are 700
+  context: null
+  hints:
+  - title: sshd is strict
+    content: sshd refuses authorized_keys that are writable by others or owned by another user — StrictModes
+      protects you from a tampered file. No error reaches the client; the key is just ignored.
+  - title: Two chmods
+    content: 'Directory: `chmod 700 ~/.ssh`. File: `chmod 600 ~/.ssh/authorized_keys`.'
+  - title: Ownership matters too
+    content: 'The file must belong to the LOGIN user: `sudo chown intern:intern ~/.ssh/authorized_keys`
+      — chown needs root even for your own file.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: .ssh directory permissions are 700
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: ssh
+  weight: 30
+  prompt: authorized_keys permissions are 600
+  context: null
+  hints:
+  - title: sshd is strict
+    content: sshd refuses authorized_keys that are writable by others or owned by another user — StrictModes
+      protects you from a tampered file. No error reaches the client; the key is just ignored.
+  - title: Two chmods
+    content: 'Directory: `chmod 700 ~/.ssh`. File: `chmod 600 ~/.ssh/authorized_keys`.'
+  - title: Ownership matters too
+    content: 'The file must belong to the LOGIN user: `sudo chown intern:intern ~/.ssh/authorized_keys`
+      — chown needs root even for your own file.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: authorized_keys permissions are 600
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: ssh
+  weight: 25
+  prompt: authorized_keys is owned by intern
+  context: null
+  hints:
+  - title: sshd is strict
+    content: sshd refuses authorized_keys that are writable by others or owned by another user — StrictModes
+      protects you from a tampered file. No error reaches the client; the key is just ignored.
+  - title: Two chmods
+    content: 'Directory: `chmod 700 ~/.ssh`. File: `chmod 600 ~/.ssh/authorized_keys`.'
+  - title: Ownership matters too
+    content: 'The file must belong to the LOGIN user: `sudo chown intern:intern ~/.ssh/authorized_keys`
+      — chown needs root even for your own file.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: authorized_keys is owned by intern
+  time_target_minutes: 5
+- id: check_4
+  order: 4
+  domain: ssh
+  weight: 15
+  prompt: authorized_keys still contains the public key
+  context: null
+  hints:
+  - title: sshd is strict
+    content: sshd refuses authorized_keys that are writable by others or owned by another user — StrictModes
+      protects you from a tampered file. No error reaches the client; the key is just ignored.
+  - title: Two chmods
+    content: 'Directory: `chmod 700 ~/.ssh`. File: `chmod 600 ~/.ssh/authorized_keys`.'
+  - title: Ownership matters too
+    content: 'The file must belong to the LOGIN user: `sudo chown intern:intern ~/.ssh/authorized_keys`
+      — chown needs root even for your own file.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: authorized_keys still contains the public key
+  time_target_minutes: 5

@@ -1,6 +1,46 @@
-version: '3.8'
-
 services:
+  # One-shot job: generates POSTGRES_PASSWORD and SECRET_KEY the first time
+  # the stack comes up and persists them in the `app_secrets` volume. All
+  # other services read from that volume; values set in .env take precedence.
+  secrets-init:
+    image: alpine:3.19
+    command: sh /scripts/gen_secrets.sh
+    volumes:
+      - ./scripts/gen_secrets.sh:/scripts/gen_secrets.sh:ro
+      - app_secrets:/secrets
+    restart: "no"
+
+  # One-shot: database migrations + admin seeding, in the backend image. It
+  # KEEPS the shared entrypoint so DATABASE_URL gets filled from the generated
+  # secrets (the entrypoint skips its wait/sync extras unless DB_WAIT=1).
+  # If this fails, `docker compose logs db-init` shows exactly which step and why.
+  db-init:
+    build:
+      context: ./backend
+    command:
+      - sh
+      - -c
+      - |
+        echo ">>> [db-init] running migrations (alembic upgrade head)"
+        alembic upgrade head || exit 1
+        echo ">>> [db-init] seeding admin + default group"
+        PYTHONPATH="${PYTHONPATH:-/app}" python scripts/seed_admin.py || exit 1
+        echo ">>> [db-init] complete"
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    volumes:
+      - ./backend/alembic:/app/alembic
+      - app_secrets:/secrets:ro
+    depends_on:
+      secrets-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   nginx:
     image: nginx:alpine
     ports:
@@ -8,8 +48,10 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
-      - frontend
-      - backend
+      frontend:
+        condition: service_started
+      backend:
+        condition: service_healthy
     restart: always
 
   frontend:
@@ -24,22 +66,41 @@ services:
     build:
       context: ./backend
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"
     environment:
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/lab_platform
+      # Empty values fall back to the generated secrets (backend/docker-entrypoint.sh)
+      - DATABASE_URL=${DATABASE_URL:-}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-}
       - REDIS_URL=redis://redis:6379/0
-      - SECRET_KEY=${SECRET_KEY}
+      - SECRET_KEY=${SECRET_KEY:-}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      # Cross-origin grants for external integrations only — same-origin by default
+      - CORS_ORIGINS=${CORS_ORIGINS:-}
+      # Backend role: entrypoint waits for the DB, syncs labs (non-fatal)
+      - DB_WAIT=1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${LABS_HOST_PATH:-./labs-repo}:/labs-repo:ro
+      - ${LABS_HOST_PATH:-../labs}:/labs-repo:ro
       - ./backend/alembic:/app/alembic
+      - app_secrets:/secrets:ro
     depends_on:
+      secrets-init:
+        condition: service_completed_successfully
+      db-init:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
         condition: service_started
+    # Migrations + seeding + lab sync run before uvicorn binds; start_period
+    # keeps the first boot from being flagged unhealthy while it works
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request as u, sys; sys.exit(0 if u.urlopen('http://127.0.0.1:8000/api/health', timeout=3).status == 200 else 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
     restart: always
 
   lab-manager:
@@ -48,11 +109,19 @@ services:
       dockerfile: lab-manager/Dockerfile
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/lab_platform
+      - DATABASE_URL=${DATABASE_URL:-}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-}
+      # Host-absolute path of the labs dir, used to rewrite bind mounts for
+      # lab containers (resolved by the host Docker daemon). Leave empty to
+      # auto-detect it from this container's mount table (worker.py).
+      - LABS_HOST_PATH=${LABS_HOST_PATH:-}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${LABS_HOST_PATH:-./labs-repo}:/labs-repo:ro
+      - ${LABS_HOST_PATH:-../labs}:/labs-repo:ro
+      - app_secrets:/secrets:ro
     depends_on:
+      secrets-init:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -61,12 +130,20 @@ services:
 
   postgres:
     image: postgres:15-alpine
+    # Use the generated password unless POSTGRES_PASSWORD is set explicitly
+    entrypoint: ["/bin/sh", "-c", "export POSTGRES_PASSWORD=\"$${POSTGRES_PASSWORD:-$$(cat /secrets/postgres_password)}\"; exec docker-entrypoint.sh postgres"]
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: lab_platform
+      # Empty unless pinned in .env; the entrypoint falls back to the
+      # generated password in /secrets/postgres_password when it is empty
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - app_secrets:/secrets:ro
+    depends_on:
+      secrets-init:
+        condition: service_completed_successfully
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d lab_platform"]
       interval: 5s
@@ -80,3 +157,4 @@ services:
 
 volumes:
   postgres_data:
+  app_secrets:

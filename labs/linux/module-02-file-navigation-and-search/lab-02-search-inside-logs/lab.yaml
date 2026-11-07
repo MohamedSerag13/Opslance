@@ -1,0 +1,110 @@
+schema_version: 2
+lab: module-02-lab-02-search-inside-logs
+title: Hunting Errors in Application Logs
+category: linux
+domain: fundamentals
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/errors.txt exists and contains ERROR lines from /var/log/webapp/error.log
+  context: null
+  hints:
+  - title: Basic grep
+    content: '''grep PATTERN /path/to/file'' prints every line in the file that contains the pattern.
+      By default the match is case-sensitive.'
+  - title: Counting instead of printing
+    content: Adding -c to grep makes it output only the count of matching lines, not the lines themselves.
+      That count can then be redirected to a file.
+  - title: Case-insensitive search
+    content: The -i flag makes grep ignore case differences. 'grep -i error' matches ERROR, Error, error,
+      and any other capitalisation.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: errors.txt exists and is non-empty
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/warning_count.txt exists and contains a number greater than 0
+  context: null
+  hints:
+  - title: Basic grep
+    content: '''grep PATTERN /path/to/file'' prints every line in the file that contains the pattern.
+      By default the match is case-sensitive.'
+  - title: Counting instead of printing
+    content: Adding -c to grep makes it output only the count of matching lines, not the lines themselves.
+      That count can then be redirected to a file.
+  - title: Case-insensitive search
+    content: The -i flag makes grep ignore case differences. 'grep -i error' matches ERROR, Error, error,
+      and any other capitalisation.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: warning_count.txt exists and contains a number greater than 0
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/all_errors.txt exists and is non-empty (case-insensitive search across all files
+    in /var/log/webapp/)
+  context: null
+  hints:
+  - title: Basic grep
+    content: '''grep PATTERN /path/to/file'' prints every line in the file that contains the pattern.
+      By default the match is case-sensitive.'
+  - title: Counting instead of printing
+    content: Adding -c to grep makes it output only the count of matching lines, not the lines themselves.
+      That count can then be redirected to a file.
+  - title: Case-insensitive search
+    content: The -i flag makes grep ignore case differences. 'grep -i error' matches ERROR, Error, error,
+      and any other capitalisation.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: all_errors.txt exists and is non-empty
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/server_errors.txt exists and contains lines with 500 from /var/log/webapp/access.log
+  context: null
+  hints:
+  - title: Basic grep
+    content: '''grep PATTERN /path/to/file'' prints every line in the file that contains the pattern.
+      By default the match is case-sensitive.'
+  - title: Counting instead of printing
+    content: Adding -c to grep makes it output only the count of matching lines, not the lines themselves.
+      That count can then be redirected to a file.
+  - title: Case-insensitive search
+    content: The -i flag makes grep ignore case differences. 'grep -i error' matches ERROR, Error, error,
+      and any other capitalisation.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: server_errors.txt exists and contains 500
+  time_target_minutes: 4

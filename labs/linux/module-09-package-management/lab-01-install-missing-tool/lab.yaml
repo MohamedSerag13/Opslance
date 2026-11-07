@@ -1,0 +1,85 @@
+schema_version: 2
+lab: module-09-lab-01-install-missing-tool
+title: Install the Missing Tool
+category: linux
+domain: packages
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: packages
+  weight: 50
+  prompt: curl is installed and on the PATH
+  context: null
+  hints:
+  - title: Index first, install second
+    content: apt installs from its local index. If the index is stale or empty, `sudo apt-get update`
+      refreshes it from the archives — always run it before installing.
+  - title: The -y flag
+    content: '`apt-get install -y curl` answers yes to the ''Do you want to continue?'' prompt automatically
+      — essential in scripts.'
+  - title: Verify like an operator
+    content: '`command -v curl` prints the path if the tool is on the PATH and nothing (with a failing
+      exit status) if it is not.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: curl is installed and on the PATH
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: packages
+  weight: 30
+  prompt: curl runs and reports a version
+  context: null
+  hints:
+  - title: Index first, install second
+    content: apt installs from its local index. If the index is stale or empty, `sudo apt-get update`
+      refreshes it from the archives — always run it before installing.
+  - title: The -y flag
+    content: '`apt-get install -y curl` answers yes to the ''Do you want to continue?'' prompt automatically
+      — essential in scripts.'
+  - title: Verify like an operator
+    content: '`command -v curl` prints the path if the tool is on the PATH and nothing (with a failing
+      exit status) if it is not.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: curl runs and reports a version
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: packages
+  weight: 20
+  prompt: the healthcheck script is still in place
+  context: null
+  hints:
+  - title: Index first, install second
+    content: apt installs from its local index. If the index is stale or empty, `sudo apt-get update`
+      refreshes it from the archives — always run it before installing.
+  - title: The -y flag
+    content: '`apt-get install -y curl` answers yes to the ''Do you want to continue?'' prompt automatically
+      — essential in scripts.'
+  - title: Verify like an operator
+    content: '`command -v curl` prints the path if the tool is on the PATH and nothing (with a failing
+      exit status) if it is not.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: the healthcheck script is still in place
+  time_target_minutes: 5

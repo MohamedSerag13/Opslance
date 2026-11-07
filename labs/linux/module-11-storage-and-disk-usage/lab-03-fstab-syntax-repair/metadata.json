@@ -1,0 +1,61 @@
+{
+  "id": "module-11-lab-03-fstab-syntax-repair",
+  "module_number": 11,
+  "module_title": "Storage & Disk Usage",
+  "title": "Repair the Broken fstab",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "storage",
+  "skills": [
+    "/etc/fstab",
+    "filesystem table fields",
+    "awk field checks",
+    "sed"
+  ],
+  "description": "A one-field orphan line is breaking fstab parsing; replace it with a valid 6-field mount entry.",
+  "scenario": "A cloud-init script crashed halfway through editing /etc/fstab and left a lone '//10.0.0.30/share' line with no mount point, no type and no options. fstab requires exactly six whitespace-separated fields per entry, and admins double-check the file with an awk field count before any reboot. Replace the orphan with the intended entry: /dev/sdb1 mounted on /mnt/data as ext4 with defaults and pass number 2.",
+  "symptoms": [
+    "`mount -a` (and every boot) aborts with an fstab parse error",
+    "The last line of /etc/fstab contains only '//10.0.0.30/share'",
+    "The intended data disk /dev/sdb1 on /mnt/data was never mounted",
+    "Ops policy: no reboot while any fstab line has other than 6 fields"
+  ],
+  "mission": "Replace the orphan line in /etc/fstab with `/dev/sdb1 /mnt/data ext4 defaults 0 2` so every non-comment line has exactly 6 fields.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "The six fields",
+      "content": "fstab lines are: device, mount point, filesystem type, options, dump freq, pass no. — e.g. `/dev/sdb1 /mnt/data ext4 defaults 0 2`."
+    },
+    {
+      "number": 2,
+      "title": "Field-count check",
+      "content": "`awk '!/^#/ && NF>0 { if (NF!=6) bad=1 } END { exit bad }' /etc/fstab` exits non-zero while any line is malformed — the runbook's pre-reboot gate."
+    },
+    {
+      "number": 3,
+      "title": "Replace the whole line",
+      "content": "`sudo sed -i 's|^//10.0.0.30/share$|/dev/sdb1 /mnt/data ext4 defaults 0 2|' /etc/fstab` swaps the orphan for the correct entry in one shot."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "every non-comment fstab line has exactly 6 fields",
+      "weight": 40
+    },
+    {
+      "id": "check_2",
+      "description": "the repaired entry mounts /dev/sdb1 on /mnt/data as ext4",
+      "weight": 35
+    },
+    {
+      "id": "check_3",
+      "description": "the repaired entry ends with pass number 2",
+      "weight": 25
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+schema_version: 2
+lab: module-02-lab-03-live-log-monitor
+title: Monitoring a Live Service Log
+category: linux
+domain: fundamentals
+pass_mark: 5
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: fundamentals
+  weight: 30
+  prompt: /home/intern/log_preview.txt exists and contains the first 5 lines of /var/log/service/events.log
+  context: null
+  hints:
+  - title: Previewing a file
+    content: '''head -5 filename'' prints the first 5 lines. The -5 is shorthand for -n 5. Both forms
+      work identically.'
+  - title: Following a live file
+    content: '''tail -f filename'' keeps the terminal open and prints new lines as they are appended to
+      the file. Press Ctrl+C to stop when you have seen what you need.'
+  - title: Capturing a specific event automatically
+    content: Combine 'tail -f' with 'grep -m 1' to wait for a pattern and stop as soon as it is found.
+      The -m 1 flag means stop after the first match, so the command exits on its own.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: log_preview.txt exists and is non-empty
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: fundamentals
+  weight: 40
+  prompt: /home/intern/deploy_event.txt exists and contains the DEPLOY_SUCCESS line
+  context: null
+  hints:
+  - title: Previewing a file
+    content: '''head -5 filename'' prints the first 5 lines. The -5 is shorthand for -n 5. Both forms
+      work identically.'
+  - title: Following a live file
+    content: '''tail -f filename'' keeps the terminal open and prints new lines as they are appended to
+      the file. Press Ctrl+C to stop when you have seen what you need.'
+  - title: Capturing a specific event automatically
+    content: Combine 'tail -f' with 'grep -m 1' to wait for a pattern and stop as soon as it is found.
+      The -m 1 flag means stop after the first match, so the command exits on its own.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: deploy_event.txt exists and contains DEPLOY_SUCCESS
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: fundamentals
+  weight: 30
+  prompt: /home/intern/log_tail.txt exists and contains at least 5 lines from the end of /var/log/service/events.log
+  context: null
+  hints:
+  - title: Previewing a file
+    content: '''head -5 filename'' prints the first 5 lines. The -5 is shorthand for -n 5. Both forms
+      work identically.'
+  - title: Following a live file
+    content: '''tail -f filename'' keeps the terminal open and prints new lines as they are appended to
+      the file. Press Ctrl+C to stop when you have seen what you need.'
+  - title: Capturing a specific event automatically
+    content: Combine 'tail -f' with 'grep -m 1' to wait for a pattern and stop as soon as it is found.
+      The -m 1 flag means stop after the first match, so the command exits on its own.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: log_tail.txt exists and has at least 5 lines
+  time_target_minutes: 5

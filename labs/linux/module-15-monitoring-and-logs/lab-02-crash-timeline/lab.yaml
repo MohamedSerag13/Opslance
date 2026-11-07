@@ -1,0 +1,85 @@
+schema_version: 2
+lab: module-15-lab-02-crash-timeline
+title: Build the Crash Timeline
+category: linux
+domain: monitoring
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: monitoring
+  weight: 20
+  prompt: /home/intern/crash-report.txt exists
+  context: null
+  hints:
+  - title: Correlate two log sources
+    content: systemd's 'Failed with result' lines and the app's own 'Segmentation fault' lines tell one
+      story — grep each and compare timestamps.
+  - title: Count precisely
+    content: '`grep -c ''Segmentation fault'' /var/log/syslog` counts the crashes. Check the preceding
+      lines to confirm the process is orders-api.'
+  - title: First occurrence
+    content: 'Syslog is chronological: the first crash is `grep ''Segmentation fault'' /var/log/syslog
+      | head -1`, and its timestamp is the first three fields.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/crash-report.txt exists
+  time_target_minutes: 7
+- id: check_2
+  order: 2
+  domain: monitoring
+  weight: 40
+  prompt: report states crash-count=3
+  context: null
+  hints:
+  - title: Correlate two log sources
+    content: systemd's 'Failed with result' lines and the app's own 'Segmentation fault' lines tell one
+      story — grep each and compare timestamps.
+  - title: Count precisely
+    content: '`grep -c ''Segmentation fault'' /var/log/syslog` counts the crashes. Check the preceding
+      lines to confirm the process is orders-api.'
+  - title: First occurrence
+    content: 'Syslog is chronological: the first crash is `grep ''Segmentation fault'' /var/log/syslog
+      | head -1`, and its timestamp is the first three fields.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: report states crash-count=3
+  time_target_minutes: 7
+- id: check_3
+  order: 3
+  domain: monitoring
+  weight: 40
+  prompt: report states first-crash=Jun 16 14:05:32
+  context: null
+  hints:
+  - title: Correlate two log sources
+    content: systemd's 'Failed with result' lines and the app's own 'Segmentation fault' lines tell one
+      story — grep each and compare timestamps.
+  - title: Count precisely
+    content: '`grep -c ''Segmentation fault'' /var/log/syslog` counts the crashes. Check the preceding
+      lines to confirm the process is orders-api.'
+  - title: First occurrence
+    content: 'Syslog is chronological: the first crash is `grep ''Segmentation fault'' /var/log/syslog
+      | head -1`, and its timestamp is the first three fields.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: report states first-crash=Jun 16 14:05:32
+  time_target_minutes: 7

@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-11-lab-03-fstab-syntax-repair:
+    build: .
+    container_name: lab-11-03-fstab-syntax-repair
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 11"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Repair the Broken fstab"
+      - "lab.id=module-11-lab-03-fstab-syntax-repair"

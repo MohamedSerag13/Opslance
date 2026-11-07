@@ -1,0 +1,128 @@
+{
+  "id": "cka-w7-lab-01-troubleshooting-challenge",
+  "module_number": 27,
+  "module_title": "CKA Week 7 - Troubleshooting (30% of the exam)",
+  "title": "CKA Week 7 Challenge - Fix the Broken Cluster (14 Scenarios)",
+  "difficulty": "advanced",
+  "estimated_minutes": 180,
+  "points": 140,
+  "category": "kubernetes",
+  "subcategory": "cka-week-7",
+  "skills": [
+    "ImagePullBackOff",
+    "CrashLoopBackOff",
+    "Pending diagnosis",
+    "Service endpoints debugging",
+    "OOMKilled",
+    "NetworkPolicy debugging",
+    "Ingress 404",
+    "logs --previous",
+    "describe/events"
+  ],
+  "description": "Fourteen deliberately broken workloads in one cluster. Follow the troubleshooting order - get, describe, events, logs, then config - and fix each one; most checks verify live traffic, not just object state.",
+  "scenario": "It is Wednesday of Week 7: 15 broken scenarios, 8 minutes each. Everything in ns broken is broken ON PURPOSE: wrong images, crashing commands, impossible resources, silent Services, blocked policies, 404 ingresses. Diagnose, fix, verify.",
+  "symptoms": [
+    "ipull cannot pull, crashy cannot run, huge cannot schedule, zero-dep runs nothing",
+    "two Services silently misrouted: wrong targetPort, wrong selector",
+    "an ingress answers 404, a NetworkPolicy blocks a working Service, a PVC never binds"
+  ],
+  "mission": "Get every broken object healthy again and prove each fix with live behavior, then write your root-cause notes to /root/diagnosis.md.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "The order",
+      "content": "get -> describe -> events -> logs -> config, from the node down. kubectl describe pod X shows the event that names the root cause for 10 of these 14 tasks."
+    },
+    {
+      "number": 2,
+      "title": "Immutable fields",
+      "content": "Pod resources/env and Job templates are immutable: export with -o yaml, edit, kubectl replace --force. Deployments can be patched in place."
+    },
+    {
+      "number": 3,
+      "title": "Silent Services",
+      "content": "A Service with NO endpoints = selector matches nothing. Endpoints but refused connection = wrong targetPort. Task 5 and 6 are exactly this pair."
+    },
+    {
+      "number": 4,
+      "title": "Traffic checks",
+      "content": "Tasks 5, 6, 11, 12 and 13 verify live behavior (wget/curl). If the object looks right but traffic fails, re-read the week 5 notes on endpoints and policies."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "resource_limits": {
+    "privileged": true
+  },
+  "acceptance_criteria": [
+    {
+      "id": "task_01",
+      "description": "ipull: wrong image fixed to nginx:1.27 and pods Ready",
+      "weight": 10
+    },
+    {
+      "id": "task_02",
+      "description": "crashy: container command fixed to sleep (pods Ready, no more CrashLoopBackOff)",
+      "weight": 10
+    },
+    {
+      "id": "task_03",
+      "description": "huge: impossible cpu request fixed to 100m and pods Ready",
+      "weight": 10
+    },
+    {
+      "id": "task_04",
+      "description": "zero-dep: scaled to 3 with 3 replicas Ready",
+      "weight": 10
+    },
+    {
+      "id": "task_05",
+      "description": "broken-svc: targetPort corrected to 80; tester reaches the Service",
+      "weight": 10
+    },
+    {
+      "id": "task_06",
+      "description": "no-ep-svc: selector corrected to app=web; Service has endpoints",
+      "weight": 10
+    },
+    {
+      "id": "task_07",
+      "description": "oom: memory limit raised to 128Mi; pod Running (was OOMKilled)",
+      "weight": 10
+    },
+    {
+      "id": "task_08",
+      "description": "env-app: missing GREETING=hello env added; pod Running",
+      "weight": 10
+    },
+    {
+      "id": "task_09",
+      "description": "stuck-sc: PVC rescued from a missing StorageClass and now Bound",
+      "weight": 10
+    },
+    {
+      "id": "task_10",
+      "description": "bad-job: fixed so it completes (status.succeeded >= 1)",
+      "weight": 10
+    },
+    {
+      "id": "task_11",
+      "description": "sec-reader: reads /creds/password (secret key mapping fixed); pod Running",
+      "weight": 10
+    },
+    {
+      "id": "task_12",
+      "description": "broken-ing: backend Service corrected; curl with Host header serves nginx",
+      "weight": 10
+    },
+    {
+      "id": "task_13",
+      "description": "netpol-block: policy removed/relaxed; tester reaches web-svc again",
+      "weight": 10
+    },
+    {
+      "id": "task_14",
+      "description": "/root/diagnosis.md documents the root causes (mentions ImagePullBackOff)",
+      "weight": 10
+    }
+  ]
+}

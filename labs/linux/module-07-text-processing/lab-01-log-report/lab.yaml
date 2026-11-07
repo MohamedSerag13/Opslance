@@ -1,0 +1,105 @@
+schema_version: 2
+lab: module-07-lab-01-log-report
+title: Traffic Report from Raw Logs
+category: linux
+domain: text-processing
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: text-processing
+  weight: 20
+  prompt: /home/intern/report.txt exists
+  context: null
+  hints:
+  - title: Count lines
+    content: '`wc -l` counts lines. The report format is total=<number>, e.g. total=42.'
+  - title: Filter then count
+    content: '`grep -c '' 404 ''` prints only a count of matching lines. The status is surrounded by spaces
+      in the log, which keeps the match exact.'
+  - title: Top talker pipeline
+    content: '`awk ''{print $1}''` takes the first column (the IP). Piping through `sort | uniq -c | sort
+      -rn | head -1` yields the most frequent one. Prefix the report line as top_client=<ip>.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/report.txt exists
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: text-processing
+  weight: 25
+  prompt: report states total=40
+  context: null
+  hints:
+  - title: Count lines
+    content: '`wc -l` counts lines. The report format is total=<number>, e.g. total=42.'
+  - title: Filter then count
+    content: '`grep -c '' 404 ''` prints only a count of matching lines. The status is surrounded by spaces
+      in the log, which keeps the match exact.'
+  - title: Top talker pipeline
+    content: '`awk ''{print $1}''` takes the first column (the IP). Piping through `sort | uniq -c | sort
+      -rn | head -1` yields the most frequent one. Prefix the report line as top_client=<ip>.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: report states total=40
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: text-processing
+  weight: 25
+  prompt: report states errors_404=14
+  context: null
+  hints:
+  - title: Count lines
+    content: '`wc -l` counts lines. The report format is total=<number>, e.g. total=42.'
+  - title: Filter then count
+    content: '`grep -c '' 404 ''` prints only a count of matching lines. The status is surrounded by spaces
+      in the log, which keeps the match exact.'
+  - title: Top talker pipeline
+    content: '`awk ''{print $1}''` takes the first column (the IP). Piping through `sort | uniq -c | sort
+      -rn | head -1` yields the most frequent one. Prefix the report line as top_client=<ip>.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: report states errors_404=14
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: text-processing
+  weight: 30
+  prompt: report states top_client=10.0.0.5
+  context: null
+  hints:
+  - title: Count lines
+    content: '`wc -l` counts lines. The report format is total=<number>, e.g. total=42.'
+  - title: Filter then count
+    content: '`grep -c '' 404 ''` prints only a count of matching lines. The status is surrounded by spaces
+      in the log, which keeps the match exact.'
+  - title: Top talker pipeline
+    content: '`awk ''{print $1}''` takes the first column (the IP). Piping through `sort | uniq -c | sort
+      -rn | head -1` yields the most frequent one. Prefix the report line as top_client=<ip>.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: report states top_client=10.0.0.5
+  time_target_minutes: 4

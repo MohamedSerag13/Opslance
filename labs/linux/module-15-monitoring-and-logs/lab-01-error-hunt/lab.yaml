@@ -1,0 +1,82 @@
+schema_version: 2
+lab: module-15-lab-01-error-hunt
+title: The Error Hunt
+category: linux
+domain: monitoring
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: monitoring
+  weight: 20
+  prompt: /home/intern/error-report.txt exists
+  context: null
+  hints:
+  - title: Count with grep -c
+    content: '`grep -c ERROR file` prints only the number of matching lines — exactly the incident template''s
+      error-count.'
+  - title: Log lines are chronological
+    content: 'The LAST error is the last matching line: pipe the matches through `tail -1`.'
+  - title: Extract the timestamp
+    content: Each line starts 'YYYY-MM-DD HH:MM:SS LEVEL ...', so `awk '{print $1, $2}'` on that one line
+      gives '2026-06-17 09:42:11'.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/error-report.txt exists
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: monitoring
+  weight: 40
+  prompt: report states error-count=7
+  context: null
+  hints:
+  - title: Count with grep -c
+    content: '`grep -c ERROR file` prints only the number of matching lines — exactly the incident template''s
+      error-count.'
+  - title: Log lines are chronological
+    content: 'The LAST error is the last matching line: pipe the matches through `tail -1`.'
+  - title: Extract the timestamp
+    content: Each line starts 'YYYY-MM-DD HH:MM:SS LEVEL ...', so `awk '{print $1, $2}'` on that one line
+      gives '2026-06-17 09:42:11'.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: report states error-count=7
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: monitoring
+  weight: 40
+  prompt: report states last-error=2026-06-17 09:42:11
+  context: null
+  hints:
+  - title: Count with grep -c
+    content: '`grep -c ERROR file` prints only the number of matching lines — exactly the incident template''s
+      error-count.'
+  - title: Log lines are chronological
+    content: 'The LAST error is the last matching line: pipe the matches through `tail -1`.'
+  - title: Extract the timestamp
+    content: Each line starts 'YYYY-MM-DD HH:MM:SS LEVEL ...', so `awk '{print $1, $2}'` on that one line
+      gives '2026-06-17 09:42:11'.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: report states last-error=2026-06-17 09:42:11
+  time_target_minutes: 5

@@ -1,0 +1,65 @@
+{
+  "id": "module-08-lab-01-first-script",
+  "module_number": 8,
+  "module_title": "Shell Scripting Basics",
+  "title": "Your First Script",
+  "difficulty": "beginner",
+  "estimated_minutes": 10,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "scripting",
+  "skills": [
+    "shebang",
+    "chmod +x",
+    "echo",
+    "executing scripts"
+  ],
+  "description": "Write hello.sh with a proper shebang, make it executable and verify its output.",
+  "scenario": "The team keeps pasting the same boot-check command into terminals by hand. Your lead asks you to turn it into your first script: /home/intern/hello.sh must print exactly 'Opslance boot OK' when run. It needs a proper shebang so it runs under bash no matter who invokes it, and the executable bit so it can be run directly.",
+  "symptoms": [
+    "There is no boot-check script yet — everyone types the command manually",
+    "Scripts without a shebang behave differently depending on how they are invoked",
+    "A script without the executable bit cannot be run as ./hello.sh"
+  ],
+  "mission": "Create /home/intern/hello.sh starting with #!/bin/bash that prints exactly 'Opslance boot OK', make it executable, and run it.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "The shebang line",
+      "content": "The first line `#!/bin/bash` tells the kernel which interpreter to use. Without it, ./hello.sh may run under sh with different behaviour."
+    },
+    {
+      "number": 2,
+      "title": "Create and edit",
+      "content": "Use `nano /home/intern/hello.sh` to write the two lines, or `printf`/`cat` from the shell."
+    },
+    {
+      "number": 3,
+      "title": "The executable bit",
+      "content": "`chmod +x /home/intern/hello.sh` adds execute permission so `./hello.sh` works, not just `bash hello.sh`."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/hello.sh exists",
+      "weight": 25
+    },
+    {
+      "id": "check_2",
+      "description": "first line of the script is the shebang #!/bin/bash",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "script has the executable bit set",
+      "weight": 20
+    },
+    {
+      "id": "check_4",
+      "description": "running the script prints exactly 'Opslance boot OK'",
+      "weight": 30
+    }
+  ]
+}

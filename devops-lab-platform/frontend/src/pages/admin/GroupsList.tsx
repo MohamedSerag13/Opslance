@@ -39,33 +39,33 @@ export default function GroupsList() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <Link to="/admin" className="text-blue-600 mb-4 inline-block">← Dashboard</Link>
+      <Link to="/admin" className="text-primary-strong mb-4 inline-block">← Dashboard</Link>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Groups</h1>
-        <button onClick={() => setShowModal(true)} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        <button onClick={() => setShowModal(true)} className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-strong">
           + New Group
         </button>
       </div>
 
-      <div className="bg-white shadow rounded-lg border">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="bg-surface shadow rounded-lg border">
+        <table className="min-w-full divide-y divide-border">
+          <thead className="bg-surface-2">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Students</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Name</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Students</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Created</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-border">
             {groups.map(g => (
               <tr key={g.id}>
                 <td className="px-6 py-4 font-medium">{g.name}</td>
                 <td className="px-6 py-4">{g.student_count}</td>
                 <td className="px-6 py-4">{new Date(g.created_at).toLocaleDateString()}</td>
                 <td className="px-6 py-4 flex gap-4">
-                  <Link to={`/admin/groups/${g.id}`} className="text-blue-600">View/Edit</Link>
-                  <button onClick={() => handleDelete(g.id)} className="text-red-600">Delete</button>
+                  <Link to={`/admin/groups/${g.id}`} className="text-primary-strong">View/Edit</Link>
+                  <button onClick={() => handleDelete(g.id)} className="text-danger">Delete</button>
                 </td>
               </tr>
             ))}
@@ -75,7 +75,7 @@ export default function GroupsList() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg w-96">
+          <div className="bg-surface p-6 rounded-lg w-96">
             <h2 className="text-xl font-bold mb-4">New Group</h2>
             <form onSubmit={handleCreate}>
               <input 
@@ -89,8 +89,8 @@ export default function GroupsList() {
                 value={desc} onChange={e => setDesc(e.target.value)} 
               />
               <div className="flex justify-end gap-2">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-gray-600 border rounded">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Create</button>
+                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-muted border rounded">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-primary text-white rounded">Create</button>
               </div>
             </form>
           </div>

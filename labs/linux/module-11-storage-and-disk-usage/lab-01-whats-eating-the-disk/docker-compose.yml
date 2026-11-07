@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-11-lab-01-whats-eating-the-disk:
+    build: .
+    container_name: lab-11-01-whats-eating-the-disk
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 11"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=What's Eating the Disk?"
+      - "lab.id=module-11-lab-01-whats-eating-the-disk"

@@ -1,0 +1,115 @@
+{
+  "id": "cka-w6-lab-01-storage-helm-kustomize-challenge",
+  "module_number": 26,
+  "module_title": "CKA Week 6 - Storage, Helm, Kustomize and Extension Points",
+  "title": "CKA Week 6 Challenge - Storage, Helm, Kustomize, CRDs",
+  "difficulty": "advanced",
+  "estimated_minutes": 150,
+  "points": 120,
+  "category": "kubernetes",
+  "subcategory": "cka-week-6",
+  "skills": [
+    "PV/PVC access modes",
+    "StorageClass + dynamic provisioning",
+    "volume expansion",
+    "helm install/upgrade/rollback/template",
+    "kustomize overlays",
+    "CRDs + custom resources"
+  ],
+  "description": "End-of-week challenge for the smaller exam domains: static and dynamic volumes, a stuck PVC to fix, Helm lifecycle, a Kustomize overlay and a custom resource definition.",
+  "scenario": "Week 6 in one lab. k3s ships the local-path provisioner and a ready-made Helm chart plus Kustomize base wait for you in /root. A deliberately broken PVC tests your debugging.",
+  "symptoms": [
+    "pending-pvc references a StorageClass that does not exist - fix it to local-path",
+    "The chart in /root/webchart defaults to nginx:1.27; overrides come via --set",
+    "The Kustomize base in /root/kustomize/base deploys cka-web at 1 replica"
+  ],
+  "mission": "Bind static and dynamic volumes, expand a StorageClass, rescue a stuck PVC, run a full Helm lifecycle (install/upgrade/rollback/template) and ship an overlay with Kustomize, then extend the API with a CRD.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Static vs dynamic binding",
+      "content": "manual-pvc binds only because storageClassName matches the PV. dyn-pvc relies on the local-path provisioner. A PVC binds on capacity + accessModes + className matching."
+    },
+    {
+      "number": 2,
+      "title": "RWO vs RWOP",
+      "content": "ReadWriteOnce = one NODE at a time; ReadWriteOncePod = one POD. Do not mix them - the exam loves this distinction."
+    },
+    {
+      "number": 3,
+      "title": "Helm lifecycle order",
+      "content": "install --set replicaCount=2 (rev 1), upgrade --set image.tag=1.28 (rev 2), rollback 1 (rev 3). helm history shows every revision; get values shows the live ones."
+    },
+    {
+      "number": 4,
+      "title": "Kustomize patches",
+      "content": "The overlay needs: resources [../../base], a replicas patch (target kind Deployment), images: [{name: nginx, newTag: 1.28}] and namespace: w6. kubectl apply -k does the rest."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "resource_limits": {
+    "privileged": true
+  },
+  "acceptance_criteria": [
+    {
+      "id": "task_01",
+      "description": "PV manual-pv: 1Gi, RWO, hostPath /mnt/data",
+      "weight": 10
+    },
+    {
+      "id": "task_02",
+      "description": "PVC manual-pvc is Bound to manual-pv",
+      "weight": 10
+    },
+    {
+      "id": "task_03",
+      "description": "Pod pvc-user mounts manual-pvc at /usr/share/nginx/html and runs",
+      "weight": 10
+    },
+    {
+      "id": "task_04",
+      "description": "Dynamic PVC dyn-pvc (1Gi, storageClassName local-path) is Bound",
+      "weight": 10
+    },
+    {
+      "id": "task_05",
+      "description": "Rescue: seeded pending-pvc (bad StorageClass) is now Bound",
+      "weight": 10
+    },
+    {
+      "id": "task_06",
+      "description": "StorageClass fast: local-path provisioner, Retain, allowVolumeExpansion",
+      "weight": 10
+    },
+    {
+      "id": "task_07",
+      "description": "Helm release webapp installed in w6 with replicaCount 2",
+      "weight": 10
+    },
+    {
+      "id": "task_08",
+      "description": "Helm upgrade pins image.tag=1.28",
+      "weight": 10
+    },
+    {
+      "id": "task_09",
+      "description": "Helm rollback executed (history shows a Rollback entry)",
+      "weight": 10
+    },
+    {
+      "id": "task_10",
+      "description": "helm template output saved to /root/chart-render.yaml (Deployment + ConfigMap)",
+      "weight": 10
+    },
+    {
+      "id": "task_11",
+      "description": "Kustomize overlay prod applied: cka-web at 3 replicas on nginx:1.28",
+      "weight": 10
+    },
+    {
+      "id": "task_12",
+      "description": "CRD databases.example.com Established + CR my-db with spec.size=small",
+      "weight": 10
+    }
+  ]
+}

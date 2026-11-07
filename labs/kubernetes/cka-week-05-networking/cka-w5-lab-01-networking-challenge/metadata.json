@@ -1,0 +1,116 @@
+{
+  "id": "cka-w5-lab-01-networking-challenge",
+  "module_number": 25,
+  "module_title": "CKA Week 5 - Services and Networking",
+  "title": "CKA Week 5 Challenge - Services, DNS, Ingress, NetworkPolicy",
+  "difficulty": "advanced",
+  "estimated_minutes": 150,
+  "points": 120,
+  "category": "kubernetes",
+  "subcategory": "cka-week-5",
+  "skills": [
+    "Service types",
+    "headless Services",
+    "ExternalName",
+    "CoreDNS lookups",
+    "Ingress rules + TLS",
+    "Gateway API",
+    "NetworkPolicy (ingress + egress DNS)"
+  ],
+  "description": "End-of-week challenge for networking: every Service type, DNS verification from pods, host and path Ingress with TLS, a Gateway/HTTPRoute pair, and NetworkPolicies verified by real traffic.",
+  "scenario": "Week 5 in one lab. An ingress-nginx controller and the Gateway API CRDs are pre-installed; two namespaces hold the workloads. NetworkPolicy tasks are graded by live traffic - denied pods must fail, allowed pods must succeed.",
+  "symptoms": [
+    "ns apps holds web-a (nginx) and web-b (httpd) behind different host rules",
+    "ns secure holds protected + client + client2: the policy story is verified with wget, not with kubectl get",
+    "Ingress checks use real curl through the controller NodePort, exactly like debugging in the exam"
+  ],
+  "mission": "Wire up all Service types, prove DNS, publish two virtual hosts with TLS through Ingress, create a Gateway API route, and lock down ns secure with default-deny plus surgical allow rules.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Behavior beats objects",
+      "content": "Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine. If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller logs - the week 7 order."
+    },
+    {
+      "number": 2,
+      "title": "NodePort discovery",
+      "content": "The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with jsonpath as shown in the solutions, then curl with a Host header."
+    },
+    {
+      "number": 3,
+      "title": "NetworkPolicy AND/OR semantics",
+      "content": "Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule first whenever you write egress rules, or nslookup dies too."
+    },
+    {
+      "number": 4,
+      "title": "Gateway API",
+      "content": "The CRDs and a GatewayClass named cka-gc are pre-installed. Create a Gateway (listener on :80) and an HTTPRoute attaching to it; existence and class are checked, no controller implements it."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "resource_limits": {
+    "privileged": true
+  },
+  "acceptance_criteria": [
+    {
+      "id": "task_01",
+      "description": "Service web-a-svc (ClusterIP 80) in apps has ready endpoints",
+      "weight": 10
+    },
+    {
+      "id": "task_02",
+      "description": "Service web-a-np in apps is a NodePort",
+      "weight": 10
+    },
+    {
+      "id": "task_03",
+      "description": "Headless Service web-a-headless in apps (clusterIP: None)",
+      "weight": 10
+    },
+    {
+      "id": "task_04",
+      "description": "ExternalName Service external-db points to db.example.com",
+      "weight": 10
+    },
+    {
+      "id": "task_05",
+      "description": "Cluster DNS resolves web-a-svc.apps.svc.cluster.local from a pod",
+      "weight": 10
+    },
+    {
+      "id": "task_06",
+      "description": "Ingress app-ingress routes app.example.com to web-a-svc (verified with curl)",
+      "weight": 10
+    },
+    {
+      "id": "task_07",
+      "description": "Second virtual host api.example.com routes to web-b-svc (curl shows the httpd page)",
+      "weight": 10
+    },
+    {
+      "id": "task_08",
+      "description": "TLS ingress: secret app-tls serves https for app.example.com (curl -k)",
+      "weight": 10
+    },
+    {
+      "id": "task_09",
+      "description": "NetworkPolicy default-deny in secure: client CANNOT reach protected (live traffic)",
+      "weight": 10
+    },
+    {
+      "id": "task_10",
+      "description": "Allow rule: client2 (label access=allowed) CAN reach protected",
+      "weight": 10
+    },
+    {
+      "id": "task_11",
+      "description": "DNS egress preserved: client can still resolve kubernetes.default",
+      "weight": 10
+    },
+    {
+      "id": "task_12",
+      "description": "Gateway API: a Gateway and an HTTPRoute exist (class cka-gc)",
+      "weight": 10
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+schema_version: 2
+lab: module-01-lab-06-finding-things
+title: Finding Things
+category: linux
+domain: fundamentals
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/found_config.txt contains path to custom_app.conf
+  context: null
+  hints:
+  - title: Finding Config
+    content: You can find custom config files using `find /etc -name '*custom_app*'`.
+  - title: Finding Large Logs
+    content: Use size options with find, such as `find /var/log -size +50k` to locate the orphaned log
+      file.
+  - title: Saving the paths
+    content: 'Save paths by redirecting output: e.g. `find /etc -name ''custom_app.conf'' > /home/intern/found_config.txt`
+      and `which bash > /home/intern/bash_location.txt`.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: found_config.txt points to /etc/custom_app.conf
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/found_largelog.txt contains path to orphaned log
+  context: null
+  hints:
+  - title: Finding Config
+    content: You can find custom config files using `find /etc -name '*custom_app*'`.
+  - title: Finding Large Logs
+    content: Use size options with find, such as `find /var/log -size +50k` to locate the orphaned log
+      file.
+  - title: Saving the paths
+    content: 'Save paths by redirecting output: e.g. `find /etc -name ''custom_app.conf'' > /home/intern/found_config.txt`
+      and `which bash > /home/intern/bash_location.txt`.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: found_largelog.txt points to /var/log/orphaned_app.log
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/found_script.txt contains path to helper script
+  context: null
+  hints:
+  - title: Finding Config
+    content: You can find custom config files using `find /etc -name '*custom_app*'`.
+  - title: Finding Large Logs
+    content: Use size options with find, such as `find /var/log -size +50k` to locate the orphaned log
+      file.
+  - title: Saving the paths
+    content: 'Save paths by redirecting output: e.g. `find /etc -name ''custom_app.conf'' > /home/intern/found_config.txt`
+      and `which bash > /home/intern/bash_location.txt`.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: found_script.txt points to /opt/tools/helper.sh
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/bash_location.txt contains path to bash executable
+  context: null
+  hints:
+  - title: Finding Config
+    content: You can find custom config files using `find /etc -name '*custom_app*'`.
+  - title: Finding Large Logs
+    content: Use size options with find, such as `find /var/log -size +50k` to locate the orphaned log
+      file.
+  - title: Saving the paths
+    content: 'Save paths by redirecting output: e.g. `find /etc -name ''custom_app.conf'' > /home/intern/found_config.txt`
+      and `which bash > /home/intern/bash_location.txt`.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: bash_location.txt contains a valid path to bash executable
+  time_target_minutes: 4

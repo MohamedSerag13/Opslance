@@ -1,0 +1,72 @@
+{
+  "id": "module-08-lab-04-loop-cleanup",
+  "module_number": 8,
+  "module_title": "Shell Scripting Basics",
+  "title": "Clean Up with a Loop",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "scripting",
+  "skills": [
+    "for loops",
+    "globbing in scripts",
+    "mv",
+    "mkdir",
+    "file glob patterns"
+  ],
+  "description": "Write cleanup.sh to move every *.tmp file from a spool directory into its archive subdirectory.",
+  "scenario": "A monitoring agent dumps .tmp files into /home/intern/spool all day and nobody archives them. Your job: write /home/intern/cleanup.sh that moves every *.tmp file from the spool into /home/intern/spool /archive/ using a for loop (no manual one-by-one moves), make it executable and run it once. The non-tmp files must stay where they are.",
+  "symptoms": [
+    "Six .tmp files clutter /home/intern/spool",
+    "The archive/ subdirectory exists but is empty",
+    "keepme.txt and the agent's README must not be touched",
+    "The team wants a reusable script, not a one-off command"
+  ],
+  "mission": "Create executable /home/intern/cleanup.sh that uses a for loop to move every spool/*.tmp file into spool/archive/, then run it so the spool root is left with zero .tmp files.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Glob the pattern",
+      "content": "`for f in /home/intern/spool/*.tmp` expands the wildcard into one loop iteration per match."
+    },
+    {
+      "number": 2,
+      "title": "Move inside the loop",
+      "content": "The loop body is just `mv \"$f\" /home/intern/spool/archive/` — quote the variable so filenames with spaces stay intact."
+    },
+    {
+      "number": 3,
+      "title": "Guard the empty case",
+      "content": "If no files match, the loop would try to move the literal '*.tmp'. Guard with `[ -e \"$f\" ] || continue` — good habit for idempotent scripts."
+    },
+    {
+      "number": 4,
+      "title": "Run it",
+      "content": "`chmod +x cleanup.sh` then `./cleanup.sh` from your home directory."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/cleanup.sh exists and is executable",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "the script uses a for loop",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "no .tmp files remain in the spool root",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "all 6 .tmp files are now in spool/archive/",
+      "weight": 30
+    }
+  ]
+}

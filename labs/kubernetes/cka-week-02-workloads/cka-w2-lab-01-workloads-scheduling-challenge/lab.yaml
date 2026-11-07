@@ -1,0 +1,327 @@
+schema_version: 2
+lab: cka-w2-lab-01-workloads-scheduling-challenge
+title: CKA Week 2 Challenge - Workloads and Scheduling
+category: kubernetes
+domain: CKA Week 2 - Workloads and Scheduling
+pass_mark: 66
+grading_scale: points
+total: 120
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: task_01
+  order: 1
+  domain: CKA Week 2 - Workloads and Scheduling
+  weight: 10
+  prompt: upgrade-me updated to nginx:1.27 (revision >= 2)
+  context: null
+  hints:
+  - title: Two seeds, two flows
+    content: upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates
+      then undoes. The revision annotation proves both steps happened.
+  - title: Patch for strategies
+    content: kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge
+      cleanly.
+  - title: $do + edit for pods
+    content: 'Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client
+      -o yaml, edit, apply. This is the exact exam workflow.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: task
+    description: upgrade-me updated to nginx:1.27 (revision >= 2)
+  time_target_minutes: 12
+  description: The seeded Deployment upgrade-me runs nginx:1.26. Update it to nginx:1.27 so a new revision
+    is recorded. The check verifies the image and revision annotation >= 2.
+- id: task_02
+  order: 2
+  domain: CKA Week 2 - Workloads and Scheduling
+  weight: 10
+  prompt: rollback-me back on nginx:1.26 after update to 1.28 + undo (revision >= 3)
+  context: null
+  hints:
+  - title: Two seeds, two flows
+    content: upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates
+      then undoes. The revision annotation proves both steps happened.
+  - title: Patch for strategies
+    content: kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge
+      cleanly.
+  - title: $do + edit for pods
+    content: 'Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client
+      -o yaml, edit, apply. This is the exact exam workflow.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: task
+    description: rollback-me back on nginx:1.26 after update to 1.28 + undo (revision >= 3)
+  time_target_minutes: 12
+  description: Take rollback-me from nginx:1.26 to nginx:1.28, then `kubectl rollout undo` it back to
+    1.26. The check expects revision annotation >= 3 AND image 1.26.
+- id: task_03
+  order: 3
+  domain: CKA Week 2 - Workloads and Scheduling
+  weight: 10
+  prompt: 'upgrade-me strategy: maxUnavailable=0, maxSurge=1 (no-downtime rolling update)'
+  context: null
+  hints:
+  - title: Two seeds, two flows
+    content: upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates
+      then undoes. The revision annotation proves both steps happened.
+  - title: Patch for strategies
+    content: kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge
+      cleanly.
+  - title: $do + edit for pods
+    content: 'Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client
+      -o yaml, edit, apply. This is the exact exam workflow.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: task
+    description: 'upgrade-me strategy: maxUnavailable=0, maxSurge=1 (no-downtime rolling update)'
+  time_target_minutes: 12
+  description: Configure upgrade-me's rolling update strategy with maxUnavailable=0 and maxSurge=1 (zero-downtime
+    updates). The check reads .spec.strategy.rollingUpdate.
+- id: task_04
+  order: 4
+  domain: CKA Week 2 - Workloads and Scheduling
+  weight: 10
+  prompt: 'HPA web-hpa on upgrade-me: min 2, max 6, CPU target 70%'
+  context: null
+  hints:
+  - title: Two seeds, two flows
+    content: upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates
+      then undoes. The revision annotation proves both steps happened.
+  - title: Patch for strategies
+    content: kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge
+      cleanly.
+  - title: $do + edit for pods
+    content: 'Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client
+      -o yaml, edit, apply. This is the exact exam workflow.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: task
+    description: 'HPA web-hpa on upgrade-me: min 2, max 6, CPU target 70%'
+  time_target_minutes: 12
+  description: 'Create an HPA named web-hpa targeting the upgrade-me deployment: min 2, max 6 replicas,
+    70% CPU target. The check verifies the HPA spec fields.'
+- id: task_05
+  order: 5
+  domain: CKA Week 2 - Workloads and Scheduling
+  weight: 10
+  prompt: ConfigMap w2-config (MODE=fast) consumed as env by pod cm-env via envFrom
+  context: null
+  hints:
+  - title: Two seeds, two flows
+    content: upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates
+      then undoes. The revision annotation proves both steps happened.
+  - title: Patch for strategies
+    content: kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge
+      cleanly.
+  - title: $do + edit for pods
+    content: 'Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client
+      -o yaml, edit, apply. This is the exact exam workflow.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 5
+    kind: task
+    description: ConfigMap w2-config (MODE=fast) consumed as env by pod cm-env via envFrom
+  time_target_minutes: 12
+  description: Create ConfigMap w2-config with data MODE=fast, then run a pod cm-env that consumes the
+    whole ConfigMap as environment variables via envFrom. The check verifies the pod's envFrom source.
+- id: task_06
+  order: 6
+  domain: CKA Week 2 - Workloads and Scheduling
+  weight: 10
+  prompt: Secret w2-secret mounted at /etc/creds in pod sec-mount
+  context: null
+  hints:
+  - title: Two seeds, two flows
+    content: upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates
+      then undoes. The revision annotation proves both steps happened.
+  - title: Patch for strategies
+    content: kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge
+      cleanly.
+  - title: $do + edit for pods
+    content: 'Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client
+      -o yaml, edit, apply. This is the exact exam workflow.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 6
+    kind: task
+    description: Secret w2-secret mounted at /etc/creds in pod sec-mount
+  time_target_minutes: 12
+  description: Create Secret w2-secret and mount it at /etc/creds inside a pod named sec-mount. The check
+    verifies the volume mount path and source.
+- id: task_07
+  order: 7
+  domain: CKA Week 2 - Workloads and Scheduling
+  weight: 10
+  prompt: 'Pod bootstrapper: init container writes index.html into emptyDir served by nginx'
+  context: null
+  hints:
+  - title: Two seeds, two flows
+    content: upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates
+      then undoes. The revision annotation proves both steps happened.
+  - title: Patch for strategies
+    content: kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge
+      cleanly.
+  - title: $do + edit for pods
+    content: 'Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client
+      -o yaml, edit, apply. This is the exact exam workflow.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 7
+    kind: task
+    description: 'Pod bootstrapper: init container writes index.html into emptyDir served by nginx'
+  time_target_minutes: 12
+  description: Create a pod bootstrapper whose init container writes index.html into a shared emptyDir
+    volume which the nginx main container then serves. The check verifies the init container, the volume
+    type and the mount.
+- id: task_08
+  order: 8
+  domain: CKA Week 2 - Workloads and Scheduling
+  weight: 10
+  prompt: 'Pod logger: busybox sidecar shares an emptyDir at /logs with the main container'
+  context: null
+  hints:
+  - title: Two seeds, two flows
+    content: upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates
+      then undoes. The revision annotation proves both steps happened.
+  - title: Patch for strategies
+    content: kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge
+      cleanly.
+  - title: $do + edit for pods
+    content: 'Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client
+      -o yaml, edit, apply. This is the exact exam workflow.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 8
+    kind: task
+    description: 'Pod logger: busybox sidecar shares an emptyDir at /logs with the main container'
+  time_target_minutes: 12
+  description: Create a pod logger where a busybox sidecar shares an emptyDir mounted at /logs with the
+    main container (classic log-shipping pattern). The check verifies the sidecar image and the shared
+    mount.
+- id: task_09
+  order: 9
+  domain: CKA Week 2 - Workloads and Scheduling
+  weight: 10
+  prompt: 'Job batch-job: completions 3, parallelism 2, backoffLimit 4'
+  context: null
+  hints:
+  - title: Two seeds, two flows
+    content: upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates
+      then undoes. The revision annotation proves both steps happened.
+  - title: Patch for strategies
+    content: kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge
+      cleanly.
+  - title: $do + edit for pods
+    content: 'Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client
+      -o yaml, edit, apply. This is the exact exam workflow.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 9
+    kind: task
+    description: 'Job batch-job: completions 3, parallelism 2, backoffLimit 4'
+  time_target_minutes: 12
+  description: Create a Job named batch-job with completions=3, parallelism=2 and backoffLimit=4. The
+    check verifies all three spec fields.
+- id: task_10
+  order: 10
+  domain: CKA Week 2 - Workloads and Scheduling
+  weight: 10
+  prompt: 'CronJob nightly: schedule 30 2 * * *, not suspended'
+  context: null
+  hints:
+  - title: Two seeds, two flows
+    content: upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates
+      then undoes. The revision annotation proves both steps happened.
+  - title: Patch for strategies
+    content: kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge
+      cleanly.
+  - title: $do + edit for pods
+    content: 'Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client
+      -o yaml, edit, apply. This is the exact exam workflow.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 10
+    kind: task
+    description: 'CronJob nightly: schedule 30 2 * * *, not suspended'
+  time_target_minutes: 12
+  description: Create a CronJob named nightly with schedule 30 2 * * * and make sure it is not suspended.
+    The check verifies .spec.schedule and suspend == false.
+- id: task_11
+  order: 11
+  domain: CKA Week 2 - Workloads and Scheduling
+  weight: 10
+  prompt: Node labeled disk=fast and pod pin-node lands there via nodeSelector
+  context: null
+  hints:
+  - title: Two seeds, two flows
+    content: upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates
+      then undoes. The revision annotation proves both steps happened.
+  - title: Patch for strategies
+    content: kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge
+      cleanly.
+  - title: $do + edit for pods
+    content: 'Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client
+      -o yaml, edit, apply. This is the exact exam workflow.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 11
+    kind: task
+    description: Node labeled disk=fast and pod pin-node lands there via nodeSelector
+  time_target_minutes: 12
+  description: Label a node with disk=fast, then create a pod pin-node that lands on that node via nodeSelector.
+    The check verifies the node label and the pod's assigned node.
+- id: task_12
+  order: 12
+  domain: CKA Week 2 - Workloads and Scheduling
+  weight: 10
+  prompt: Node tainted dedicated=cka:NoSchedule; pod tol-pod tolerates it and still runs
+  context: null
+  hints:
+  - title: Two seeds, two flows
+    content: upgrade-me and rollback-me both start at nginx:1.26. Task 1 only updates; task 2 updates
+      then undoes. The revision annotation proves both steps happened.
+  - title: Patch for strategies
+    content: kubectl patch deploy X -p with the rollingUpdate block. Nothing else changes maxUnavailable/maxSurge
+      cleanly.
+  - title: $do + edit for pods
+    content: 'Env injection, volumes, init containers and tolerations all need the YAML: run with --dry-run=client
+      -o yaml, edit, apply. This is the exact exam workflow.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 12
+    kind: task
+    description: Node tainted dedicated=cka:NoSchedule; pod tol-pod tolerates it and still runs
+  time_target_minutes: 12
+  description: Taint a node with dedicated=cka:NoSchedule, then create pod tol-pod that tolerates the
+    taint and still runs on the cluster. The check verifies the taint exists and the pod tolerates it.

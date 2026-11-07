@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-09-lab-04-refresh-package-index:
+    build: .
+    container_name: lab-09-04-refresh-package-index
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 09"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=The Empty Package Index"
+      - "lab.id=module-09-lab-04-refresh-package-index"

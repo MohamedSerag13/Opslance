@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /labs/
+Disallow: /admin
+Disallow: /progress
+Disallow: /leaderboard
+Disallow: /billing
+Disallow: /reset-password
+
+Sitemap: /sitemap.xml

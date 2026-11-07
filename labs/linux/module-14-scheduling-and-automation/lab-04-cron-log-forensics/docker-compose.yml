@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-14-lab-04-cron-log-forensics:
+    build: .
+    container_name: lab-14-04-cron-log-forensics
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 14"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Cron Log Forensics"
+      - "lab.id=module-14-lab-04-cron-log-forensics"

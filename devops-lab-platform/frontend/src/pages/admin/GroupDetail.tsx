@@ -86,16 +86,16 @@ export default function GroupDetail() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <Link to="/admin/groups" className="text-blue-600 mb-4 inline-block">← Groups List</Link>
+      <Link to="/admin/groups" className="text-primary-strong mb-4 inline-block">← Groups List</Link>
       <div className="mb-6 flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold">{group.name}</h1>
-          <p className="text-gray-600 mt-1">{group.description}</p>
+          <p className="text-muted mt-1">{group.description}</p>
         </div>
         <div className="flex gap-2 items-center">
           <button 
             onClick={toggleChallengeMode}
-            className={`px-4 py-2 border rounded font-medium flex items-center gap-2 ${challengeMode ? 'bg-red-500 text-white border-red-600 hover:bg-red-600' : 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200'}`}
+            className={`px-4 py-2 border rounded font-medium flex items-center gap-2 ${challengeMode ? 'bg-danger text-white border-danger/40 hover:bg-danger' : 'bg-warn/15 text-warn border-warn/40 hover:bg-warn'}`}
           >
             {challengeMode ? '🛑 End Challenge Mode' : '⚡ Start Challenge Mode'}
           </button>
@@ -104,7 +104,7 @@ export default function GroupDetail() {
               setEditData({ name: group.name, description: group.description || '' });
               setIsEditing(true);
             }} 
-            className="px-4 py-2 border text-gray-700 hover:bg-gray-50 rounded font-medium"
+            className="px-4 py-2 border text-content hover:bg-surface-2 rounded font-medium"
           >
             Edit Group
           </button>
@@ -112,37 +112,37 @@ export default function GroupDetail() {
       </div>
 
       <div className="flex border-b mb-6">
-        <button onClick={() => setTab('students')} className={`px-4 py-2 font-medium border-b-2 ${tab === 'students' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>
+        <button onClick={() => setTab('students')} className={`px-4 py-2 font-medium border-b-2 ${tab === 'students' ? 'border-primary/40 text-primary-strong' : 'border-transparent text-muted'}`}>
           Students ({students.length})
         </button>
-        <button onClick={() => setTab('labs')} className={`px-4 py-2 font-medium border-b-2 ${tab === 'labs' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500'}`}>
+        <button onClick={() => setTab('labs')} className={`px-4 py-2 font-medium border-b-2 ${tab === 'labs' ? 'border-primary/40 text-primary-strong' : 'border-transparent text-muted'}`}>
           Labs Configuration
         </button>
-        <button onClick={() => setTab('help')} className={`px-4 py-2 font-medium border-b-2 ${tab === 'help' ? 'border-yellow-600 text-yellow-600' : 'border-transparent text-gray-500'}`}>
-          Help Queue {helpQueue.length > 0 && <span className="ml-1 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">{helpQueue.length}</span>}
+        <button onClick={() => setTab('help')} className={`px-4 py-2 font-medium border-b-2 ${tab === 'help' ? 'border-warn/40 text-warn' : 'border-transparent text-muted'}`}>
+          Help Queue {helpQueue.length > 0 && <span className="ml-1 bg-danger text-white text-xs px-2 py-0.5 rounded-full">{helpQueue.length}</span>}
         </button>
       </div>
 
       {tab === 'students' && (
         <div>
           <div className="flex justify-end mb-4">
-            <Link to="/admin/students" className="bg-blue-600 text-white px-4 py-2 rounded">+ Add Student</Link>
+            <Link to="/admin/students" className="bg-primary text-white px-4 py-2 rounded">+ Add Student</Link>
           </div>
-          <div className="bg-white border rounded-lg shadow-sm overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="bg-surface border rounded-lg shadow-sm overflow-hidden">
+            <table className="min-w-full divide-y divide-border">
+              <thead className="bg-surface-2">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-muted">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-border">
                 {students.map(s => (
                   <tr key={s.id}>
                     <td className="px-6 py-4">{s.full_name}</td>
                     <td className="px-6 py-4">{s.email}</td>
-                    <td className="px-6 py-4"><Link to={`/admin/students/${s.id}`} className="text-blue-600">View</Link></td>
+                    <td className="px-6 py-4"><Link to={`/admin/students/${s.id}`} className="text-primary-strong">View</Link></td>
                   </tr>
                 ))}
                 {students.length === 0 && <tr><td colSpan={3} className="px-6 py-4 text-center">No students in group</td></tr>}
@@ -155,28 +155,28 @@ export default function GroupDetail() {
       {tab === 'labs' && (
         <div>
           <div className="flex justify-between items-center mb-4 border-b pb-4">
-            <p className="text-gray-600 text-sm">Toggle visibility to show/hide labs for this group.</p>
+            <p className="text-muted text-sm">Toggle visibility to show/hide labs for this group.</p>
             <div className="gap-2 flex">
-              <button onClick={showAll} className="px-3 py-1 bg-gray-200 rounded text-sm hover:bg-gray-300">Show All</button>
-              <button onClick={hideAll} className="px-3 py-1 bg-gray-200 rounded text-sm hover:bg-gray-300">Hide All</button>
+              <button onClick={showAll} className="px-3 py-1 bg-surface-2 rounded text-sm hover:bg-border">Show All</button>
+              <button onClick={hideAll} className="px-3 py-1 bg-surface-2 rounded text-sm hover:bg-border">Hide All</button>
             </div>
           </div>
-          <div className="bg-white border rounded-lg shadow-sm">
+          <div className="bg-surface border rounded-lg shadow-sm">
             {labs.map((l, idx) => (
-              <div key={l.lab_id} className="flex justify-between items-center p-4 border-b last:border-0 hover:bg-gray-50">
+              <div key={l.lab_id} className="flex justify-between items-center p-4 border-b last:border-0 hover:bg-surface-2">
                 <div className="flex items-center gap-4">
-                  <span className="text-gray-400 w-6 cursor-move text-center">↕</span>
+                  <span className="text-muted w-6 cursor-move text-center">↕</span>
                   <div>
-                    <div className="text-sm text-gray-500">Module {l.module_number} • <span className="capitalize">{l.difficulty}</span></div>
+                    <div className="text-sm text-muted">Module {l.module_number} • <span className="capitalize">{l.difficulty}</span></div>
                     <div className="font-bold">{l.title}</div>
                   </div>
                 </div>
                 <div>
                   <button 
                     onClick={() => toggleLab(l.lab_id, l.is_visible, l.unlock_order)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${l.is_visible ? 'bg-blue-600' : 'bg-gray-200'}`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${l.is_visible ? 'bg-primary' : 'bg-surface-2'}`}
                   >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${l.is_visible ? 'translate-x-6' : 'translate-x-1'}`} />
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-surface transition-transform ${l.is_visible ? 'translate-x-6' : 'translate-x-1'}`} />
                   </button>
                 </div>
               </div>
@@ -189,19 +189,19 @@ export default function GroupDetail() {
         <div>
           <h2 className="text-xl font-bold mb-4">Live Help Queue</h2>
           {helpQueue.length === 0 ? (
-            <div className="bg-white border rounded-lg shadow-sm p-8 text-center text-gray-500">
+            <div className="bg-surface border rounded-lg shadow-sm p-8 text-center text-muted">
               No students currently requesting help.
             </div>
           ) : (
             <div className="space-y-4">
               {helpQueue.map(h => (
-                <div key={h.student_id} className="bg-white border rounded-lg shadow-sm p-4 flex justify-between items-center border-l-4 border-l-yellow-400">
+                <div key={h.student_id} className="bg-surface border rounded-lg shadow-sm p-4 flex justify-between items-center border-l-4 border-l-yellow-400">
                   <div>
-                    <h3 className="font-bold text-lg text-gray-900">{h.student_name}</h3>
-                    <p className="text-sm text-gray-600">Lab: {h.lab_title}</p>
-                    <p className="text-xs text-gray-400 mt-1">Requested at {new Date(h.requested_at * 1000).toLocaleTimeString()}</p>
+                    <h3 className="font-bold text-lg text-content">{h.student_name}</h3>
+                    <p className="text-sm text-muted">Lab: {h.lab_title}</p>
+                    <p className="text-xs text-muted mt-1">Requested at {new Date(h.requested_at * 1000).toLocaleTimeString()}</p>
                   </div>
-                  <button onClick={() => resolveHelp(h.student_id)} className="px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded font-bold hover:bg-green-100">
+                  <button onClick={() => resolveHelp(h.student_id)} className="px-4 py-2 bg-success/10 text-success border border-success/40 rounded font-bold hover:bg-success/15">
                     Mark Resolved
                   </button>
                 </div>
@@ -213,7 +213,7 @@ export default function GroupDetail() {
 
       {isEditing && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg w-96 max-w-full">
+          <div className="bg-surface p-6 rounded-lg w-96 max-w-full">
             <h2 className="text-xl font-bold mb-4">Edit Group</h2>
             <form onSubmit={handleEdit} className="space-y-4">
               <div>
@@ -225,8 +225,8 @@ export default function GroupDetail() {
                 <textarea className="w-full border p-2 rounded" rows={3} value={editData.description} onChange={e => setEditData({...editData, description: e.target.value})} />
               </div>
               <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 text-gray-600 border rounded">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded">Save Changes</button>
+                <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 text-muted border rounded">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-primary text-white rounded">Save Changes</button>
               </div>
             </form>
           </div>

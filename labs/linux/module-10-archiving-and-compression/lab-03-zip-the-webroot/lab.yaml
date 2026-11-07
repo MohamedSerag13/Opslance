@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-10-lab-03-zip-the-webroot
+title: Zip the Webroot
+category: linux
+domain: archiving
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: archiving
+  weight: 25
+  prompt: /home/intern/webroot.zip exists
+  context: null
+  hints:
+  - title: Recursive zip
+    content: '`zip -r out.zip dir` descends into subdirectories. Run it from /var/www so the entries are
+      named html/… instead of carrying the full absolute path.'
+  - title: Exclude patterns
+    content: '`-x "*.log"` drops every entry whose path ends in .log — the pattern matches against the
+      names INSIDE the archive.'
+  - title: Verify with unzip -l
+    content: '`unzip -l` lists the archive; grep the listing for index.html (must match) and debug.log
+      (must not).'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/webroot.zip exists
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: archiving
+  weight: 25
+  prompt: the file is a valid zip archive
+  context: null
+  hints:
+  - title: Recursive zip
+    content: '`zip -r out.zip dir` descends into subdirectories. Run it from /var/www so the entries are
+      named html/… instead of carrying the full absolute path.'
+  - title: Exclude patterns
+    content: '`-x "*.log"` drops every entry whose path ends in .log — the pattern matches against the
+      names INSIDE the archive.'
+  - title: Verify with unzip -l
+    content: '`unzip -l` lists the archive; grep the listing for index.html (must match) and debug.log
+      (must not).'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: the file is a valid zip archive
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: archiving
+  weight: 25
+  prompt: the archive contains index.html
+  context: null
+  hints:
+  - title: Recursive zip
+    content: '`zip -r out.zip dir` descends into subdirectories. Run it from /var/www so the entries are
+      named html/… instead of carrying the full absolute path.'
+  - title: Exclude patterns
+    content: '`-x "*.log"` drops every entry whose path ends in .log — the pattern matches against the
+      names INSIDE the archive.'
+  - title: Verify with unzip -l
+    content: '`unzip -l` lists the archive; grep the listing for index.html (must match) and debug.log
+      (must not).'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: the archive contains index.html
+  time_target_minutes: 5
+- id: check_4
+  order: 4
+  domain: archiving
+  weight: 25
+  prompt: the archive does NOT contain debug.log
+  context: null
+  hints:
+  - title: Recursive zip
+    content: '`zip -r out.zip dir` descends into subdirectories. Run it from /var/www so the entries are
+      named html/… instead of carrying the full absolute path.'
+  - title: Exclude patterns
+    content: '`-x "*.log"` drops every entry whose path ends in .log — the pattern matches against the
+      names INSIDE the archive.'
+  - title: Verify with unzip -l
+    content: '`unzip -l` lists the archive; grep the listing for index.html (must match) and debug.log
+      (must not).'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: the archive does NOT contain debug.log
+  time_target_minutes: 5

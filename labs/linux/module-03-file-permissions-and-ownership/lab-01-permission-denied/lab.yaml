@@ -1,0 +1,59 @@
+schema_version: 2
+lab: module-03-lab-01-permission-denied
+title: Permission Denied
+category: linux
+domain: permissions
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: permissions
+  weight: 50
+  prompt: secret.txt has read permission for the owner
+  context: null
+  hints:
+  - title: Inspect the permissions
+    content: Run ls -l secret.txt and look at the first column. What do the dashes mean?
+  - title: Understand rwx
+    content: Permissions are displayed as three groups of rwx (read, write, execute) for owner, group,
+      and others. A dash means the permission is not set.
+  - title: Fix with chmod
+    content: Use chmod 644 secret.txt to give the owner read and write access, and read access to group
+      and others.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: secret.txt has read permission for the owner
+  time_target_minutes: 8
+- id: check_2
+  order: 2
+  domain: permissions
+  weight: 50
+  prompt: cat secret.txt outputs Secret Data
+  context: null
+  hints:
+  - title: Inspect the permissions
+    content: Run ls -l secret.txt and look at the first column. What do the dashes mean?
+  - title: Understand rwx
+    content: Permissions are displayed as three groups of rwx (read, write, execute) for owner, group,
+      and others. A dash means the permission is not set.
+  - title: Fix with chmod
+    content: Use chmod 644 secret.txt to give the owner read and write access, and read access to group
+      and others.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: cat secret.txt outputs Secret Data
+  time_target_minutes: 8

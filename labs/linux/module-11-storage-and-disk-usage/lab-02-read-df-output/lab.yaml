@@ -1,0 +1,101 @@
+schema_version: 2
+lab: module-11-lab-02-read-df-output
+title: Read the Filesystem Report
+category: linux
+domain: storage
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: storage
+  weight: 20
+  prompt: /home/intern/df-report.txt exists
+  context: null
+  hints:
+  - title: Human-readable units
+    content: '`df -h` prints sizes in K/M/G instead of 1K-blocks — the version humans (and slides) want.'
+  - title: One filesystem, one line
+    content: '`df -h /` limits output to the root filesystem; `tail -1` drops the header; awk''s $5 is
+      the Use% column.'
+  - title: Append, don't overwrite
+    content: Save the table with `>` first, then append the root-use line with `>>` — the order matters.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/df-report.txt exists
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: storage
+  weight: 25
+  prompt: report contains the df header line
+  context: null
+  hints:
+  - title: Human-readable units
+    content: '`df -h` prints sizes in K/M/G instead of 1K-blocks — the version humans (and slides) want.'
+  - title: One filesystem, one line
+    content: '`df -h /` limits output to the root filesystem; `tail -1` drops the header; awk''s $5 is
+      the Use% column.'
+  - title: Append, don't overwrite
+    content: Save the table with `>` first, then append the root-use line with `>>` — the order matters.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: report contains the df header line
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: storage
+  weight: 35
+  prompt: report contains a machine-readable root-use=<N>% line
+  context: null
+  hints:
+  - title: Human-readable units
+    content: '`df -h` prints sizes in K/M/G instead of 1K-blocks — the version humans (and slides) want.'
+  - title: One filesystem, one line
+    content: '`df -h /` limits output to the root filesystem; `tail -1` drops the header; awk''s $5 is
+      the Use% column.'
+  - title: Append, don't overwrite
+    content: Save the table with `>` first, then append the root-use line with `>>` — the order matters.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: report contains a machine-readable root-use=<N>% line
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: storage
+  weight: 20
+  prompt: report contains the root filesystem row (ending in /)
+  context: null
+  hints:
+  - title: Human-readable units
+    content: '`df -h` prints sizes in K/M/G instead of 1K-blocks — the version humans (and slides) want.'
+  - title: One filesystem, one line
+    content: '`df -h /` limits output to the root filesystem; `tail -1` drops the header; awk''s $5 is
+      the Use% column.'
+  - title: Append, don't overwrite
+    content: Save the table with `>` first, then append the root-use line with `>>` — the order matters.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: report contains the root filesystem row (ending in /)
+  time_target_minutes: 4

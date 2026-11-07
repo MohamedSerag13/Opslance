@@ -9,7 +9,13 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Entrypoint resolves the auto-generated secrets, then runs the CMD
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 COPY . .
 
-# Run pending migrations, seed, sync labs, then start FastAPI
-CMD ["sh", "-c", "alembic upgrade head && PYTHONPATH=/app python scripts/seed_admin.py && PYTHONPATH=/app python scripts/sync_labs.py && uvicorn main:app --host 0.0.0.0 --port 8000"]
+# Migrations + seeding run in the one-shot db-init service; the entrypoint
+# waits for the database, syncs labs (non-fatal), then starts the API
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENTRYPOINT ["docker-entrypoint.sh"]

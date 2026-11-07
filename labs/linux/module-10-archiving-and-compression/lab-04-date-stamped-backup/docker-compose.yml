@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-10-lab-04-date-stamped-backup:
+    build: .
+    container_name: lab-10-04-date-stamped-backup
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 10"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=The Date-Stamped Backup"
+      - "lab.id=module-10-lab-04-date-stamped-backup"

@@ -1,0 +1,85 @@
+schema_version: 2
+lab: module-12-lab-03-alias-rescue
+title: Bring Back the Aliases
+category: linux
+domain: shell-config
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: shell-config
+  weight: 35
+  prompt: .bashrc defines alias ll='ls -alF'
+  context: null
+  hints:
+  - title: Alias syntax
+    content: '`alias name=''expansion''` — with the equals sign attached to the name and the expansion
+      quoted. Spaces around = are an error.'
+  - title: Where aliases live
+    content: Aliases are for interactive convenience, so .bashrc is their home. They are NOT inherited
+      by scripts (that's deliberate — scripts need predictable commands).
+  - title: Verify by sourcing
+    content: 'Aliases defined in .bashrc apply after the file is sourced. Test with: `bash -c ''source
+      ~/.bashrc; alias ll''`.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: .bashrc defines alias ll='ls -alF'
+  time_target_minutes: 3
+- id: check_2
+  order: 2
+  domain: shell-config
+  weight: 35
+  prompt: .bashrc defines alias grep='grep --color=auto'
+  context: null
+  hints:
+  - title: Alias syntax
+    content: '`alias name=''expansion''` — with the equals sign attached to the name and the expansion
+      quoted. Spaces around = are an error.'
+  - title: Where aliases live
+    content: Aliases are for interactive convenience, so .bashrc is their home. They are NOT inherited
+      by scripts (that's deliberate — scripts need predictable commands).
+  - title: Verify by sourcing
+    content: 'Aliases defined in .bashrc apply after the file is sourced. Test with: `bash -c ''source
+      ~/.bashrc; alias ll''`.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: .bashrc defines alias grep='grep --color=auto'
+  time_target_minutes: 3
+- id: check_3
+  order: 3
+  domain: shell-config
+  weight: 30
+  prompt: sourcing .bashrc in a fresh shell defines the ll alias
+  context: null
+  hints:
+  - title: Alias syntax
+    content: '`alias name=''expansion''` — with the equals sign attached to the name and the expansion
+      quoted. Spaces around = are an error.'
+  - title: Where aliases live
+    content: Aliases are for interactive convenience, so .bashrc is their home. They are NOT inherited
+      by scripts (that's deliberate — scripts need predictable commands).
+  - title: Verify by sourcing
+    content: 'Aliases defined in .bashrc apply after the file is sourced. Test with: `bash -c ''source
+      ~/.bashrc; alias ll''`.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: sourcing .bashrc in a fresh shell defines the ll alias
+  time_target_minutes: 3

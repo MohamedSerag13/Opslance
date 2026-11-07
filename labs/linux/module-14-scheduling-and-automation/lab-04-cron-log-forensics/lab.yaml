@@ -1,0 +1,82 @@
+schema_version: 2
+lab: module-14-lab-04-cron-log-forensics
+title: Cron Log Forensics
+category: linux
+domain: scheduling
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: scheduling
+  weight: 20
+  prompt: /home/intern/cron-report.txt exists
+  context: null
+  hints:
+  - title: Filter twice
+    content: 'First select the failure lines (`grep ''CMD FAILED''`), then narrow to this job (`grep backup.sh`)
+      — combining both in one regex also works: `grep ''CMD FAILED.*backup.sh''`.'
+  - title: Timestamps are the first three fields
+    content: 'Syslog lines start with ''Month Day Time'' — awk ''{print $1, $2, $3}'' extracts it: Jun
+      16 02:15:02.'
+  - title: head -1 after sorting by time
+    content: Log lines are chronological, so the first failure is the first matching line.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/cron-report.txt exists
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: scheduling
+  weight: 45
+  prompt: report states failed-backups=3
+  context: null
+  hints:
+  - title: Filter twice
+    content: 'First select the failure lines (`grep ''CMD FAILED''`), then narrow to this job (`grep backup.sh`)
+      — combining both in one regex also works: `grep ''CMD FAILED.*backup.sh''`.'
+  - title: Timestamps are the first three fields
+    content: 'Syslog lines start with ''Month Day Time'' — awk ''{print $1, $2, $3}'' extracts it: Jun
+      16 02:15:02.'
+  - title: head -1 after sorting by time
+    content: Log lines are chronological, so the first failure is the first matching line.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: report states failed-backups=3
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: scheduling
+  weight: 35
+  prompt: report states first-failure=Jun 16 02:15:02
+  context: null
+  hints:
+  - title: Filter twice
+    content: 'First select the failure lines (`grep ''CMD FAILED''`), then narrow to this job (`grep backup.sh`)
+      — combining both in one regex also works: `grep ''CMD FAILED.*backup.sh''`.'
+  - title: Timestamps are the first three fields
+    content: 'Syslog lines start with ''Month Day Time'' — awk ''{print $1, $2, $3}'' extracts it: Jun
+      16 02:15:02.'
+  - title: head -1 after sorting by time
+    content: Log lines are chronological, so the first failure is the first matching line.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: report states first-failure=Jun 16 02:15:02
+  time_target_minutes: 5

@@ -1,0 +1,116 @@
+{
+  "id": "cka-w3-lab-01-maintenance-etcd-challenge",
+  "module_number": 23,
+  "module_title": "CKA Week 3 - Cluster Maintenance, etcd, Logging and Monitoring",
+  "title": "CKA Week 3 Challenge - Maintenance, etcd, Logging",
+  "difficulty": "advanced",
+  "estimated_minutes": 150,
+  "points": 120,
+  "category": "kubernetes",
+  "subcategory": "cka-week-3",
+  "skills": [
+    "kubectl drain/cordon/uncordon",
+    "etcdctl snapshot save/status",
+    "etcdutl snapshot restore",
+    "kubectl logs --previous",
+    "kubectl top",
+    "static pod manifests",
+    "kubectl describe"
+  ],
+  "description": "End-of-week challenge for maintenance and observability: drain a node safely, take and verify an etcd snapshot exactly like the exam, restore with etcdutl, and drill the logging commands.",
+  "scenario": "Week 3 in one lab: the tasks you cannot afford to hesitate on. The etcd backup flow here is the exam flow - a control-plane pod with hostPath mounts of the etcd certs, snapshot to local disk, verify, restore into a fresh data-dir. (kubeadm upgrade itself needs real VMs - practice that on the Tuesday/Wednesday VM drills from your plan.)",
+  "symptoms": [
+    "bare-worker is a pod with no controller: draining evicts it permanently - the perfect drain proof",
+    "fail-log crash-loops on purpose so logs --previous always has material",
+    "The k3s static manifests are mounted read-only at /k3s-manifests for inspection"
+  ],
+  "mission": "Prove a safe drain, take a verified etcd snapshot and restore from it, and capture the observability evidence (logs --previous, top, events, describe) the exam asks for.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Drain proof",
+      "content": "bare-worker has no owner References, so after drain + uncordon it is gone for good - that is your proof the drain actually evicted it. Deployments come back; bare pods do not."
+    },
+    {
+      "number": 2,
+      "title": "The exam etcd flow",
+      "content": "On the exam you run etcdctl ON the control plane with the certs from /etc/kubernetes/pki/etcd. Here the helper pod mounts the k3s equivalents (/tls) and talks to 127.0.0.1:2379 via hostNetwork - same steps, same flags, copy them exactly."
+    },
+    {
+      "number": 3,
+      "title": "snapshot status is offline",
+      "content": "etcdctl snapshot status works on the file alone - no cluster contact. Use it to verify /root/etcd-backup.db is a real snapshot."
+    },
+    {
+      "number": 4,
+      "title": "Restore does not touch the running cluster",
+      "content": "etcdutl snapshot restore --data-dir only builds a NEW data directory from the snapshot. Pointing the server at it (manifest --data-dir edit) is the exam step you practice on real VMs."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "resource_limits": {
+    "privileged": true
+  },
+  "acceptance_criteria": [
+    {
+      "id": "task_01",
+      "description": "Drain (--ignore-daemonsets --delete-emptydir-data) then uncordon: bare-worker evicted, node schedulable",
+      "weight": 10
+    },
+    {
+      "id": "task_02",
+      "description": "etcd-helper pod Running in kube-system (k3s image, hostNetwork, /tls + /snapshots hostPaths)",
+      "weight": 10
+    },
+    {
+      "id": "task_03",
+      "description": "etcd snapshot saved via helper and copied to /root/etcd-backup.db (valid snapshot file)",
+      "weight": 10
+    },
+    {
+      "id": "task_04",
+      "description": "/root/snapshot-status.txt captures the snapshot status table (DB size present)",
+      "weight": 10
+    },
+    {
+      "id": "task_05",
+      "description": "/root/backup-manifest.txt contains the snapshot sha256",
+      "weight": 10
+    },
+    {
+      "id": "task_06",
+      "description": "Restore drilled: etcdutl restore produced /snapshots/restored/member inside the helper",
+      "weight": 10
+    },
+    {
+      "id": "task_07",
+      "description": "/root/crash.log captures logs --previous of the crash-looping fail-log deployment",
+      "weight": 10
+    },
+    {
+      "id": "task_08",
+      "description": "/root/top-pods.txt has live metrics-server output for all pods",
+      "weight": 10
+    },
+    {
+      "id": "task_09",
+      "description": "/root/events-ops.txt shows events mentioning fail-log",
+      "weight": 10
+    },
+    {
+      "id": "task_10",
+      "description": "/root/static-manifests.txt lists the k3s static pod manifests (coredns visible)",
+      "weight": 10
+    },
+    {
+      "id": "task_11",
+      "description": "/root/node-describe.txt is a node describe output containing Conditions",
+      "weight": 10
+    },
+    {
+      "id": "task_12",
+      "description": "etcd endpoint health verified through the helper",
+      "weight": 10
+    }
+  ]
+}

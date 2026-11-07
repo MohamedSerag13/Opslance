@@ -1,0 +1,72 @@
+{
+  "id": "module-08-lab-02-script-arguments",
+  "module_number": 8,
+  "module_title": "Shell Scripting Basics",
+  "title": "Scripts That Take Arguments",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "scripting",
+  "skills": [
+    "$1",
+    "positional parameters",
+    "exit codes",
+    "if statements",
+    "usage messages"
+  ],
+  "description": "Write greet.sh that greets its first argument and fails politely with a usage message when called without one.",
+  "scenario": "The support team wants a tiny greeting tool for their onboarding emails: /home/intern/greet.sh must print 'Hello, <name>!' when given a name as the first argument, and when called without an argument it must print a 'Usage: greet.sh <name>' line and exit with a non-zero status so their automation can detect the mistake.",
+  "symptoms": [
+    "Calling the script with a name should print 'Hello, Sam!' but nothing exists yet",
+    "Calling it with no argument must NOT print a greeting",
+    "Support automation checks exit codes — a missing argument must exit non-zero",
+    "The usage message must mention 'Usage' so humans recognise it"
+  ],
+  "mission": "Create /home/intern/greet.sh: with an argument it prints 'Hello, <name>!'; without one it prints 'Usage: greet.sh <name>' and exits 1.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "First argument is $1",
+      "content": "`$1` holds the first positional parameter; `\"$1\"` (quoted) is safe even when it is empty."
+    },
+    {
+      "number": 2,
+      "title": "Test for empty",
+      "content": "`if [ -z \"$1\" ]` is true when the argument is missing or empty. `-z` means zero-length."
+    },
+    {
+      "number": 3,
+      "title": "Exit codes",
+      "content": "`exit 1` ends the script with failure status. The caller sees it in `$?` — 0 means success, anything else means failure."
+    },
+    {
+      "number": 4,
+      "title": "Wire it together",
+      "content": "echo the usage line BEFORE exiting so humans see why the script failed."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/greet.sh exists and is executable",
+      "weight": 25
+    },
+    {
+      "id": "check_2",
+      "description": "greet.sh Sam prints exactly 'Hello, Sam!'",
+      "weight": 35
+    },
+    {
+      "id": "check_3",
+      "description": "calling greet.sh without an argument exits non-zero",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "the no-argument run prints a Usage message",
+      "weight": 15
+    }
+  ]
+}

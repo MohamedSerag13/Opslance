@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-11-lab-04-cache-cleanup:
+    build: .
+    container_name: lab-11-04-cache-cleanup
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 11"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Build Cache Cleanup"
+      - "lab.id=module-11-lab-04-cache-cleanup"

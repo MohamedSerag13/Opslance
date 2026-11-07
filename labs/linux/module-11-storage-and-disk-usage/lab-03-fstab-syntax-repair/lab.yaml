@@ -1,0 +1,85 @@
+schema_version: 2
+lab: module-11-lab-03-fstab-syntax-repair
+title: Repair the Broken fstab
+category: linux
+domain: storage
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: storage
+  weight: 40
+  prompt: every non-comment fstab line has exactly 6 fields
+  context: null
+  hints:
+  - title: The six fields
+    content: 'fstab lines are: device, mount point, filesystem type, options, dump freq, pass no. — e.g.
+      `/dev/sdb1 /mnt/data ext4 defaults 0 2`.'
+  - title: Field-count check
+    content: '`awk ''!/^#/ && NF>0 { if (NF!=6) bad=1 } END { exit bad }'' /etc/fstab` exits non-zero
+      while any line is malformed — the runbook''s pre-reboot gate.'
+  - title: Replace the whole line
+    content: '`sudo sed -i ''s|^//10.0.0.30/share$|/dev/sdb1 /mnt/data ext4 defaults 0 2|'' /etc/fstab`
+      swaps the orphan for the correct entry in one shot.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: every non-comment fstab line has exactly 6 fields
+  time_target_minutes: 7
+- id: check_2
+  order: 2
+  domain: storage
+  weight: 35
+  prompt: the repaired entry mounts /dev/sdb1 on /mnt/data as ext4
+  context: null
+  hints:
+  - title: The six fields
+    content: 'fstab lines are: device, mount point, filesystem type, options, dump freq, pass no. — e.g.
+      `/dev/sdb1 /mnt/data ext4 defaults 0 2`.'
+  - title: Field-count check
+    content: '`awk ''!/^#/ && NF>0 { if (NF!=6) bad=1 } END { exit bad }'' /etc/fstab` exits non-zero
+      while any line is malformed — the runbook''s pre-reboot gate.'
+  - title: Replace the whole line
+    content: '`sudo sed -i ''s|^//10.0.0.30/share$|/dev/sdb1 /mnt/data ext4 defaults 0 2|'' /etc/fstab`
+      swaps the orphan for the correct entry in one shot.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: the repaired entry mounts /dev/sdb1 on /mnt/data as ext4
+  time_target_minutes: 7
+- id: check_3
+  order: 3
+  domain: storage
+  weight: 25
+  prompt: the repaired entry ends with pass number 2
+  context: null
+  hints:
+  - title: The six fields
+    content: 'fstab lines are: device, mount point, filesystem type, options, dump freq, pass no. — e.g.
+      `/dev/sdb1 /mnt/data ext4 defaults 0 2`.'
+  - title: Field-count check
+    content: '`awk ''!/^#/ && NF>0 { if (NF!=6) bad=1 } END { exit bad }'' /etc/fstab` exits non-zero
+      while any line is malformed — the runbook''s pre-reboot gate.'
+  - title: Replace the whole line
+    content: '`sudo sed -i ''s|^//10.0.0.30/share$|/dev/sdb1 /mnt/data ext4 defaults 0 2|'' /etc/fstab`
+      swaps the orphan for the correct entry in one shot.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: the repaired entry ends with pass number 2
+  time_target_minutes: 7

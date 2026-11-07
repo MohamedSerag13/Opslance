@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-07-lab-02-sed-config-surgery:
+    build: .
+    container_name: lab-07-02-sed-config-surgery
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 07"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Config Surgery with sed"
+      - "lab.id=module-07-lab-02-sed-config-surgery"

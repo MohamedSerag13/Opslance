@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-08-lab-04-loop-cleanup:
+    build: .
+    container_name: lab-08-04-loop-cleanup
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 08"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Clean Up with a Loop"
+      - "lab.id=module-08-lab-04-loop-cleanup"

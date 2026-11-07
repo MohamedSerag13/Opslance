@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-12-lab-02-app-env-vars:
+    build: .
+    container_name: lab-12-02-app-env-vars
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 12"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Feed the App Its Environment"
+      - "lab.id=module-12-lab-02-app-env-vars"

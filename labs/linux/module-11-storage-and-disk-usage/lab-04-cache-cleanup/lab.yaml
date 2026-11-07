@@ -1,0 +1,105 @@
+schema_version: 2
+lab: module-11-lab-04-cache-cleanup
+title: Build Cache Cleanup
+category: linux
+domain: storage
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: storage
+  weight: 35
+  prompt: no *.o files remain anywhere under the build cache
+  context: null
+  hints:
+  - title: Preview before delete
+    content: Run `find … -name '*.o'` without -delete first and eyeball the list — deleting is forever.
+  - title: The -delete action
+    content: '`find dir -name ''*.o'' -delete` removes every match in the whole tree, in one command.
+      No wildcards in a rm that could mis-expand.'
+  - title: Quote the glob
+    content: 'If you use rm instead, quote it: `sudo find … -exec rm {} +` or `rm ''*.o''` — an unquoted
+      *.o only matches the CURRENT directory''s files.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: no *.o files remain anywhere under the build cache
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: storage
+  weight: 25
+  prompt: the sources (src/main.c) survived
+  context: null
+  hints:
+  - title: Preview before delete
+    content: Run `find … -name '*.o'` without -delete first and eyeball the list — deleting is forever.
+  - title: The -delete action
+    content: '`find dir -name ''*.o'' -delete` removes every match in the whole tree, in one command.
+      No wildcards in a rm that could mis-expand.'
+  - title: Quote the glob
+    content: 'If you use rm instead, quote it: `sudo find … -exec rm {} +` or `rm ''*.o''` — an unquoted
+      *.o only matches the CURRENT directory''s files.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: the sources (src/main.c) survived
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: storage
+  weight: 25
+  prompt: the output binary survived
+  context: null
+  hints:
+  - title: Preview before delete
+    content: Run `find … -name '*.o'` without -delete first and eyeball the list — deleting is forever.
+  - title: The -delete action
+    content: '`find dir -name ''*.o'' -delete` removes every match in the whole tree, in one command.
+      No wildcards in a rm that could mis-expand.'
+  - title: Quote the glob
+    content: 'If you use rm instead, quote it: `sudo find … -exec rm {} +` or `rm ''*.o''` — an unquoted
+      *.o only matches the CURRENT directory''s files.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: the output binary survived
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: storage
+  weight: 15
+  prompt: cleanup report records object-files-removed=4
+  context: null
+  hints:
+  - title: Preview before delete
+    content: Run `find … -name '*.o'` without -delete first and eyeball the list — deleting is forever.
+  - title: The -delete action
+    content: '`find dir -name ''*.o'' -delete` removes every match in the whole tree, in one command.
+      No wildcards in a rm that could mis-expand.'
+  - title: Quote the glob
+    content: 'If you use rm instead, quote it: `sudo find … -exec rm {} +` or `rm ''*.o''` — an unquoted
+      *.o only matches the CURRENT directory''s files.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: cleanup report records object-files-removed=4
+  time_target_minutes: 4

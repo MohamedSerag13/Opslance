@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-10-lab-04-date-stamped-backup
+title: The Date-Stamped Backup
+category: linux
+domain: archiving
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: archiving
+  weight: 20
+  prompt: /tmp/backups directory exists
+  context: null
+  hints:
+  - title: date +%F
+    content: '`date +%F` prints the current date as YYYY-MM-DD — exactly the convention the rotation script
+      expects.'
+  - title: Command substitution
+    content: '`$(command)` runs the command and pastes its output into the surrounding line — that is
+      how today''s date lands in the filename.'
+  - title: Quotes matter
+    content: 'Put quotes around the path but NOT around the substitution: `tar -czf "/tmp/backups/etc-$(date
+      +%F).tar.gz"` — quoted ''$(date)'' would stay literal text.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /tmp/backups directory exists
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: archiving
+  weight: 45
+  prompt: etc-<today>.tar.gz exists in /tmp/backups (name matches today's date)
+  context: null
+  hints:
+  - title: date +%F
+    content: '`date +%F` prints the current date as YYYY-MM-DD — exactly the convention the rotation script
+      expects.'
+  - title: Command substitution
+    content: '`$(command)` runs the command and pastes its output into the surrounding line — that is
+      how today''s date lands in the filename.'
+  - title: Quotes matter
+    content: 'Put quotes around the path but NOT around the substitution: `tar -czf "/tmp/backups/etc-$(date
+      +%F).tar.gz"` — quoted ''$(date)'' would stay literal text.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: etc-<today>.tar.gz exists in /tmp/backups (name matches today's date)
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: archiving
+  weight: 20
+  prompt: the backup is a valid gzipped archive
+  context: null
+  hints:
+  - title: date +%F
+    content: '`date +%F` prints the current date as YYYY-MM-DD — exactly the convention the rotation script
+      expects.'
+  - title: Command substitution
+    content: '`$(command)` runs the command and pastes its output into the surrounding line — that is
+      how today''s date lands in the filename.'
+  - title: Quotes matter
+    content: 'Put quotes around the path but NOT around the substitution: `tar -czf "/tmp/backups/etc-$(date
+      +%F).tar.gz"` — quoted ''$(date)'' would stay literal text.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: the backup is a valid gzipped archive
+  time_target_minutes: 5
+- id: check_4
+  order: 4
+  domain: archiving
+  weight: 15
+  prompt: the archive contains db.conf
+  context: null
+  hints:
+  - title: date +%F
+    content: '`date +%F` prints the current date as YYYY-MM-DD — exactly the convention the rotation script
+      expects.'
+  - title: Command substitution
+    content: '`$(command)` runs the command and pastes its output into the surrounding line — that is
+      how today''s date lands in the filename.'
+  - title: Quotes matter
+    content: 'Put quotes around the path but NOT around the substitution: `tar -czf "/tmp/backups/etc-$(date
+      +%F).tar.gz"` — quoted ''$(date)'' would stay literal text.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: the archive contains db.conf
+  time_target_minutes: 5

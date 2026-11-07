@@ -1,0 +1,65 @@
+{
+  "id": "module-13-lab-01-generate-ssh-keypair",
+  "module_number": 13,
+  "module_title": "SSH & Remote Access",
+  "title": "Generate Your First SSH Key",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "ssh",
+  "skills": [
+    "ssh-keygen",
+    "ed25519",
+    "key permissions",
+    "~/.ssh layout"
+  ],
+  "description": "No SSH key exists on this box; generate an ed25519 keypair with correct permissions.",
+  "scenario": "You are about to be added to the jump-host rotation, and the policy requires key-based authentication with a modern algorithm: ed25519, no passphrase (the team's key agent handles unlocking), stored at the default location. Today ~/.ssh does not even exist. Generate the keypair and set the permissions SSH expects.",
+  "symptoms": [
+    "`ls ~/.ssh` reports the directory does not exist",
+    "The jump-host onboarding checklist requires an ed25519 keypair",
+    "SSH refuses private keys whose permissions are too open"
+  ],
+  "mission": "Generate an ed25519 keypair at ~/.ssh/id_ed25519 (no passphrase), with the private key at mode 600, the directory at 700.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "The algorithm",
+      "content": "`-t ed25519` picks the modern Ed25519 algorithm — short keys, fast, and the current best practice over RSA."
+    },
+    {
+      "number": 2,
+      "title": "No passphrase this time",
+      "content": "`-N \"\"` supplies an empty passphrase; the two quotes are required so ssh-keygen does not prompt."
+    },
+    {
+      "number": 3,
+      "title": "Permissions are policy",
+      "content": "SSH enforces them: ~/.ssh at 700, private key at 600. Group/world-readable private keys get refused with 'UNPROTECTED PRIVATE KEY FILE'."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "private key /home/intern/.ssh/id_ed25519 exists",
+      "weight": 35
+    },
+    {
+      "id": "check_2",
+      "description": "public key id_ed25519.pub exists",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "private key permissions are 600",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": ".ssh directory permissions are 700",
+      "weight": 15
+    }
+  ]
+}

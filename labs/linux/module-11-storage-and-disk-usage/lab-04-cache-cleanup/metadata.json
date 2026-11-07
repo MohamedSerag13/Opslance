@@ -1,0 +1,72 @@
+{
+  "id": "module-11-lab-04-cache-cleanup",
+  "module_number": 11,
+  "module_title": "Storage & Disk Usage",
+  "title": "Build Cache Cleanup",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "storage",
+  "skills": [
+    "find -name",
+    "find -delete",
+    "glob patterns",
+    "du -sh",
+    "safe cleanup"
+  ],
+  "description": "Delete regeneratable *.o object files from a build cache while keeping sources and the output binary.",
+  "scenario": "The CI runner's cache directory /var/tmp/buildcache has grown fat with object files (*.o) that the compiler regenerates anyway. Free the space: remove every *.o file in the tree, keep the src/ sources and the output/ binary untouched, and record how many object files you removed in /home/intern/cleanup-report.txt as object-files-removed=4.",
+  "symptoms": [
+    "/var/tmp/buildcache is much larger than its git history suggests",
+    "Four *.o object files sit in the cache tree",
+    "src/ (sources) and output/ (the built binary) must survive untouched",
+    "The cleanup count must be reported in /home/intern/cleanup-report.txt"
+  ],
+  "mission": "Delete all 4 *.o files under /var/tmp/buildcache, keep src/ and output/ intact, and write `object-files-removed=4` into /home/intern/cleanup-report.txt.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Preview before delete",
+      "content": "Run `find … -name '*.o'` without -delete first and eyeball the list — deleting is forever."
+    },
+    {
+      "number": 2,
+      "title": "The -delete action",
+      "content": "`find dir -name '*.o' -delete` removes every match in the whole tree, in one command. No wildcards in a rm that could mis-expand."
+    },
+    {
+      "number": 3,
+      "title": "Quote the glob",
+      "content": "If you use rm instead, quote it: `sudo find … -exec rm {} +` or `rm '*.o'` — an unquoted *.o only matches the CURRENT directory's files."
+    },
+    {
+      "number": 4,
+      "title": "Report the count",
+      "content": "The number of matches from the preview IS the number removed — here, 4."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "no *.o files remain anywhere under the build cache",
+      "weight": 35
+    },
+    {
+      "id": "check_2",
+      "description": "the sources (src/main.c) survived",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "the output binary survived",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "cleanup report records object-files-removed=4",
+      "weight": 15
+    }
+  ]
+}

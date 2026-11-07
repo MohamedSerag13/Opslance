@@ -1,0 +1,105 @@
+schema_version: 2
+lab: module-10-lab-02-extract-and-verify
+title: Deploy from a Tarball
+category: linux
+domain: archiving
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: archiving
+  weight: 35
+  prompt: /var/www/site/index.html exists after extraction
+  context: null
+  hints:
+  - title: List before extracting
+    content: '`tar -tzf file.tar.gz` shows exactly which paths will appear — no surprises about a wrapping
+      top-level directory.'
+  - title: -C chooses the destination
+    content: '`tar -xzf archive -C /var/www/site` extracts INTO that directory instead of the current
+      one.'
+  - title: sudo for root-owned targets
+    content: /var/www belongs to root, so writing into it needs `sudo tar …`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /var/www/site/index.html exists after extraction
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: archiving
+  weight: 25
+  prompt: /var/www/site/css/style.css exists
+  context: null
+  hints:
+  - title: List before extracting
+    content: '`tar -tzf file.tar.gz` shows exactly which paths will appear — no surprises about a wrapping
+      top-level directory.'
+  - title: -C chooses the destination
+    content: '`tar -xzf archive -C /var/www/site` extracts INTO that directory instead of the current
+      one.'
+  - title: sudo for root-owned targets
+    content: /var/www belongs to root, so writing into it needs `sudo tar …`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: /var/www/site/css/style.css exists
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: archiving
+  weight: 25
+  prompt: /var/www/site/js/app.js exists
+  context: null
+  hints:
+  - title: List before extracting
+    content: '`tar -tzf file.tar.gz` shows exactly which paths will appear — no surprises about a wrapping
+      top-level directory.'
+  - title: -C chooses the destination
+    content: '`tar -xzf archive -C /var/www/site` extracts INTO that directory instead of the current
+      one.'
+  - title: sudo for root-owned targets
+    content: /var/www belongs to root, so writing into it needs `sudo tar …`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: /var/www/site/js/app.js exists
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: archiving
+  weight: 15
+  prompt: index.html content is intact (contains <h1>)
+  context: null
+  hints:
+  - title: List before extracting
+    content: '`tar -tzf file.tar.gz` shows exactly which paths will appear — no surprises about a wrapping
+      top-level directory.'
+  - title: -C chooses the destination
+    content: '`tar -xzf archive -C /var/www/site` extracts INTO that directory instead of the current
+      one.'
+  - title: sudo for root-owned targets
+    content: /var/www belongs to root, so writing into it needs `sudo tar …`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: index.html content is intact (contains <h1>)
+  time_target_minutes: 4

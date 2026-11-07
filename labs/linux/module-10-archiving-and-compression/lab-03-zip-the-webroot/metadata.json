@@ -1,0 +1,65 @@
+{
+  "id": "module-10-lab-03-zip-the-webroot",
+  "module_number": 10,
+  "module_title": "Archiving & Compression",
+  "title": "Zip the Webroot",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "archiving",
+  "skills": [
+    "zip -r",
+    "unzip -l",
+    "exclude patterns",
+    "archive verification"
+  ],
+  "description": "Zip the webroot for the security review while excluding debug logs from the archive.",
+  "scenario": "The security review team wants a copy of the webroot at /var/www/html — but policy forbids shipping log files, and a stray debug.log is sitting in the directory. Create /home/intern/webroot.zip with zip, excluding any *.log file, then verify with unzip -l that the site pages are in and the log is not.",
+  "symptoms": [
+    "/var/www/html contains index.html, about.html, assets/ — and a debug.log that must NOT ship",
+    "The review portal only accepts .zip archives",
+    "The previous attempt included the log and was rejected by the reviewers"
+  ],
+  "mission": "Create /home/intern/webroot.zip from /var/www/html excluding *.log files, and verify the archive lists index.html but no debug.log.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Recursive zip",
+      "content": "`zip -r out.zip dir` descends into subdirectories. Run it from /var/www so the entries are named html/… instead of carrying the full absolute path."
+    },
+    {
+      "number": 2,
+      "title": "Exclude patterns",
+      "content": "`-x \"*.log\"` drops every entry whose path ends in .log — the pattern matches against the names INSIDE the archive."
+    },
+    {
+      "number": 3,
+      "title": "Verify with unzip -l",
+      "content": "`unzip -l` lists the archive; grep the listing for index.html (must match) and debug.log (must not)."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/webroot.zip exists",
+      "weight": 25
+    },
+    {
+      "id": "check_2",
+      "description": "the file is a valid zip archive",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "the archive contains index.html",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "the archive does NOT contain debug.log",
+      "weight": 25
+    }
+  ]
+}

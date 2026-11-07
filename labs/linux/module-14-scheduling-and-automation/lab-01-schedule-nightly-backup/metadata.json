@@ -1,0 +1,66 @@
+{
+  "id": "module-14-lab-01-schedule-nightly-backup",
+  "module_number": 14,
+  "module_title": "Job Scheduling & Automation",
+  "title": "Schedule the Nightly Backup",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "scheduling",
+  "skills": [
+    "cron syntax",
+    "/etc/cron.d",
+    "crontab fields",
+    "scheduling"
+  ],
+  "description": "Create a cron job that runs the backup script every night at 02:00 as root.",
+  "scenario": "The ops runbook requires nightly configuration backups at 02:00. The backup script itself is ready at /usr/local/bin/backup.sh — what is missing is the schedule. Create /etc/cron.d/nightly-backup with a valid cron entry that runs the script as root every day at 02:00. Remember: /etc/cron.d files need the username field that plain crontabs don't have.",
+  "symptoms": [
+    "/usr/local/bin/backup.sh exists but never runs",
+    "No cron file references the backup script",
+    "The runbook requires 02:00 nightly, as root",
+    "The job must live in /etc/cron.d/nightly-backup (config-managed, survives reboots)"
+  ],
+  "mission": "Create /etc/cron.d/nightly-backup containing the line `0 2 * * * root /usr/local/bin/backup.sh`.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "The five time fields",
+      "content": "minute hour day-of-month month day-of-week — `0 2 * * *` means 02:00 every day. Stars mean 'every'."
+    },
+    {
+      "number": 2,
+      "title": "cron.d needs a username",
+      "content": "Unlike a personal crontab, every /etc/cron.d line names the USER the job runs as, right after the schedule: `0 2 * * * root /usr/local/bin/backup.sh` — seven fields total (5 time fields + username + command)."
+    },
+    {
+      "number": 3,
+      "title": "tee for root files",
+      "content": "`echo ... | sudo tee /etc/cron.d/nightly-backup` writes a root-owned file from your shell."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/etc/cron.d/nightly-backup exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "every active line has the 7 fields /etc/cron.d requires (5 time fields + username + command)",
+      "weight": 30
+    },
+    {
+      "id": "check_3",
+      "description": "the schedule line is exactly '0 2 * * * root /usr/local/bin/backup.sh'",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "the scheduled backup script is executable",
+      "weight": 25
+    }
+  ]
+}

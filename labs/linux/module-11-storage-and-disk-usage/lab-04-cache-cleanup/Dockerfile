@@ -1,0 +1,33 @@
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    sudo vim nano less \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN useradd -m -s /bin/bash intern && \
+    echo "intern:intern123" | chpasswd
+# Note: sudo whitelist for intern is injected at runtime by lab-manager
+#       via /etc/sudoers.d/lab-student — do NOT add NOPASSWD:ALL here.
+
+# Lab scenario files (the broken state)
+COPY context/ /
+
+# THE BREAK: apply the broken-state permissions, users and data
+RUN mkdir -p /var/tmp/buildcache/obj
+RUN for i in 1 2 3 4; do fallocate -l 512K /var/tmp/buildcache/obj/module-$i.o; done
+RUN chmod -R a+rX /var/tmp/buildcache
+
+# Ensure /etc/sudoers.d is read (safe runtime whitelist injected there)
+RUN grep -qxF "#includedir /etc/sudoers.d" /etc/sudoers || echo "#includedir /etc/sudoers.d" >> /etc/sudoers
+COPY check.sh /check.sh
+RUN chmod +x /check.sh
+
+RUN echo "FLAG-cache-cleanup-6a4d06ea" > /root/flag.txt
+
+USER intern
+WORKDIR /home/intern
+
+ENTRYPOINT ["tail", "-f", "/dev/null"]

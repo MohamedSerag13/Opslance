@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-14-lab-01-schedule-nightly-backup
+title: Schedule the Nightly Backup
+category: linux
+domain: scheduling
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: scheduling
+  weight: 20
+  prompt: /etc/cron.d/nightly-backup exists
+  context: null
+  hints:
+  - title: The five time fields
+    content: minute hour day-of-month month day-of-week — `0 2 * * *` means 02:00 every day. Stars mean
+      'every'.
+  - title: cron.d needs a username
+    content: 'Unlike a personal crontab, every /etc/cron.d line names the USER the job runs as, right
+      after the schedule: `0 2 * * * root /usr/local/bin/backup.sh` — seven fields total (5 time fields
+      + username + command).'
+  - title: tee for root files
+    content: '`echo ... | sudo tee /etc/cron.d/nightly-backup` writes a root-owned file from your shell.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /etc/cron.d/nightly-backup exists
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: scheduling
+  weight: 30
+  prompt: every active line has the 7 fields /etc/cron.d requires (5 time fields + username + command)
+  context: null
+  hints:
+  - title: The five time fields
+    content: minute hour day-of-month month day-of-week — `0 2 * * *` means 02:00 every day. Stars mean
+      'every'.
+  - title: cron.d needs a username
+    content: 'Unlike a personal crontab, every /etc/cron.d line names the USER the job runs as, right
+      after the schedule: `0 2 * * * root /usr/local/bin/backup.sh` — seven fields total (5 time fields
+      + username + command).'
+  - title: tee for root files
+    content: '`echo ... | sudo tee /etc/cron.d/nightly-backup` writes a root-owned file from your shell.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: every active line has the 7 fields /etc/cron.d requires (5 time fields + username + command)
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: scheduling
+  weight: 25
+  prompt: the schedule line is exactly '0 2 * * * root /usr/local/bin/backup.sh'
+  context: null
+  hints:
+  - title: The five time fields
+    content: minute hour day-of-month month day-of-week — `0 2 * * *` means 02:00 every day. Stars mean
+      'every'.
+  - title: cron.d needs a username
+    content: 'Unlike a personal crontab, every /etc/cron.d line names the USER the job runs as, right
+      after the schedule: `0 2 * * * root /usr/local/bin/backup.sh` — seven fields total (5 time fields
+      + username + command).'
+  - title: tee for root files
+    content: '`echo ... | sudo tee /etc/cron.d/nightly-backup` writes a root-owned file from your shell.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: the schedule line is exactly '0 2 * * * root /usr/local/bin/backup.sh'
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: scheduling
+  weight: 25
+  prompt: the scheduled backup script is executable
+  context: null
+  hints:
+  - title: The five time fields
+    content: minute hour day-of-month month day-of-week — `0 2 * * *` means 02:00 every day. Stars mean
+      'every'.
+  - title: cron.d needs a username
+    content: 'Unlike a personal crontab, every /etc/cron.d line names the USER the job runs as, right
+      after the schedule: `0 2 * * * root /usr/local/bin/backup.sh` — seven fields total (5 time fields
+      + username + command).'
+  - title: tee for root files
+    content: '`echo ... | sudo tee /etc/cron.d/nightly-backup` writes a root-owned file from your shell.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: the scheduled backup script is executable
+  time_target_minutes: 4

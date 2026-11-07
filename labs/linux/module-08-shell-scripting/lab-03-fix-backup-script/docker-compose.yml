@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-08-lab-03-fix-backup-script:
+    build: .
+    container_name: lab-08-03-fix-backup-script
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 08"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Debug the Backup Script"
+      - "lab.id=module-08-lab-03-fix-backup-script"

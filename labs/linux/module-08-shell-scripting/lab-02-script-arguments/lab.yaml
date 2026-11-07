@@ -1,0 +1,101 @@
+schema_version: 2
+lab: module-08-lab-02-script-arguments
+title: Scripts That Take Arguments
+category: linux
+domain: scripting
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: scripting
+  weight: 25
+  prompt: /home/intern/greet.sh exists and is executable
+  context: null
+  hints:
+  - title: First argument is $1
+    content: '`$1` holds the first positional parameter; `"$1"` (quoted) is safe even when it is empty.'
+  - title: Test for empty
+    content: '`if [ -z "$1" ]` is true when the argument is missing or empty. `-z` means zero-length.'
+  - title: Exit codes
+    content: '`exit 1` ends the script with failure status. The caller sees it in `$?` — 0 means success,
+      anything else means failure.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/greet.sh exists and is executable
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: scripting
+  weight: 35
+  prompt: greet.sh Sam prints exactly 'Hello, Sam!'
+  context: null
+  hints:
+  - title: First argument is $1
+    content: '`$1` holds the first positional parameter; `"$1"` (quoted) is safe even when it is empty.'
+  - title: Test for empty
+    content: '`if [ -z "$1" ]` is true when the argument is missing or empty. `-z` means zero-length.'
+  - title: Exit codes
+    content: '`exit 1` ends the script with failure status. The caller sees it in `$?` — 0 means success,
+      anything else means failure.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: greet.sh Sam prints exactly 'Hello, Sam!'
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: scripting
+  weight: 25
+  prompt: calling greet.sh without an argument exits non-zero
+  context: null
+  hints:
+  - title: First argument is $1
+    content: '`$1` holds the first positional parameter; `"$1"` (quoted) is safe even when it is empty.'
+  - title: Test for empty
+    content: '`if [ -z "$1" ]` is true when the argument is missing or empty. `-z` means zero-length.'
+  - title: Exit codes
+    content: '`exit 1` ends the script with failure status. The caller sees it in `$?` — 0 means success,
+      anything else means failure.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: calling greet.sh without an argument exits non-zero
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: scripting
+  weight: 15
+  prompt: the no-argument run prints a Usage message
+  context: null
+  hints:
+  - title: First argument is $1
+    content: '`$1` holds the first positional parameter; `"$1"` (quoted) is safe even when it is empty.'
+  - title: Test for empty
+    content: '`if [ -z "$1" ]` is true when the argument is missing or empty. `-z` means zero-length.'
+  - title: Exit codes
+    content: '`exit 1` ends the script with failure status. The caller sees it in `$?` — 0 means success,
+      anything else means failure.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: the no-argument run prints a Usage message
+  time_target_minutes: 4

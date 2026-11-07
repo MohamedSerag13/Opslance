@@ -1,0 +1,147 @@
+{
+  "id": "cka-w8-lab-01-mock-exam",
+  "module_number": 28,
+  "module_title": "CKA Week 8 - Mock Exam Simulation",
+  "title": "CKA Week 8 Mock Exam - 18 Questions, 120 Minutes",
+  "difficulty": "advanced",
+  "estimated_minutes": 120,
+  "points": 180,
+  "category": "kubernetes",
+  "subcategory": "cka-week-8",
+  "skills": [
+    "mixed domains",
+    "kubectl speed",
+    "RBAC",
+    "networking",
+    "storage",
+    "etcd backup",
+    "Helm/Kustomize",
+    "troubleshooting"
+  ],
+  "description": "A timed mock exam: 18 questions drawn from every CKA domain, graded the way the platform grades - live cluster state and behavior. Target: finish within 120 minutes above the 66% pass mark.",
+  "scenario": "Exam day rehearsal. One cluster, 18 questions, 2 hours. First 2 minutes: alias k, $do, $now, completion, vim. First command of every question: check your context. Skim everything, bank the quick wins, keep 10 minutes to verify with kubectl get and describe.",
+  "symptoms": [
+    "Questions span all domains: workloads, RBAC, networking, storage, etcd, Helm, Kustomize, troubleshooting",
+    "One seeded deployment (fixme) is broken and must be repaired as part of the exam",
+    "An etcd helper is pre-seeded exactly like a control-plane node in the real exam"
+  ],
+  "mission": "Score above 66% (the CKA pass mark) within 120 minutes. Then review SOLUTION.md and log every miss in mistakes.md before sitting killer.sh.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Exam protocol",
+      "content": "Minutes 0-2: alias k, $do, $now, completion, vim settings. First command of EVERY question: verify your context and namespace. Flag anything over 6 minutes and come back."
+    },
+    {
+      "number": 2,
+      "title": "Weight your time",
+      "content": "All questions are 10 points. The RBAC pair (9-10), the CronJob and the ConfigMap/Secret are fast wins - bank them before touching the etcd question."
+    },
+    {
+      "number": 3,
+      "title": "The seeded helpers",
+      "content": "etcd-helper (kube-system) is pre-seeded for the backup question; the ingress controller is pre-installed; fixme is your one troubleshooting question."
+    },
+    {
+      "number": 4,
+      "title": "Verify before submitting",
+      "content": "Keep 10 minutes at the end: kubectl get + describe every object you created. The checks grade live state and live traffic."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "resource_limits": {
+    "privileged": true
+  },
+  "acceptance_criteria": [
+    {
+      "id": "task_01",
+      "description": "Namespace exam created and set as the current-context namespace",
+      "weight": 10
+    },
+    {
+      "id": "task_02",
+      "description": "Pod fast runs nginx:1.27 in exam and is Running",
+      "weight": 10
+    },
+    {
+      "id": "task_03",
+      "description": "Deployment api: 4 replicas of nginx:1.27, all Ready",
+      "weight": 10
+    },
+    {
+      "id": "task_04",
+      "description": "legacy-app updated to nginx:1.27 (revision >= 2)",
+      "weight": 10
+    },
+    {
+      "id": "task_05",
+      "description": "ConfigMap exam-cm (KEY1=val1) and Secret exam-sec (PASS=topsecret) in exam",
+      "weight": 10
+    },
+    {
+      "id": "task_06",
+      "description": "CronJob backup-cron runs daily at 01:00 (0 1 * * *)",
+      "weight": 10
+    },
+    {
+      "id": "task_07",
+      "description": "Service api-svc (80) exposes deploy api with ready endpoints",
+      "weight": 10
+    },
+    {
+      "id": "task_08",
+      "description": "Node tainted exam=drain:NoSchedule; pod tol-pod tolerates it and runs",
+      "weight": 10
+    },
+    {
+      "id": "task_09",
+      "description": "RBAC: SA deployer + Role deployer-role (create deployments) + RoleBinding in exam",
+      "weight": 10
+    },
+    {
+      "id": "task_10",
+      "description": "auth can-i: deployer SA CAN create deployments in exam",
+      "weight": 10
+    },
+    {
+      "id": "task_11",
+      "description": "NetworkPolicy in exam: client cannot reach protected, DNS still works",
+      "weight": 10
+    },
+    {
+      "id": "task_12",
+      "description": "Storage: PVC exam-pvc (1Gi, local-path) Bound and mounted in pod pvc-pod",
+      "weight": 10
+    },
+    {
+      "id": "task_13",
+      "description": "etcd backup: snapshot copied to /root/exam-snap.db and verified",
+      "weight": 10
+    },
+    {
+      "id": "task_14",
+      "description": "Helm release exam-rel installed in exam with replicaCount 2",
+      "weight": 10
+    },
+    {
+      "id": "task_15",
+      "description": "Kustomize overlay applied: kust-web at 2 replicas on nginx:1.28 in exam",
+      "weight": 10
+    },
+    {
+      "id": "task_16",
+      "description": "Ingress exam-ing: exam.example.com -> api-svc verified with curl",
+      "weight": 10
+    },
+    {
+      "id": "task_17",
+      "description": "fixme repaired: 2 replicas of nginx:1.27 all Ready (was 0 replicas, broken image)",
+      "weight": 10
+    },
+    {
+      "id": "task_18",
+      "description": "/root/pod-ips.txt contains the live IP of pod fast",
+      "weight": 10
+    }
+  ]
+}

@@ -1,3 +1,176 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Design tokens — Opslance v2
+   Values are space-separated RGB channels so Tailwind can apply opacity
+   (e.g. bg-primary/20). Themes flip by swapping variables under
+   <html data-theme="dark|light">; set pre-hydration in index.html.
+--------------------------------------------------------------------------- */
+:root, [data-theme='dark'] {
+  --c-bg: 10 15 28;            /* #0A0F1C deep navy */
+  --c-surface: 16 23 41;       /* #101729 */
+  --c-surface-2: 21 30 53;     /* #151E35 */
+  --c-border: 38 49 78;        /* #26314E */
+  --c-text: 231 236 246;       /* #E7ECF6 */
+  --c-muted: 148 163 190;      /* #94A3BE */
+  --c-primary: 99 102 241;     /* indigo-500 */
+  --c-primary-strong: 129 140 248; /* indigo-400 (hover on dark) */
+  --c-accent: 249 115 22;      /* orange-500 */
+  --c-accent-soft: 253 186 116;/* orange-300 */
+  --c-success: 16 185 129;
+  --c-warn: 245 158 11;
+  --c-danger: 244 63 94;
+  --glass: rgb(16 23 41 / 0.72);
+  color-scheme: dark;
+}
+
+[data-theme='light'] {
+  --c-bg: 247 248 252;         /* #F7F8FC */
+  --c-surface: 255 255 255;
+  --c-surface-2: 241 244 250;
+  --c-border: 226 232 244;
+  --c-text: 15 23 42;          /* slate-900 */
+  --c-muted: 100 116 139;      /* slate-500 */
+  --c-primary: 79 70 229;      /* indigo-600 */
+  --c-primary-strong: 99 102 241;
+  --c-accent: 234 88 12;       /* orange-600 */
+  --c-accent-soft: 251 146 60;
+  --c-success: 5 150 105;
+  --c-warn: 217 119 6;
+  --c-danger: 225 29 72;
+  --glass: rgb(255 255 255 / 0.75);
+  color-scheme: light;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/inter-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/inter-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/inter-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/inter-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/inter-latin-800-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/space-grotesk-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/space-grotesk-latin-600-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/space-grotesk-latin-700-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-latin-600-normal.woff2') format('woff2');
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-bg text-content font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background: rgb(var(--c-primary) / 0.35);
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-primary-strong));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .glass {
+    background: var(--glass);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .text-gradient {
+    background: linear-gradient(100deg, rgb(var(--c-primary-strong)) 0%, rgb(var(--c-accent-soft)) 55%, rgb(var(--c-accent)) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .ring-glow {
+    box-shadow: 0 0 0 1px rgb(var(--c-primary) / 0.4), 0 10px 44px -10px rgb(var(--c-primary) / 0.55);
+  }
+  /* decorative radial glows used by hero/CTA sections */
+  .glow-orb {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(90px);
+    pointer-events: none;
+  }
+  .grid-bg {
+    background-image:
+      linear-gradient(rgb(var(--c-border) / 0.4) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--c-border) / 0.4) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
+  }
+  .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: rgb(var(--c-border)); border-radius: 8px; }
+}

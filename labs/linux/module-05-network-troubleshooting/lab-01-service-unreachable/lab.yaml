@@ -1,0 +1,82 @@
+schema_version: 2
+lab: module-05-lab-01-service-unreachable
+title: Service Unreachable — Nothing on Port 8080
+category: linux
+domain: networking
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: networking
+  weight: 40
+  prompt: /home/intern/diagnosis.txt exists and contains the diagnosis keyword
+  context: null
+  hints:
+  - title: Confirm the failure first
+    content: Run 'curl localhost:8080'. You will see 'Connection refused'. This is the error we need to
+      diagnose.
+  - title: Inspect the socket table
+    content: 'Run ''ss -tulnp''. Look at the Local Address:Port column. Is there any entry for port 8080?
+      The flags mean: -t TCP, -u UDP, -l listening, -n numeric, -p show process.'
+  - title: Write your diagnosis
+    content: 'Run: echo "No process listening on port 8080" > /home/intern/diagnosis.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: diagnosis.txt exists and contains the diagnosis keyword
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: networking
+  weight: 30
+  prompt: A process is now listening on port 8080
+  context: null
+  hints:
+  - title: Confirm the failure first
+    content: Run 'curl localhost:8080'. You will see 'Connection refused'. This is the error we need to
+      diagnose.
+  - title: Inspect the socket table
+    content: 'Run ''ss -tulnp''. Look at the Local Address:Port column. Is there any entry for port 8080?
+      The flags mean: -t TCP, -u UDP, -l listening, -n numeric, -p show process.'
+  - title: Write your diagnosis
+    content: 'Run: echo "No process listening on port 8080" > /home/intern/diagnosis.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: A process is now listening on port 8080
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: networking
+  weight: 30
+  prompt: curl localhost:8080 returns HTTP 200
+  context: null
+  hints:
+  - title: Confirm the failure first
+    content: Run 'curl localhost:8080'. You will see 'Connection refused'. This is the error we need to
+      diagnose.
+  - title: Inspect the socket table
+    content: 'Run ''ss -tulnp''. Look at the Local Address:Port column. Is there any entry for port 8080?
+      The flags mean: -t TCP, -u UDP, -l listening, -n numeric, -p show process.'
+  - title: Write your diagnosis
+    content: 'Run: echo "No process listening on port 8080" > /home/intern/diagnosis.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: curl localhost:8080 returns HTTP 200
+  time_target_minutes: 5

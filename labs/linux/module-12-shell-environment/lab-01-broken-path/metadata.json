@@ -1,0 +1,67 @@
+{
+  "id": "module-12-lab-01-broken-path",
+  "module_number": 12,
+  "module_title": "Shell Environment & Configuration",
+  "title": "The Broken PATH",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "shell-config",
+  "skills": [
+    "PATH",
+    "export",
+    ".bashrc",
+    "which/command -v",
+    "env -i"
+  ],
+  "description": "A .bashrc line overwrites PATH with a single directory; fix it to append and restore the standard tools.",
+  "scenario": "Every new shell on this box is half-broken: `ls` works in the current session, but any fresh shell claims 'command not found' for everything in /usr/bin. A previous admin added `export PATH=/usr/local/apps/bin` to /home/intern/.bashrc — which REPLACES the PATH instead of extending it. Fix the line so the custom app directory is appended to the existing PATH, keeping both the system tools and the in-house deploy command working.",
+  "symptoms": [
+    "A fresh shell cannot find ls, grep or any /usr/bin tool",
+    "/home/intern/.bashrc contains `export PATH=/usr/local/apps/bin` with no $PATH reference",
+    "The custom /usr/local/apps/bin/deploy command must stay reachable",
+    "Login shells behave differently from the current session — the classic PATH-wipe signature"
+  ],
+  "mission": "Fix /home/intern/.bashrc so the PATH line APPENDS /usr/local/apps/bin to the existing PATH (export PATH=\"$PATH:/usr/local/apps/bin\"), keeping system tools and deploy both reachable.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "= vs :=",
+      "content": "PATH is a colon-separated list. `export PATH=/usr/local/apps/bin` REPLACES the whole list; `export PATH=\"$PATH:/usr/local/apps/bin\"` KEEPS the old value and adds yours at the end."
+    },
+    {
+      "number": 2,
+      "title": "Always reference $PATH",
+      "content": "Any correct PATH line contains $PATH somewhere on the right-hand side. If it doesn't, it's a wipe."
+    },
+    {
+      "number": 3,
+      "title": "Test like a fresh login",
+      "content": "`env -i HOME=$HOME bash -c 'source ~/.bashrc; command -v ls'` simulates a clean shell — if ls resolves there, real logins will work."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "the PATH-wiping line is gone from .bashrc",
+      "weight": 35
+    },
+    {
+      "id": "check_2",
+      "description": ".bashrc now appends usr/local/apps/bin to the existing $PATH",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "a clean shell sourcing .bashrc still finds system tools (ls)",
+      "weight": 20
+    },
+    {
+      "id": "check_4",
+      "description": "a clean shell sourcing .bashrc finds the deploy command",
+      "weight": 20
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "id": "module-09-lab-03-package-forensics",
+  "module_number": 9,
+  "module_title": "Package Management",
+  "title": "Package Forensics",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "packages",
+  "skills": [
+    "dpkg -S",
+    "dpkg -l",
+    "dpkg -s",
+    "apt-cache policy",
+    "package queries"
+  ],
+  "description": "Answer three inventory questions with dpkg queries and record them in a forensics report.",
+  "scenario": "A vulnerability bulletin names a library and the security team wants to know what else on this box came from the same source package. Before they roll out anything, answer three inventory questions with dpkg and write them into /home/intern/forensics.txt: which package owns /bin/ls, how many packages are installed, and what version of bash is installed.",
+  "symptoms": [
+    "Nobody knows which package provides /bin/ls on this image",
+    "The installed-package count has never been recorded",
+    "The bash version matters because of the bulletin, but nobody wrote it down",
+    "The security team wants the answers in /home/intern/forensics.txt"
+  ],
+  "mission": "Create /home/intern/forensics.txt with three lines: ls-owner=<package>, package-count=<number> and bash-version=<version>, all answered with dpkg queries.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "File → package",
+      "content": "`dpkg -S /bin/ls` searches the package database for the file. The part before the colon is the package name."
+    },
+    {
+      "number": 2,
+      "title": "Installed count",
+      "content": "Every installed package has a line starting with 'ii' in `dpkg -l` output, so `dpkg -l | grep -c '^ii'` is the count."
+    },
+    {
+      "number": 3,
+      "title": "Package → details",
+      "content": "`dpkg -s bash` dumps the record; the Version: line is what the bulletin wants. Grab the second word with awk."
+    },
+    {
+      "number": 4,
+      "title": "Report format",
+      "content": "Three lines, machine-readable: `ls-owner=coreutils`-style output goes into /home/intern/forensics.txt."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/forensics.txt exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "report correctly identifies coreutils as the owner of /bin/ls",
+      "weight": 40
+    },
+    {
+      "id": "check_3",
+      "description": "report contains a plausible package-count (at least two digits)",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "report records the bash version",
+      "weight": 15
+    }
+  ]
+}

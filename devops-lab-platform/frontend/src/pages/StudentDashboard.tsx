@@ -2,61 +2,269 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, Link } from 'react-router-dom';
+import AppNav from '../components/layout/AppNav';
+import { Card, Badge, Button, Skeleton, EmptyState, ProgressBar, ProgressRing } from '../components/ui';
+import { BlurFade } from '../components/fx';
+import Heatmap from '../components/dashboard/Heatmap';
+import type { continueItem, dashboardData } from './dashboard-types';
 
-interface SummaryData {
-  total_labs_completed: number;
-  total_points: number;
-  current_streak: number;
-  completion_percentage: number;
-  subscription_tier: 'free' | 'pro';
+/* ---------------------------------- types ---------------------------------- */
+
+type Track = dashboardData['tracks'][number];
+
+const RANK_STYLES = ['bg-warn/20 text-warn', 'bg-muted/25 text-muted', 'bg-accent/15 text-accent'];
+
+function greeting(): string {
+  const h = new Date().getHours();
+  if (h < 5) return 'Burning the midnight oil';
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
 }
 
-interface ModuleData {
-  module_number: number;
-  module_title: string;
-  total_labs: number;
-  completed_labs: number;
-  labs: Array<{
-    id: string;
-    title: string;
-    difficulty: string;
-    estimated_minutes: number;
-    points: number;
-    status: 'not_started' | 'in_progress' | 'completed';
-    best_score: number;
-  }>;
+function fmtCountdown(seconds: number): string {
+  const s = Math.max(0, Math.floor(seconds));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : `${m}:${String(sec).padStart(2, '0')}`;
 }
 
-interface ActivityData {
-  date: string;
-  labs_completed: number;
+/** Live countdown chip for an exam attempt; null when untimed or expired. */
+function useExamCountdown(expiresAt: string | null | undefined): { text: string | null; critical: boolean } {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!expiresAt) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [expiresAt]);
+  if (!expiresAt) return { text: null, critical: false };
+  const remaining = (new Date(expiresAt).getTime() - now) / 1000;
+  return { text: fmtCountdown(remaining), critical: remaining < 300 };
 }
+
+/* ------------------------------- sub-components ------------------------------ */
+
+const ContinueCard: React.FC<{ item: continueItem }> = ({ item }) => {
+  const navigate = useNavigate();
+  const countdown = useExamCountdown(item.kind === 'attempt' ? item.expires_at : null);
+
+  const kindMeta = {
+    attempt: { icon: '🏁', label: item.mode === 'exam' ? 'Exam in progress' : 'Practice in progress' },
+    session: { icon: '⚙️', label: 'Session running' },
+    retry: { icon: '🔁', label: `Failed — scored ${item.last_score}/${item.points}` },
+    next: { icon: '➡️', label: 'Next up in your path' },
+  }[item.kind];
+
+  const target = item.kind === 'attempt' ? `/labs/${item.lab_id}/run` : `/labs/${item.lab_id}`;
+  const cta = item.kind === 'attempt' ? 'Resume' : item.kind === 'session' ? 'Open' : item.kind === 'retry' ? 'Retry' : 'Start';
+
+  return (
+    <Card interactive className="flex min-w-[260px] flex-col justify-between gap-3 p-5">
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-xl" aria-hidden>{kindMeta.icon}</span>
+        <span className="flex flex-wrap items-center justify-end gap-1.5">
+          {countdown.text && (
+            <span className={`tabular-nums rounded-lg px-2 py-1 text-xs font-bold border ${countdown.critical ? 'text-danger border-danger/50 bg-danger/10' : 'text-content border-border bg-surface-2'}`}>
+              ⏱ {countdown.text}
+            </span>
+          )}
+          <Badge variant={item.kind === 'attempt' && item.mode === 'exam' ? 'accent' : 'default'}>{kindMeta.label}</Badge>
+        </span>
+      </div>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wider text-muted">Module {String(item.module_number).padStart(2, '0')}</p>
+        <p className="mt-0.5 line-clamp-2 text-sm font-bold text-content">{item.lab_title}</p>
+        {item.kind === 'attempt' && (
+          <p className="mt-1 text-xs font-medium text-muted">
+            Question {Math.min((item.current_index ?? 0) + 1, item.question_count || 1)} of {item.question_count || '?'}
+          </p>
+        )}
+        {item.kind === 'next' && (
+          <p className="mt-1 text-xs font-medium text-muted capitalize">
+            {item.difficulty} · {item.estimated_minutes} min · ⭐ {item.points} pts
+          </p>
+        )}
+      </div>
+      <Button variant="primary" size="sm" className="w-full" onClick={() => navigate(target)}>{cta} →</Button>
+    </Card>
+  );
+};
+
+/** Week-by-week stepper for certification tracks (one big lab per week). */
+const WeekStepper: React.FC<{ track: Track }> = ({ track }) => {
+  const navigate = useNavigate();
+  const weeks = track.modules;
+  const currentWeek = weeks.find((w) => w.labs?.some((l) => l.status !== 'completed')) ?? null;
+  const currentLab = currentWeek?.labs?.find((l) => l.status !== 'completed') ?? currentWeek?.labs?.[0];
+
+  return (
+    <Card glow className="p-6">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-start gap-4">
+          <ProgressRing value={track.completion} size={72} label={`${track.title} completion`}>
+            <span className="text-sm font-black text-content">{track.completion}%</span>
+          </ProgressRing>
+          <div>
+            <h3 className="font-display text-lg font-bold text-content">{track.title}</h3>
+            <p className="mt-1 max-w-md text-sm font-medium text-muted">{track.tagline}</p>
+            <p className="mt-2 text-xs font-bold uppercase tracking-wider text-muted">
+              {track.completed_labs} / {track.total_labs} weeks complete
+            </p>
+          </div>
+        </div>
+        {currentLab && (
+          <Button variant="accent" size="sm" onClick={() => navigate(`/labs/${currentLab.lab_id}`)} className="shrink-0">
+            {currentWeek && track.completed_labs > 0 ? `Continue Week ${currentWeek.module_number - 20}` : 'Start Week 1'} →
+          </Button>
+        )}
+      </div>
+
+      <ol className="mt-6 flex items-center gap-1.5 overflow-x-auto pb-1 sm:gap-2" aria-label="Weeks">
+        {weeks.map((w, i) => {
+          const lab = w.labs?.[0];
+          const done = lab?.status === 'completed';
+          const active = lab?.status === 'in_progress';
+          return (
+            <li key={w.module_number} className="flex flex-1 items-center gap-1.5 sm:gap-2">
+              <button
+                onClick={() => lab && navigate(`/labs/${lab.lab_id}`)}
+                disabled={!lab}
+                title={`Week ${i + 1}: ${lab?.title ?? w.module_title}${done ? ` — passed (${lab?.best_score}/${w.points})` : ''}`}
+                aria-label={`Week ${i + 1}: ${lab?.title ?? w.module_title}${done ? ', completed' : ''}`}
+                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-xs font-black transition-all sm:h-11 sm:w-11 sm:text-sm
+                  ${done ? 'border-success bg-success text-white hover:scale-105'
+                    : active ? 'border-primary bg-primary/15 text-primary animate-pulse hover:scale-105'
+                    : 'border-border bg-surface-2 text-muted hover:border-primary/50 hover:text-content'}`}
+              >
+                {done ? '✓' : i + 1}
+              </button>
+              {i < weeks.length - 1 && (
+                <span aria-hidden className={`h-0.5 min-w-2 flex-1 rounded ${done ? 'bg-success' : 'bg-border'}`} />
+              )}
+            </li>
+          );
+        })}
+      </ol>
+      <div className="mt-3 flex justify-between text-xs font-semibold text-muted">
+        <span>W1 Foundations</span>
+        <span>W8 Mock Exam</span>
+      </div>
+    </Card>
+  );
+};
+
+/** Compact module cards for path tracks, with next-lab deep links. */
+const ModuleGrid: React.FC<{ track: Track }> = ({ track }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {track.modules.map((m) => {
+        const done = m.completed_labs === m.total_labs;
+        return (
+          <Card key={m.module_number} interactive className="flex flex-col justify-between gap-3 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-primary">
+                Module {String(m.module_number).padStart(2, '0')}
+              </span>
+              {done && <Badge variant="success" dot>Complete</Badge>}
+            </div>
+            <div>
+              <h4 className="text-sm font-bold leading-snug text-content">{m.module_title}</h4>
+              <div className="mt-2.5 flex items-center gap-2">
+                <ProgressBar value={m.completed_labs} max={m.total_labs} className="flex-1" label={`${m.module_title} progress`} />
+                <span className="text-xs font-bold tabular-nums text-muted">{m.completed_labs}/{m.total_labs}</span>
+              </div>
+            </div>
+            {m.next_lab ? (
+              <button
+                onClick={() => navigate(`/labs/${m.next_lab!.lab_id}`)}
+                className="truncate text-left text-xs font-black text-primary hover:underline"
+                title={`Next: ${m.next_lab.title}`}
+              >
+                Next: {m.next_lab.title} →
+              </button>
+            ) : (
+              <span className="text-xs font-bold text-success">All labs passed 🎉</span>
+            )}
+          </Card>
+        );
+      })}
+    </div>
+  );
+};
+
+/* ------------------------------ leaderboard widget --------------------------- */
+
+const LeaderboardWidget: React.FC<{ board: dashboardData['leaderboard'] }> = ({ board }) => (
+  <Card className="p-6">
+    <div className="flex items-baseline justify-between">
+      <h3 className="font-display text-lg font-bold text-content">Leaderboard</h3>
+      <Badge variant={board.scope === 'group' ? 'primary' : 'default'}>
+        {board.scope === 'group' ? 'Your group' : 'Global'} · #{board.my_rank ?? '—'} of {board.total_students}
+      </Badge>
+    </div>
+    {board.entries.length === 0 ? (
+      <p className="mt-4 text-sm font-medium text-muted">No ranked students yet — pass a lab to appear here.</p>
+    ) : (
+      <ol className="mt-4 space-y-1.5">
+        {board.entries.map((e) => (
+          <li
+            key={e.student_id}
+            className={`flex items-center gap-3 rounded-xl px-3 py-2 text-sm ${e.is_me ? 'bg-primary/10 ring-1 ring-primary/40' : 'bg-surface-2/50'}`}
+          >
+            <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black ${RANK_STYLES[e.rank - 1] ?? 'bg-surface-2 text-muted'}`}>
+              {e.rank}
+            </span>
+            <span className={`min-w-0 flex-1 truncate font-semibold ${e.is_me ? 'text-primary' : 'text-content'}`}>
+              {e.name}{e.is_me ? ' (you)' : ''}
+            </span>
+            <span className="shrink-0 text-xs font-bold tabular-nums text-muted">{e.labs_completed} labs · {e.total_score} pts</span>
+          </li>
+        ))}
+        {board.my_rank !== null && board.my_rank > 5 && (
+          <li className="flex items-center gap-3 rounded-xl bg-primary/10 px-3 py-2 text-sm ring-1 ring-primary/40">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface-2 text-xs font-black text-muted">{board.my_rank}</span>
+            <span className="min-w-0 flex-1 truncate font-semibold text-primary">You</span>
+            <span className="text-xs font-bold text-muted">keep climbing ↑</span>
+          </li>
+        )}
+      </ol>
+    )}
+    <Link to="/leaderboard" className="mt-4 inline-block text-xs font-black text-primary hover:underline">
+      View full leaderboard →
+    </Link>
+  </Card>
+);
+
+/* --------------------------------- main page -------------------------------- */
 
 export default function StudentDashboard() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
-  const [summary, setSummary] = useState<SummaryData | null>(null);
-  const [modules, setModules] = useState<ModuleData[]>([]);
-  const [activity, setActivity] = useState<ActivityData[]>([]);
+  const [data, setData] = useState<dashboardData | null>(null);
+  const [profile, setProfile] = useState<{ xp: number; level: number; current_streak: number; longest_streak: number } | null>(null);
   const [optOutCompletion, setOptOutCompletion] = useState(false);
   const [updatingPrefs, setUpdatingPrefs] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   const fetchData = async () => {
+    setLoading(true);
+    setFailed(false);
     try {
-      const [summaryRes, modulesRes, activityRes, meRes] = await Promise.all([
-        api.get('/progress/summary'),
-        api.get('/progress/modules'),
-        api.get('/progress/activity?days=30'),
+      const [dashRes, profRes, meRes] = await Promise.all([
+        api.get('/progress/dashboard'),
+        api.get('/gamification/profile'),
         api.get('/auth/me'),
       ]);
-      setSummary(summaryRes.data);
-      setModules(modulesRes.data);
-      setActivity(activityRes.data);
+      setData(dashRes.data);
+      setProfile(profRes.data);
       setOptOutCompletion(meRes.data.opt_out_completion || false);
     } catch (err) {
-      console.error("Failed to load dashboard data", err);
+      console.error('Failed to load dashboard data', err);
+      setFailed(true);
     } finally {
       setLoading(false);
     }
@@ -73,8 +281,8 @@ export default function StudentDashboard() {
     try {
       await api.put('/auth/preferences', { opt_out_completion: newVal });
     } catch (err) {
-      console.error("Failed to update preferences", err);
-      setOptOutCompletion(!newVal); // revert
+      console.error('Failed to update preferences', err);
+      setOptOutCompletion(!newVal);
     } finally {
       setUpdatingPrefs(false);
     }
@@ -82,232 +290,155 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16 flex flex-col items-center justify-center">
-        <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="mt-4 text-gray-600 font-semibold">Loading Opslance Dashboard...</p>
+      <div className="min-h-screen bg-bg">
+        <AppNav />
+        <div className="mx-auto max-w-7xl space-y-6 px-4 py-8 sm:px-6 lg:px-8">
+          <Skeleton className="h-36 w-full" />
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-28 w-full" />)}
+          </div>
+          <Skeleton className="h-64 w-full" />
+        </div>
       </div>
     );
   }
 
-  // Get color code for heatmap completion cell
-  const getHeatmapColor = (count: number) => {
-    if (count === 0) return 'bg-gray-100 border-gray-200';
-    if (count === 1) return 'bg-emerald-200 border-emerald-300 text-emerald-800';
-    return 'bg-emerald-600 border-emerald-700 text-white';
-  };
+  if (failed || !data) {
+    return (
+      <div className="min-h-screen bg-bg">
+        <AppNav />
+        <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+          <EmptyState
+            icon={<span className="text-2xl">⚠️</span>}
+            title="Couldn't load your dashboard"
+            description="The backend didn't respond. Check your connection and try again."
+            action={<Button variant="primary" onClick={fetchData}>Retry</Button>}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const { summary, continue: continueItems, tracks, activity, leaderboard } = data;
+  const ckaTrack = tracks.find((t) => t.kind === 'certification');
+  const pathTrack = tracks.find((t) => t.kind === 'path');
+  const tierBadge = summary.subscription_tier === 'pro'
+    ? <Badge variant="accent" dot>Pro</Badge>
+    : summary.subscription_tier === 'enterprise'
+      ? <Badge variant="primary" dot>Enterprise</Badge>
+      : <Badge>Free</Badge>;
+
+  const totalCatalog = tracks.reduce((s, t) => s + t.total_labs, 0);
+  const statCards = [
+    { label: 'XP · Level', value: profile ? `${profile.xp}` : String(summary.total_points), sub: profile ? `Level ${profile.level}` : 'points', accent: 'text-primary' },
+    { label: 'Day Streak', value: `🔥 ${profile?.current_streak ?? summary.current_streak}`, sub: profile ? `best ${profile.longest_streak}` : '', accent: 'text-accent' },
+    { label: 'Labs Completed', value: String(summary.total_labs_completed), sub: `of ${totalCatalog}`, accent: 'text-content' },
+    { label: 'Total Points', value: String(summary.total_points), sub: 'best scores', accent: 'text-success' },
+  ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Header Panel */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gradient-to-r from-indigo-900 to-slate-900 p-8 rounded-3xl shadow-lg border border-indigo-500/20 text-white gap-6">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight">Welcome, {user?.full_name}! 👋</h1>
-          <p className="text-indigo-200 mt-1.5 font-medium">Ready to break some servers and level up your DevOps skills?</p>
-        </div>
-        <div className="flex flex-wrap gap-4 items-center">
-          <Link to="/billing" className="bg-indigo-600/80 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-2xl text-sm font-bold shadow transition flex items-center gap-1.5">
-            💳 Tier: <span className="uppercase text-yellow-300 font-black">{summary?.subscription_tier}</span>
-          </Link>
-          <Link to="/leaderboard" className="bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-2xl text-sm font-bold shadow transition border border-slate-700">
-            🏆 Leaderboard
-          </Link>
-          <button onClick={logout} className="bg-red-950/80 hover:bg-red-900 text-red-200 px-5 py-2.5 rounded-2xl text-sm font-bold transition">
-            Log Out
-          </button>
-        </div>
-      </div>
-
-      {/* Top Stat Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between">
-          <p className="text-sm font-bold uppercase tracking-wider text-gray-400">Subscription</p>
-          <div className="flex items-center justify-between mt-4">
-            <span className={`text-2xl font-black uppercase ${summary?.subscription_tier === 'pro' ? 'text-indigo-600' : 'text-slate-500'}`}>
-              {summary?.subscription_tier} Tier
-            </span>
-            <Link to="/billing" className="text-xs text-indigo-600 font-extrabold hover:underline">
-              {summary?.subscription_tier === 'pro' ? 'Manage' : 'Upgrade ⚡'}
-            </Link>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between">
-          <p className="text-sm font-bold uppercase tracking-wider text-gray-400">Labs Completed</p>
-          <div className="flex items-baseline justify-between mt-4">
-            <span className="text-3xl font-black text-gray-900">{summary?.total_labs_completed}</span>
-            <span className="text-sm text-gray-400 font-semibold">Total</span>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between">
-          <p className="text-sm font-bold uppercase tracking-wider text-gray-400">Total Points</p>
-          <div className="flex items-baseline justify-between mt-4">
-            <span className="text-3xl font-black text-emerald-500">{summary?.total_points}</span>
-            <span className="text-sm text-gray-400 font-semibold">XP</span>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between">
-          <p className="text-sm font-bold uppercase tracking-wider text-gray-400">Consecutive Days</p>
-          <div className="flex items-baseline justify-between mt-4">
-            <span className="text-3xl font-black text-orange-500">🔥 {summary?.current_streak}</span>
-            <span className="text-sm text-gray-400 font-semibold">Day Streak</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Module Progress list */}
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-2xl font-black text-gray-900">Your Learning Paths</h2>
-
-          {modules.map((mod) => {
-            // Find next incomplete lab inside this module
-            const nextIncomplete = mod.labs.find((l) => l.status !== 'completed');
-
-            return (
-              <div key={mod.module_number} className="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 space-y-6 transition hover:shadow-md">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                  <div>
-                    <span className="bg-indigo-50 text-indigo-700 text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider">
-                      Module {mod.module_number.toString().padStart(2, '0')}
-                    </span>
-                    <h3 className="text-xl font-bold text-gray-900 mt-2">{mod.module_title}</h3>
-                  </div>
-                  {nextIncomplete ? (
-                    <button
-                      onClick={() => navigate(`/labs/${nextIncomplete.id}`)}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-2xl shadow transition"
-                    >
-                      Continue Lab
-                    </button>
-                  ) : (
-                    <span className="bg-emerald-50 text-emerald-700 font-extrabold text-sm px-4 py-2 rounded-2xl flex items-center gap-1.5 border border-emerald-100">
-                      ✓ Module Completed!
-                    </span>
-                  )}
-                </div>
-
-                {/* Progress bar */}
-                <div>
-                  <div className="flex justify-between text-sm font-semibold text-gray-500 mb-2">
-                    <span>Progress</span>
-                    <span>{mod.completed_labs} / {mod.total_labs} Labs Completed</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-3">
-                    <div
-                      className="bg-gradient-to-r from-indigo-500 to-indigo-600 h-3 rounded-full transition-all duration-500"
-                      style={{ width: `${mod.total_labs ? (mod.completed_labs / mod.total_labs) * 100 : 0}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                {/* Individual labs grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  {mod.labs.map((lab) => (
-                    <div key={lab.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col justify-between h-32">
-                      <div className="flex justify-between items-start">
-                        <p className="font-bold text-sm text-slate-800 line-clamp-1">{lab.title}</p>
-                        <span
-                          className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                            lab.status === 'completed'
-                              ? 'bg-green-100 text-green-800'
-                              : lab.status === 'in_progress'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-gray-200 text-gray-600'
-                          }`}
-                        >
-                          {lab.status === 'completed' ? 'Done' : lab.status === 'in_progress' ? 'Running' : 'Not Started'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-end mt-4">
-                        <span className="text-xs text-gray-400 font-semibold">
-                          ⏱ {lab.estimated_minutes} min | ⭐ {lab.points} pts
-                        </span>
-                        {lab.status === 'completed' ? (
-                          <span className="text-xs text-emerald-600 font-bold bg-emerald-50 px-2 py-1 rounded">
-                            Score: {lab.best_score}
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => navigate(`/labs/${lab.id}`)}
-                            className="text-xs text-indigo-600 font-black hover:underline"
-                          >
-                            Start Lab →
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Sidebar activity list and preferences */}
-        <div className="space-y-8">
-          {/* Activity Heatmap Grid */}
-          <div>
-            <h2 className="text-2xl font-black text-gray-900 mb-6">Activity Heatmap</h2>
-            <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm">
-              <p className="text-xs text-gray-400 font-bold mb-4 uppercase tracking-wider">Past 30 Days Contributions</p>
-              
-              <div className="grid grid-cols-7 gap-2.5">
-                {activity.map((day) => (
-                  <div
-                    key={day.date}
-                    title={`${day.labs_completed} labs completed on ${new Date(day.date).toLocaleDateString()}`}
-                    className={`h-10 w-full rounded-lg border flex items-center justify-center text-xs font-bold transition hover:scale-105 cursor-pointer ${getHeatmapColor(
-                      day.labs_completed
-                    )}`}
-                  >
-                    {day.labs_completed > 0 ? day.labs_completed : ''}
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex justify-between items-center mt-6 text-xs text-gray-400 font-bold">
-                <span>Older</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="h-3 w-3 bg-gray-100 border rounded-sm inline-block"></span>
-                  <span>0</span>
-                  <span className="h-3 w-3 bg-emerald-200 border rounded-sm inline-block"></span>
-                  <span>1</span>
-                  <span className="h-3 w-3 bg-emerald-600 border rounded-sm inline-block"></span>
-                  <span>2+</span>
-                </div>
-                <span>Today</span>
-              </div>
+    <div className="min-h-screen bg-bg" id="main">
+      <AppNav />
+      <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+        {/* hero */}
+        <Card glow className="overflow-hidden">
+          <div className="flex flex-col items-start justify-between gap-6 bg-gradient-to-r from-primary/15 via-transparent to-accent/10 p-8">
+            <div>
+              <h1 className="font-display text-3xl font-bold tracking-tight text-content">
+                {greeting()}, {user?.full_name?.split(' ')[0]} 👋
+              </h1>
+              <p className="mt-1.5 font-medium text-muted">
+                {summary.total_labs_completed === 0
+                  ? 'Ready to break some servers and level up your DevOps skills?'
+                  : `${summary.completion_percentage}% of the catalog conquered — keep the streak alive.`}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              {continueItems[0] ? (
+                <Button variant="accent" onClick={() => navigate(continueItems[0].kind === 'attempt' ? `/labs/${continueItems[0].lab_id}/run` : `/labs/${continueItems[0].lab_id}`)}>
+                  {continueItems[0].kind === 'attempt' ? '🏁 Resume exam' : continueItems[0].kind === 'session' ? 'Resume session' : continueItems[0].kind === 'retry' ? 'Retry last lab' : 'Start next lab'}
+                </Button>
+              ) : (
+                <Button variant="accent" onClick={() => document.getElementById('tracks')?.scrollIntoView({ behavior: 'smooth' })}>
+                  Browse learning tracks
+                </Button>
+              )}
+              <Link to="/billing"><Button variant="secondary" size="sm">{tierBadge} tier</Button></Link>
+              <Button variant="ghost" size="sm" onClick={logout} className="hover:text-danger">Log out</Button>
             </div>
           </div>
+        </Card>
 
-          {/* Email Preferences Toggle Panel */}
-          <div>
-            <h2 className="text-2xl font-black text-gray-900 mb-6">User Settings</h2>
-            <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
-              <h3 className="text-lg font-bold text-gray-900">Email Notifications</h3>
-              <p className="text-sm text-gray-500 font-medium">
+        {/* stat cards */}
+        <BlurFade className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {statCards.map((c) => (
+            <Card key={c.label} className="flex flex-col justify-between p-6">
+              <p className="text-sm font-bold uppercase tracking-wider text-muted">{c.label}</p>
+              <div className="mt-4 flex items-baseline justify-between">
+                <span className={`font-display text-3xl font-bold ${c.accent}`}>{c.value}</span>
+                <span className="text-sm font-semibold text-muted">{c.sub}</span>
+              </div>
+            </Card>
+          ))}
+        </BlurFade>
+
+        {/* continue where you left off */}
+        {continueItems.length > 0 && (
+          <section aria-label="Continue where you left off">
+            <h2 className="mb-4 font-display text-2xl font-bold text-content">Pick up where you left off</h2>
+            <BlurFade delay={0.08} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {continueItems.map((item, i) => <ContinueCard key={`${item.kind}-${item.lab_id}-${i}`} item={item} />)}
+            </BlurFade>
+          </section>
+        )}
+
+        {/* certification tracks */}
+        <section id="tracks" aria-label="Learning tracks" className="space-y-6">
+          <h2 className="font-display text-2xl font-bold text-content">Learning tracks</h2>
+          {ckaTrack && <WeekStepper track={ckaTrack} />}
+
+          {pathTrack && (
+            <Card className="p-6">
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-4">
+                  <ProgressRing value={pathTrack.completion} size={72} label={`${pathTrack.title} completion`}>
+                    <span className="text-sm font-black text-content">{pathTrack.completion}%</span>
+                  </ProgressRing>
+                  <div>
+                    <h3 className="font-display text-lg font-bold text-content">{pathTrack.title}</h3>
+                    <p className="mt-1 max-w-md text-sm font-medium text-muted">{pathTrack.tagline}</p>
+                    <p className="mt-2 text-xs font-bold uppercase tracking-wider text-muted">
+                      {pathTrack.completed_labs} / {pathTrack.total_labs} labs complete
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {pathTrack && <ModuleGrid track={pathTrack} />}
+        </section>
+
+        {/* sidebar row: heatmap + leaderboard + settings */}
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+          <div className="space-y-8">
+            <Heatmap activity={activity} />
+            <Card className="space-y-4 p-6">
+              <h3 className="text-lg font-bold text-content">Email notifications</h3>
+              <p className="text-sm font-medium text-muted">
                 Customize which transactional onboarding or grading messages you receive in your inbox.
               </p>
-              
               <div className="flex items-center justify-between pt-2">
-                <span className="text-sm text-gray-700 font-semibold">Opt out of lab completion emails</span>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={optOutCompletion}
-                    onChange={handlePreferenceToggle}
-                    disabled={updatingPrefs}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                <span className="text-sm font-semibold text-content">Opt out of lab completion emails</span>
+                <label className="relative inline-flex cursor-pointer items-center">
+                  <input type="checkbox" checked={optOutCompletion} onChange={handlePreferenceToggle} disabled={updatingPrefs} className="peer sr-only" />
+                  <div className="h-6 w-11 rounded-full bg-surface-2 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-border after:bg-muted after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-checked:after:bg-surface"></div>
                 </label>
               </div>
-              {updatingPrefs && <p className="text-xs text-indigo-500 font-bold animate-pulse">Saving settings...</p>}
-            </div>
+              {updatingPrefs && <p className="animate-pulse text-xs font-bold text-primary">Saving settings…</p>}
+            </Card>
           </div>
+          <LeaderboardWidget board={leaderboard} />
         </div>
       </div>
     </div>

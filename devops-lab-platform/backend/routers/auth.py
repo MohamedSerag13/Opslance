@@ -1,12 +1,12 @@
 import os
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from datetime import datetime
 from schemas import LoginData, Token, RefreshData, UserMe, PasswordResetRequest
 from database import get_db
 import models
 from auth import verify_password, get_password_hash, create_access_token, create_refresh_token, decode_token
-from dependencies import get_current_user, get_current_student
+from dependencies import get_current_user, get_current_student, enforce_rate_limit, redis_client
 
 router = APIRouter()
 
@@ -14,8 +14,30 @@ ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 ADMIN_FULL_NAME = os.getenv("ADMIN_FULL_NAME", "Admin")
 
+# Brute-force guard: 10 failed attempts per 15 min, tracked independently per
+# email and per client IP (X-Forwarded-For first hop when proxied).
+LOGIN_MAX_FAILURES = 10
+LOGIN_WINDOW_SECONDS = 900
+
+
+def _client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for", "")
+    first_hop = forwarded.split(",")[0].strip() if forwarded else ""
+    return first_hop or (request.client.host if request.client else "unknown")
+
+
 @router.post("/login", response_model=Token)
-def login(data: LoginData, db: Session = Depends(get_db)):
+def login(data: LoginData, request: Request, db: Session = Depends(get_db)):
+    email_key = f"login_fail:email:{data.email.lower()}"
+    ip_key = f"login_fail:ip:{_client_ip(request)}"
+    for key in (email_key, ip_key):
+        current = redis_client.get(key)
+        if current is not None and int(current) >= LOGIN_MAX_FAILURES:
+            raise HTTPException(
+                status_code=429,
+                detail="Too many failed login attempts — try again in a few minutes.",
+            )
+
     # Admin login — not a Student row, flag does not apply
     if data.email == ADMIN_EMAIL and data.password == ADMIN_PASSWORD:
         user_id = "admin"
@@ -24,6 +46,9 @@ def login(data: LoginData, db: Session = Depends(get_db)):
     else:
         student = db.query(models.Student).filter(models.Student.email == data.email).first()
         if not student or not verify_password(data.password, student.password_hash):
+            for key in (email_key, ip_key):
+                enforce_rate_limit(key, LOGIN_MAX_FAILURES, LOGIN_WINDOW_SECONDS,
+                                   detail="Too many failed login attempts.")
             raise HTTPException(status_code=401, detail="Incorrect email or password")
         if not student.is_active:
             raise HTTPException(status_code=401, detail="Account is inactive")
@@ -33,6 +58,11 @@ def login(data: LoginData, db: Session = Depends(get_db)):
         user_id = str(student.id)
         role = "student"
         must_reset = bool(student.must_reset_password)
+
+    # A good login resets the counters so shared IPs (offices, NAT) and
+    # fat-fingered emails don't stay throttled.
+    redis_client.delete(email_key)
+    redis_client.delete(ip_key)
 
     access_token = create_access_token(data={"sub": user_id, "role": role, "email": data.email})
     refresh_token = create_refresh_token(data={"sub": user_id, "role": role, "email": data.email})

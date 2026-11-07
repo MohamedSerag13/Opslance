@@ -1,0 +1,67 @@
+{
+  "id": "module-07-lab-03-awk-column-report",
+  "module_number": 7,
+  "module_title": "Text Processing & Pipelines",
+  "title": "Sales Totals with awk",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "text-processing",
+  "skills": [
+    "awk",
+    "awk -F",
+    "NR",
+    "sum columns",
+    "printf"
+  ],
+  "description": "Sum the amount column of a CSV and count its data rows into a small report.",
+  "scenario": "Finance dropped /var/log/app/sales.csv on the ops box and needs two numbers for the weekly call: the total revenue and the number of sales rows (the header line does not count). There is no spreadsheet software on the server — but awk was literally built for exactly this job.",
+  "symptoms": [
+    "sales.csv has a header line that must not be counted or summed",
+    "The amount is the third comma-separated column",
+    "The report must be machine-readable: total=… and rows=… lines",
+    "The finance team needs the total formatted with exactly two decimals"
+  ],
+  "mission": "Create /home/intern/sales-total.txt containing `total=3373.51` and `rows=20`, computed from the CSV with awk.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Choose a field separator",
+      "content": "`awk -F,` splits each line on commas, so $1 is the date, $2 the region and $3 the amount."
+    },
+    {
+      "number": 2,
+      "title": "Skip the header",
+      "content": "`NR>1` is true from the second record on — the header never enters the sum."
+    },
+    {
+      "number": 3,
+      "title": "Accumulate and print at END",
+      "content": "The pattern `{s+=$3}` accumulates; the `END {…}` block runs after the last line and prints the result. Use `printf \"%.2f\"` for two decimals."
+    },
+    {
+      "number": 4,
+      "title": "Row count",
+      "content": "NR is the number of records seen, so `END {print NR-1}` is the data-row count (header excluded)."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/sales-total.txt exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "report states total=3373.51",
+      "weight": 45
+    },
+    {
+      "id": "check_3",
+      "description": "report states rows=20",
+      "weight": 35
+    }
+  ]
+}

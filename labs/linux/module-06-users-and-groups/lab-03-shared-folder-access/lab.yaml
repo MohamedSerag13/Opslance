@@ -1,0 +1,105 @@
+schema_version: 2
+lab: module-06-lab-03-shared-folder-access
+title: Shared Folder Access
+category: linux
+domain: users
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: users
+  weight: 25
+  prompt: projectx group exists in /etc/group
+  context: null
+  hints:
+  - title: One group to rule them all
+    content: Create the group first with `sudo groupadd projectx`, then add both users with `usermod -aG`.
+  - title: Group ownership
+    content: '`chgrp -R projectx /srv/projectx` changes the group of the directory and everything inside
+      it.'
+  - title: The setgid bit
+    content: 'On a directory, chmod 2770 sets the setgid bit: every NEW file inside automatically inherits
+      the directory''s group, so alice and bob stay in the same group without manual chgrp.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: projectx group exists in /etc/group
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: users
+  weight: 25
+  prompt: both alice and bob are members of projectx
+  context: null
+  hints:
+  - title: One group to rule them all
+    content: Create the group first with `sudo groupadd projectx`, then add both users with `usermod -aG`.
+  - title: Group ownership
+    content: '`chgrp -R projectx /srv/projectx` changes the group of the directory and everything inside
+      it.'
+  - title: The setgid bit
+    content: 'On a directory, chmod 2770 sets the setgid bit: every NEW file inside automatically inherits
+      the directory''s group, so alice and bob stay in the same group without manual chgrp.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: both alice and bob are members of projectx
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: users
+  weight: 25
+  prompt: /srv/projectx group ownership is projectx
+  context: null
+  hints:
+  - title: One group to rule them all
+    content: Create the group first with `sudo groupadd projectx`, then add both users with `usermod -aG`.
+  - title: Group ownership
+    content: '`chgrp -R projectx /srv/projectx` changes the group of the directory and everything inside
+      it.'
+  - title: The setgid bit
+    content: 'On a directory, chmod 2770 sets the setgid bit: every NEW file inside automatically inherits
+      the directory''s group, so alice and bob stay in the same group without manual chgrp.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: /srv/projectx group ownership is projectx
+  time_target_minutes: 5
+- id: check_4
+  order: 4
+  domain: users
+  weight: 25
+  prompt: /srv/projectx permissions are 2770 (setgid, group rwx, no access for others)
+  context: null
+  hints:
+  - title: One group to rule them all
+    content: Create the group first with `sudo groupadd projectx`, then add both users with `usermod -aG`.
+  - title: Group ownership
+    content: '`chgrp -R projectx /srv/projectx` changes the group of the directory and everything inside
+      it.'
+  - title: The setgid bit
+    content: 'On a directory, chmod 2770 sets the setgid bit: every NEW file inside automatically inherits
+      the directory''s group, so alice and bob stay in the same group without manual chgrp.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: /srv/projectx permissions are 2770 (setgid, group rwx, no access for others)
+  time_target_minutes: 5

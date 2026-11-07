@@ -1,0 +1,5 @@
+# /etc/fstab — static filesystem table
+UUID=9f3b-2a11  /        ext4    errors=remount-ro 0 1
+UUID=7c2d-9e40  none     swap    sw                0 0
+tmpfs           /dev/shm tmpfs   defaults          0 0
+//10.0.0.30/share

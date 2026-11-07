@@ -1,0 +1,337 @@
+schema_version: 2
+lab: cka-w5-lab-01-networking-challenge
+title: CKA Week 5 Challenge - Services, DNS, Ingress, NetworkPolicy
+category: kubernetes
+domain: CKA Week 5 - Services and Networking
+pass_mark: 66
+grading_scale: points
+total: 120
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: task_01
+  order: 1
+  domain: CKA Week 5 - Services and Networking
+  weight: 10
+  prompt: Service web-a-svc (ClusterIP 80) in apps has ready endpoints
+  context: null
+  hints:
+  - title: Behavior beats objects
+    content: Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine.
+      If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller
+      logs - the week 7 order.
+  - title: NodePort discovery
+    content: The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with
+      jsonpath as shown in the solutions, then curl with a Host header.
+  - title: NetworkPolicy AND/OR semantics
+    content: Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule
+      first whenever you write egress rules, or nslookup dies too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: task
+    description: Service web-a-svc (ClusterIP 80) in apps has ready endpoints
+  time_target_minutes: 12
+  description: Create Service web-a-svc in namespace apps (ClusterIP, port 80) whose selector matches
+    the running web-a pods, so it has ready endpoints. The check reads the Endpoints object.
+- id: task_02
+  order: 2
+  domain: CKA Week 5 - Services and Networking
+  weight: 10
+  prompt: Service web-a-np in apps is a NodePort
+  context: null
+  hints:
+  - title: Behavior beats objects
+    content: Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine.
+      If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller
+      logs - the week 7 order.
+  - title: NodePort discovery
+    content: The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with
+      jsonpath as shown in the solutions, then curl with a Host header.
+  - title: NetworkPolicy AND/OR semantics
+    content: Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule
+      first whenever you write egress rules, or nslookup dies too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: task
+    description: Service web-a-np in apps is a NodePort
+  time_target_minutes: 12
+  description: Expose web-a through a NodePort Service web-a-np in apps. The check verifies the Service
+    type.
+- id: task_03
+  order: 3
+  domain: CKA Week 5 - Services and Networking
+  weight: 10
+  prompt: 'Headless Service web-a-headless in apps (clusterIP: None)'
+  context: null
+  hints:
+  - title: Behavior beats objects
+    content: Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine.
+      If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller
+      logs - the week 7 order.
+  - title: NodePort discovery
+    content: The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with
+      jsonpath as shown in the solutions, then curl with a Host header.
+  - title: NetworkPolicy AND/OR semantics
+    content: Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule
+      first whenever you write egress rules, or nslookup dies too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: task
+    description: 'Headless Service web-a-headless in apps (clusterIP: None)'
+  time_target_minutes: 12
+  description: 'Create a headless Service web-a-headless in apps (clusterIP: None). The check verifies
+    .spec.clusterIP is None.'
+- id: task_04
+  order: 4
+  domain: CKA Week 5 - Services and Networking
+  weight: 10
+  prompt: ExternalName Service external-db points to db.example.com
+  context: null
+  hints:
+  - title: Behavior beats objects
+    content: Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine.
+      If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller
+      logs - the week 7 order.
+  - title: NodePort discovery
+    content: The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with
+      jsonpath as shown in the solutions, then curl with a Host header.
+  - title: NetworkPolicy AND/OR semantics
+    content: Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule
+      first whenever you write egress rules, or nslookup dies too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: task
+    description: ExternalName Service external-db points to db.example.com
+  time_target_minutes: 12
+  description: Create an ExternalName Service external-db pointing to db.example.com. The check verifies
+    .spec.externalName.
+- id: task_05
+  order: 5
+  domain: CKA Week 5 - Services and Networking
+  weight: 10
+  prompt: Cluster DNS resolves web-a-svc.apps.svc.cluster.local from a pod
+  context: null
+  hints:
+  - title: Behavior beats objects
+    content: Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine.
+      If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller
+      logs - the week 7 order.
+  - title: NodePort discovery
+    content: The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with
+      jsonpath as shown in the solutions, then curl with a Host header.
+  - title: NetworkPolicy AND/OR semantics
+    content: Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule
+      first whenever you write egress rules, or nslookup dies too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 5
+    kind: task
+    description: Cluster DNS resolves web-a-svc.apps.svc.cluster.local from a pod
+  time_target_minutes: 12
+  description: From inside a pod, resolve web-a-svc.apps.svc.cluster.local via cluster DNS. The check
+    performs the lookup from a client pod.
+- id: task_06
+  order: 6
+  domain: CKA Week 5 - Services and Networking
+  weight: 10
+  prompt: Ingress app-ingress routes app.example.com to web-a-svc (verified with curl)
+  context: null
+  hints:
+  - title: Behavior beats objects
+    content: Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine.
+      If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller
+      logs - the week 7 order.
+  - title: NodePort discovery
+    content: The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with
+      jsonpath as shown in the solutions, then curl with a Host header.
+  - title: NetworkPolicy AND/OR semantics
+    content: Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule
+      first whenever you write egress rules, or nslookup dies too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 6
+    kind: task
+    description: Ingress app-ingress routes app.example.com to web-a-svc (verified with curl)
+  time_target_minutes: 12
+  description: Create an Ingress app-ingress routing host app.example.com to web-a-svc. The check curls
+    with the Host header and expects the nginx page.
+- id: task_07
+  order: 7
+  domain: CKA Week 5 - Services and Networking
+  weight: 10
+  prompt: Second virtual host api.example.com routes to web-b-svc (curl shows the httpd page)
+  context: null
+  hints:
+  - title: Behavior beats objects
+    content: Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine.
+      If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller
+      logs - the week 7 order.
+  - title: NodePort discovery
+    content: The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with
+      jsonpath as shown in the solutions, then curl with a Host header.
+  - title: NetworkPolicy AND/OR semantics
+    content: Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule
+      first whenever you write egress rules, or nslookup dies too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 7
+    kind: task
+    description: Second virtual host api.example.com routes to web-b-svc (curl shows the httpd page)
+  time_target_minutes: 12
+  description: Add a second virtual host api.example.com on the same Ingress routing to web-b-svc. The
+    check curls it and expects the httpd page.
+- id: task_08
+  order: 8
+  domain: CKA Week 5 - Services and Networking
+  weight: 10
+  prompt: 'TLS ingress: secret app-tls serves https for app.example.com (curl -k)'
+  context: null
+  hints:
+  - title: Behavior beats objects
+    content: Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine.
+      If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller
+      logs - the week 7 order.
+  - title: NodePort discovery
+    content: The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with
+      jsonpath as shown in the solutions, then curl with a Host header.
+  - title: NetworkPolicy AND/OR semantics
+    content: Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule
+      first whenever you write egress rules, or nslookup dies too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 8
+    kind: task
+    description: 'TLS ingress: secret app-tls serves https for app.example.com (curl -k)'
+  time_target_minutes: 12
+  description: Create a TLS secret app-tls (provided material) and configure the Ingress to serve https
+    for app.example.com. The check curls -k https and expects 200.
+- id: task_09
+  order: 9
+  domain: CKA Week 5 - Services and Networking
+  weight: 10
+  prompt: 'NetworkPolicy default-deny in secure: client CANNOT reach protected (live traffic)'
+  context: null
+  hints:
+  - title: Behavior beats objects
+    content: Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine.
+      If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller
+      logs - the week 7 order.
+  - title: NodePort discovery
+    content: The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with
+      jsonpath as shown in the solutions, then curl with a Host header.
+  - title: NetworkPolicy AND/OR semantics
+    content: Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule
+      first whenever you write egress rules, or nslookup dies too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 9
+    kind: task
+    description: 'NetworkPolicy default-deny in secure: client CANNOT reach protected (live traffic)'
+  time_target_minutes: 12
+  description: Create a NetworkPolicy default-deny in namespace secure so the seeded client CANNOT reach
+    pod protected. The check verifies live traffic is blocked.
+- id: task_10
+  order: 10
+  domain: CKA Week 5 - Services and Networking
+  weight: 10
+  prompt: 'Allow rule: client2 (label access=allowed) CAN reach protected'
+  context: null
+  hints:
+  - title: Behavior beats objects
+    content: Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine.
+      If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller
+      logs - the week 7 order.
+  - title: NodePort discovery
+    content: The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with
+      jsonpath as shown in the solutions, then curl with a Host header.
+  - title: NetworkPolicy AND/OR semantics
+    content: Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule
+      first whenever you write egress rules, or nslookup dies too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 10
+    kind: task
+    description: 'Allow rule: client2 (label access=allowed) CAN reach protected'
+  time_target_minutes: 12
+  description: Add an allow rule so pod client2 (label access=allowed) CAN reach protected. The check
+    verifies live traffic succeeds for client2 only.
+- id: task_11
+  order: 11
+  domain: CKA Week 5 - Services and Networking
+  weight: 10
+  prompt: 'DNS egress preserved: client can still resolve kubernetes.default'
+  context: null
+  hints:
+  - title: Behavior beats objects
+    content: Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine.
+      If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller
+      logs - the week 7 order.
+  - title: NodePort discovery
+    content: The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with
+      jsonpath as shown in the solutions, then curl with a Host header.
+  - title: NetworkPolicy AND/OR semantics
+    content: Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule
+      first whenever you write egress rules, or nslookup dies too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 11
+    kind: task
+    description: 'DNS egress preserved: client can still resolve kubernetes.default'
+  time_target_minutes: 12
+  description: 'Preserve DNS egress: the client pod must still resolve kubernetes.default despite the
+    policies. The check does a DNS lookup from the client.'
+- id: task_12
+  order: 12
+  domain: CKA Week 5 - Services and Networking
+  weight: 10
+  prompt: 'Gateway API: a Gateway and an HTTPRoute exist (class cka-gc)'
+  context: null
+  hints:
+  - title: Behavior beats objects
+    content: Tasks 6-8 and 9-11 check LIVE traffic through the ingress controller and NetworkPolicy engine.
+      If curl/wget fails, debug with kubectl get endpoints, kubectl describe ingress and the controller
+      logs - the week 7 order.
+  - title: NodePort discovery
+    content: The controller publishes 80/443 as NodePorts on the single node (k3s-server). Grab them with
+      jsonpath as shown in the solutions, then curl with a Host header.
+  - title: NetworkPolicy AND/OR semantics
+    content: Selectors inside ONE from entry are AND; separate entries are OR. Write the DNS egress rule
+      first whenever you write egress rules, or nslookup dies too.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 12
+    kind: task
+    description: 'Gateway API: a Gateway and an HTTPRoute exist (class cka-gc)'
+  time_target_minutes: 12
+  description: 'Gateway API: create a Gateway and an HTTPRoute with gatewayClassName cka-gc. The check
+    verifies both objects exist.'

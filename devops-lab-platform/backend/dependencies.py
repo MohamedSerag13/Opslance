@@ -48,10 +48,25 @@ def rate_limit_student(student=Depends(get_current_student)):
     current = redis_client.get(key)
     if current and int(current) >= 60:
         raise HTTPException(status_code=429, detail="Too many requests. Please try again later.")
-    
+
     pipe = redis_client.pipeline()
     pipe.incr(key)
     pipe.expire(key, 60)
     pipe.execute()
-    
+
     return student
+
+
+def enforce_rate_limit(key: str, limit: int, window_seconds: int, detail: str = "Too many requests. Please slow down."):
+    """Fixed-window limiter for sensitive actions (spawn/check/submit/login).
+
+    Counters live in Redis with the window as TTL; callers pass an identity-
+    scoped key (student id, email, client IP)."""
+    current = redis_client.get(key)
+    if current is not None and int(current) >= limit:
+        raise HTTPException(status_code=429, detail=detail)
+
+    pipe = redis_client.pipeline()
+    pipe.incr(key)
+    pipe.expire(key, window_seconds)
+    pipe.execute()

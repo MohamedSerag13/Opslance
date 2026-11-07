@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-13-lab-04-fingerprint-audit
+title: Fingerprints and Stale Hosts
+category: linux
+domain: ssh
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: ssh
+  weight: 25
+  prompt: /home/intern/fingerprints.txt exists
+  context: null
+  hints:
+  - title: Fingerprints
+    content: '`ssh-keygen -lf keyfile` prints the bit length, SHA256 fingerprint and key type — the compact
+      identity of a key that humans can compare.'
+  - title: Retire a known host
+    content: '`ssh-keygen -R 10.0.0.9` removes every entry for that host and keeps the old file as known_hosts.old
+      — the supported way, no manual editing.'
+  - title: Report first, cleanup second
+    content: Generate the compliance report before touching known_hosts — the report is the deliverable,
+      the cleanup is the hygiene.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/fingerprints.txt exists
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: ssh
+  weight: 30
+  prompt: the report contains the ED25519 key fingerprint
+  context: null
+  hints:
+  - title: Fingerprints
+    content: '`ssh-keygen -lf keyfile` prints the bit length, SHA256 fingerprint and key type — the compact
+      identity of a key that humans can compare.'
+  - title: Retire a known host
+    content: '`ssh-keygen -R 10.0.0.9` removes every entry for that host and keeps the old file as known_hosts.old
+      — the supported way, no manual editing.'
+  - title: Report first, cleanup second
+    content: Generate the compliance report before touching known_hosts — the report is the deliverable,
+      the cleanup is the hygiene.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: the report contains the ED25519 key fingerprint
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: ssh
+  weight: 25
+  prompt: the report contains a SHA256 fingerprint string
+  context: null
+  hints:
+  - title: Fingerprints
+    content: '`ssh-keygen -lf keyfile` prints the bit length, SHA256 fingerprint and key type — the compact
+      identity of a key that humans can compare.'
+  - title: Retire a known host
+    content: '`ssh-keygen -R 10.0.0.9` removes every entry for that host and keeps the old file as known_hosts.old
+      — the supported way, no manual editing.'
+  - title: Report first, cleanup second
+    content: Generate the compliance report before touching known_hosts — the report is the deliverable,
+      the cleanup is the hygiene.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: the report contains a SHA256 fingerprint string
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: ssh
+  weight: 20
+  prompt: the retired host 10.0.0.9 is gone from known_hosts
+  context: null
+  hints:
+  - title: Fingerprints
+    content: '`ssh-keygen -lf keyfile` prints the bit length, SHA256 fingerprint and key type — the compact
+      identity of a key that humans can compare.'
+  - title: Retire a known host
+    content: '`ssh-keygen -R 10.0.0.9` removes every entry for that host and keeps the old file as known_hosts.old
+      — the supported way, no manual editing.'
+  - title: Report first, cleanup second
+    content: Generate the compliance report before touching known_hosts — the report is the deliverable,
+      the cleanup is the hygiene.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: the retired host 10.0.0.9 is gone from known_hosts
+  time_target_minutes: 4

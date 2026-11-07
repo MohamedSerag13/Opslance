@@ -1,0 +1,7 @@
+Staging box access (from the team wiki)
+=======================================
+IP:   10.20.0.5
+Port: 2222 (sshd moved off 22)
+User: deploy
+Key:  ~/.ssh/id_ed25519
+=> everyone should add a 'staging' alias to ~/.ssh/config

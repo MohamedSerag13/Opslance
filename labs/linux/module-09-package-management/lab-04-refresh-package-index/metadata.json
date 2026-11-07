@@ -1,0 +1,66 @@
+{
+  "id": "module-09-lab-04-refresh-package-index",
+  "module_number": 9,
+  "module_title": "Package Management",
+  "title": "The Empty Package Index",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "packages",
+  "skills": [
+    "apt update",
+    "/var/lib/apt/lists",
+    "apt-cache policy",
+    "report writing"
+  ],
+  "description": "The apt lists were wiped from the image; run apt update and record the nginx candidate version.",
+  "scenario": "This image was built with `rm -rf /var/lib/apt/lists/*` to keep it small — which means apt can no longer look anything up: even `apt list nginx` finds nothing. Refresh the index with apt update, then use apt-cache policy to find out which nginx version the archives would install, and record it in /home/intern/pkg-report.txt as nginx-candidate=<version>. This lab's container has network access.",
+  "symptoms": [
+    "`apt list nginx` reports no matches although the package obviously exists",
+    "/var/lib/apt/lists is empty — no package index files at all",
+    "apt-cache policy shows no Candidate for nginx"
+  ],
+  "mission": "Run apt update to rebuild the index, then record the nginx candidate version in /home/intern/pkg-report.txt.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "What update really does",
+      "content": "apt-get update downloads fresh index files into /var/lib/apt/lists/. Install anything you like afterwards — but without this step apt is blind."
+    },
+    {
+      "number": 2,
+      "title": "Who would install what",
+      "content": "`apt-cache policy nginx` prints Installed: (none) and Candidate: <version> — the version a fresh install would get right now."
+    },
+    {
+      "number": 3,
+      "title": "Capture the version",
+      "content": "`apt-cache policy nginx | grep 'Candidate:' | awk '{print $2}'` isolates the version string for your report line."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "package index files exist again under /var/lib/apt/lists",
+      "weight": 45
+    },
+    {
+      "id": "check_2",
+      "description": "/home/intern/pkg-report.txt exists",
+      "weight": 20
+    },
+    {
+      "id": "check_3",
+      "description": "report records the nginx candidate version",
+      "weight": 35
+    }
+  ],
+  "resource_limits": {
+    "cpu": "0.2",
+    "memory": "128m",
+    "pids": 80,
+    "network": "bridge"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "id": "module-06-lab-01-who-am-i",
+  "module_number": 6,
+  "module_title": "Users, Groups & Sudo",
+  "title": "Who Am I? Account Triage",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "users",
+  "skills": [
+    "whoami",
+    "id",
+    "groups",
+    "/etc/passwd",
+    "usermod",
+    "account audit"
+  ],
+  "description": "Document your own account and repair a service account whose login shell was broken.",
+  "scenario": "It is your first day as a junior sysadmin. Before you get access to anything, your lead asks you to prove you understand Linux user accounts: document your own identity from the shell, then repair a service account called svc_backup whose login shell was accidentally set to /bin/false, which breaks any interactive troubleshooting login.",
+  "symptoms": [
+    "The service account svc_backup cannot be used for interactive logins",
+    "/etc/passwd shows svc_backup with the shell /bin/false",
+    "Nobody on the team has written down which groups svc_backup belongs to",
+    "Your own account details (uid, groups) have never been documented"
+  ],
+  "mission": "Write an account audit report to /home/intern/audit.txt containing your id output and the svc_backup passwd entry, then change svc_backup's login shell back to /bin/bash.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Start with who you are",
+      "content": "Run `id` and `whoami` — `id` prints uid, gid and all supplementary groups in one line."
+    },
+    {
+      "number": 2,
+      "title": "Where accounts live",
+      "content": "Every local account is one line in /etc/passwd. Filter it with: `grep svc_backup /etc/passwd`. The last field is the login shell."
+    },
+    {
+      "number": 3,
+      "title": "Change the shell",
+      "content": "Use: `sudo usermod -s /bin/bash svc_backup` — the `-s` flag sets the login shell. Verify with grep again afterwards."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/audit.txt exists",
+      "weight": 25
+    },
+    {
+      "id": "check_2",
+      "description": "audit.txt contains the output of id (uid=...)",
+      "weight": 25
+    },
+    {
+      "id": "check_3",
+      "description": "svc_backup login shell is /bin/bash in /etc/passwd",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "svc_backup is a member of the backup group",
+      "weight": 25
+    }
+  ]
+}

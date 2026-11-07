@@ -1,0 +1,105 @@
+schema_version: 2
+lab: module-06-lab-01-who-am-i
+title: Who Am I? Account Triage
+category: linux
+domain: users
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: users
+  weight: 25
+  prompt: /home/intern/audit.txt exists
+  context: null
+  hints:
+  - title: Start with who you are
+    content: Run `id` and `whoami` — `id` prints uid, gid and all supplementary groups in one line.
+  - title: Where accounts live
+    content: 'Every local account is one line in /etc/passwd. Filter it with: `grep svc_backup /etc/passwd`.
+      The last field is the login shell.'
+  - title: Change the shell
+    content: 'Use: `sudo usermod -s /bin/bash svc_backup` — the `-s` flag sets the login shell. Verify
+      with grep again afterwards.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/audit.txt exists
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: users
+  weight: 25
+  prompt: audit.txt contains the output of id (uid=...)
+  context: null
+  hints:
+  - title: Start with who you are
+    content: Run `id` and `whoami` — `id` prints uid, gid and all supplementary groups in one line.
+  - title: Where accounts live
+    content: 'Every local account is one line in /etc/passwd. Filter it with: `grep svc_backup /etc/passwd`.
+      The last field is the login shell.'
+  - title: Change the shell
+    content: 'Use: `sudo usermod -s /bin/bash svc_backup` — the `-s` flag sets the login shell. Verify
+      with grep again afterwards.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: audit.txt contains the output of id (uid=...)
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: users
+  weight: 25
+  prompt: svc_backup login shell is /bin/bash in /etc/passwd
+  context: null
+  hints:
+  - title: Start with who you are
+    content: Run `id` and `whoami` — `id` prints uid, gid and all supplementary groups in one line.
+  - title: Where accounts live
+    content: 'Every local account is one line in /etc/passwd. Filter it with: `grep svc_backup /etc/passwd`.
+      The last field is the login shell.'
+  - title: Change the shell
+    content: 'Use: `sudo usermod -s /bin/bash svc_backup` — the `-s` flag sets the login shell. Verify
+      with grep again afterwards.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: svc_backup login shell is /bin/bash in /etc/passwd
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: users
+  weight: 25
+  prompt: svc_backup is a member of the backup group
+  context: null
+  hints:
+  - title: Start with who you are
+    content: Run `id` and `whoami` — `id` prints uid, gid and all supplementary groups in one line.
+  - title: Where accounts live
+    content: 'Every local account is one line in /etc/passwd. Filter it with: `grep svc_backup /etc/passwd`.
+      The last field is the login shell.'
+  - title: Change the shell
+    content: 'Use: `sudo usermod -s /bin/bash svc_backup` — the `-s` flag sets the login shell. Verify
+      with grep again afterwards.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: svc_backup is a member of the backup group
+  time_target_minutes: 4

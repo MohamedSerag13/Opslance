@@ -1,0 +1,105 @@
+schema_version: 2
+lab: module-01-lab-05-wildcards-and-globbing
+title: Wildcards and Globbing
+category: linux
+domain: fundamentals
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/logs/ contains the log files
+  context: null
+  hints:
+  - title: Understanding Wildcards
+    content: You can match all log files using wildcard patterns, like `log*` or `*.log`.
+  - title: Organizing Files
+    content: Create the target directories first using `mkdir -p ~/logs ~/reports ~/notes`. Then use `mv
+      ~/inbox/log* ~/logs/` to move logs.
+  - title: Cleaning Up
+    content: Run `rm ~/inbox/*.tmp` to delete all temporary files. Make sure no `.tmp` files remain in
+      the inbox.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: Logs directory contains log files
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/reports/ contains the report files
+  context: null
+  hints:
+  - title: Understanding Wildcards
+    content: You can match all log files using wildcard patterns, like `log*` or `*.log`.
+  - title: Organizing Files
+    content: Create the target directories first using `mkdir -p ~/logs ~/reports ~/notes`. Then use `mv
+      ~/inbox/log* ~/logs/` to move logs.
+  - title: Cleaning Up
+    content: Run `rm ~/inbox/*.tmp` to delete all temporary files. Make sure no `.tmp` files remain in
+      the inbox.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: Reports directory contains report files
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/notes/ contains the notes files
+  context: null
+  hints:
+  - title: Understanding Wildcards
+    content: You can match all log files using wildcard patterns, like `log*` or `*.log`.
+  - title: Organizing Files
+    content: Create the target directories first using `mkdir -p ~/logs ~/reports ~/notes`. Then use `mv
+      ~/inbox/log* ~/logs/` to move logs.
+  - title: Cleaning Up
+    content: Run `rm ~/inbox/*.tmp` to delete all temporary files. Make sure no `.tmp` files remain in
+      the inbox.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: Notes directory contains note files
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: fundamentals
+  weight: 25
+  prompt: No .tmp files remain in /home/intern/inbox/
+  context: null
+  hints:
+  - title: Understanding Wildcards
+    content: You can match all log files using wildcard patterns, like `log*` or `*.log`.
+  - title: Organizing Files
+    content: Create the target directories first using `mkdir -p ~/logs ~/reports ~/notes`. Then use `mv
+      ~/inbox/log* ~/logs/` to move logs.
+  - title: Cleaning Up
+    content: Run `rm ~/inbox/*.tmp` to delete all temporary files. Make sure no `.tmp` files remain in
+      the inbox.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: No .tmp files remain in /home/intern/inbox
+  time_target_minutes: 4

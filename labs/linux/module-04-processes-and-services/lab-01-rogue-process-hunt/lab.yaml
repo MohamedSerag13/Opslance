@@ -1,0 +1,61 @@
+schema_version: 2
+lab: module-04-lab-01-rogue-process-hunt
+title: Rogue Process Hunt
+category: linux
+domain: processes
+pass_mark: 3
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: processes
+  weight: 40
+  prompt: pids_found.txt exists and lists at least 3 sleep process PIDs
+  context: null
+  hints:
+  - title: List all running processes
+    content: Run 'ps aux' to see every process on the system. The output shows USER, PID, %CPU, %MEM,
+      and the COMMAND. Look for lines where the COMMAND column says 'sleep 1000'.
+  - title: Filter with grep or pgrep
+    content: 'Pipe ps output through grep: ''ps aux | grep sleep''. Alternatively, ''pgrep sleep'' prints
+      just the PIDs of matching processes — one per line, ready to copy.'
+  - title: Record the PIDs
+    content: 'Write the PIDs to /home/intern/pids_found.txt, one per line. You can do this manually with
+      a text editor, or use a redirect: ''pgrep sleep > /home/intern/pids_found.txt''.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: pids_found.txt exists and lists at least 3 sleep process PIDs
+  time_target_minutes: 8
+- id: check_2
+  order: 2
+  domain: processes
+  weight: 60
+  prompt: all rogue sleep processes have been killed (none remain)
+  context: null
+  hints:
+  - title: List all running processes
+    content: Run 'ps aux' to see every process on the system. The output shows USER, PID, %CPU, %MEM,
+      and the COMMAND. Look for lines where the COMMAND column says 'sleep 1000'.
+  - title: Filter with grep or pgrep
+    content: 'Pipe ps output through grep: ''ps aux | grep sleep''. Alternatively, ''pgrep sleep'' prints
+      just the PIDs of matching processes — one per line, ready to copy.'
+  - title: Record the PIDs
+    content: 'Write the PIDs to /home/intern/pids_found.txt, one per line. You can do this manually with
+      a text editor, or use a redirect: ''pgrep sleep > /home/intern/pids_found.txt''.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: all rogue sleep processes have been killed (none remain)
+  time_target_minutes: 8

@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-07-lab-04-motd-typo-rescue
+title: Message-of-the-Day Rescue
+category: linux
+domain: text-processing
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: text-processing
+  weight: 25
+  prompt: the 'Welcom' typo is gone from /etc/motd
+  context: null
+  hints:
+  - title: nano in 10 seconds
+    content: Open with sudo nano /etc/motd, move with arrows, type your fix, then Ctrl+O Enter to save
+      and Ctrl+X to exit.
+  - title: vim in 10 seconds
+    content: Open with sudo vi /etc/motd, press i to insert, fix the text, press Esc, then type :wq and
+      Enter to save and quit.
+  - title: No-editor option
+    content: Fix the typo with `sudo sed -i 's/Welcom/Welcome/' /etc/motd` and append with `echo 'Managed
+      by Opslance.' | sudo tee -a /etc/motd`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: the 'Welcom' typo is gone from /etc/motd
+  time_target_minutes: 2
+- id: check_2
+  order: 2
+  domain: text-processing
+  weight: 25
+  prompt: banner correctly reads 'Welcome to the Opslance staging server.'
+  context: null
+  hints:
+  - title: nano in 10 seconds
+    content: Open with sudo nano /etc/motd, move with arrows, type your fix, then Ctrl+O Enter to save
+      and Ctrl+X to exit.
+  - title: vim in 10 seconds
+    content: Open with sudo vi /etc/motd, press i to insert, fix the text, press Esc, then type :wq and
+      Enter to save and quit.
+  - title: No-editor option
+    content: Fix the typo with `sudo sed -i 's/Welcom/Welcome/' /etc/motd` and append with `echo 'Managed
+      by Opslance.' | sudo tee -a /etc/motd`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: banner correctly reads 'Welcome to the Opslance staging server.'
+  time_target_minutes: 2
+- id: check_3
+  order: 3
+  domain: text-processing
+  weight: 25
+  prompt: existing banner lines were preserved
+  context: null
+  hints:
+  - title: nano in 10 seconds
+    content: Open with sudo nano /etc/motd, move with arrows, type your fix, then Ctrl+O Enter to save
+      and Ctrl+X to exit.
+  - title: vim in 10 seconds
+    content: Open with sudo vi /etc/motd, press i to insert, fix the text, press Esc, then type :wq and
+      Enter to save and quit.
+  - title: No-editor option
+    content: Fix the typo with `sudo sed -i 's/Welcom/Welcome/' /etc/motd` and append with `echo 'Managed
+      by Opslance.' | sudo tee -a /etc/motd`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: existing banner lines were preserved
+  time_target_minutes: 2
+- id: check_4
+  order: 4
+  domain: text-processing
+  weight: 25
+  prompt: last line of /etc/motd is exactly 'Managed by Opslance.'
+  context: null
+  hints:
+  - title: nano in 10 seconds
+    content: Open with sudo nano /etc/motd, move with arrows, type your fix, then Ctrl+O Enter to save
+      and Ctrl+X to exit.
+  - title: vim in 10 seconds
+    content: Open with sudo vi /etc/motd, press i to insert, fix the text, press Esc, then type :wq and
+      Enter to save and quit.
+  - title: No-editor option
+    content: Fix the typo with `sudo sed -i 's/Welcom/Welcome/' /etc/motd` and append with `echo 'Managed
+      by Opslance.' | sudo tee -a /etc/motd`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: last line of /etc/motd is exactly 'Managed by Opslance.'
+  time_target_minutes: 2

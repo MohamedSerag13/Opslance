@@ -1,0 +1,68 @@
+{
+  "id": "module-06-lab-02-onboard-developer",
+  "module_number": 6,
+  "module_title": "Users, Groups & Sudo",
+  "title": "Onboard a New Developer",
+  "difficulty": "beginner",
+  "estimated_minutes": 20,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "users",
+  "skills": [
+    "useradd",
+    "usermod",
+    "groupadd",
+    "chpasswd",
+    "/etc/passwd",
+    "/etc/group"
+  ],
+  "description": "Create a fully configured local account for a new developer and add it to the developers group.",
+  "scenario": "A new platform engineer named Amara Okafor starts today. HR has raised the standard onboarding ticket: create her local account on the shared staging box, give her a bash shell with a home directory, put her GECOS comment in the standard 'Full Name - Team' format, add her to the developers group and set a temporary password she must change on first login.",
+  "symptoms": [
+    "There is no amara account on the server yet",
+    "The developers group already exists but has no new members",
+    "The onboarding ticket requires the GECOS comment 'Amara Okafor - Platform Team'",
+    "Without an account Amara cannot even SSH into the staging box"
+  ],
+  "mission": "Create the amara account with a home directory and bash shell, set the GECOS comment, add her to the developers group and set a temporary password.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Create, don't edit",
+      "content": "Use `useradd -m` — the `-m` flag creates /home/<name> and copies the skeleton files. Never edit /etc/passwd directly."
+    },
+    {
+      "number": 2,
+      "title": "GECOS comment",
+      "content": "The `-c` flag of useradd sets the comment (real name) field: `-c \"Amara Okafor - Platform Team\"`."
+    },
+    {
+      "number": 3,
+      "title": "Append to a group",
+      "content": "`usermod -aG developers amara` — the `-a` (append) is critical: without it you REPLACE all her groups."
+    },
+    {
+      "number": 4,
+      "title": "Temporary password",
+      "content": "`echo 'amara:ChangeMe123!' | sudo chpasswd` sets the password non-interactively."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/amara home directory exists",
+      "weight": 30
+    },
+    {
+      "id": "check_2",
+      "description": "amara has a bash shell and the correct GECOS comment in /etc/passwd",
+      "weight": 40
+    },
+    {
+      "id": "check_3",
+      "description": "amara is a member of the developers group",
+      "weight": 30
+    }
+  ]
+}

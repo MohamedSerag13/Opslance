@@ -1,0 +1,7 @@
+Jun 16 02:00:01 srv1 CRON[1201]: (root) CMD OK: /usr/local/bin/backup.sh
+Jun 16 02:15:02 srv1 CRON[1203]: (root) CMD FAILED (exit status 1): /usr/local/bin/backup.sh
+Jun 16 02:30:03 srv1 CRON[1207]: (root) CMD FAILED (exit status 1): /usr/local/bin/backup.sh
+Jun 16 02:45:04 srv1 CRON[1211]: (root) CMD FAILED (exit status 1): /usr/local/bin/backup.sh
+Jun 16 03:00:01 srv1 CRON[1215]: (root) CMD OK: /usr/local/bin/backup.sh
+Jun 16 04:00:02 srv1 CRON[1219]: (root) CMD OK: /usr/local/bin/send-report.sh
+Jun 16 05:00:02 srv1 CRON[1223]: (root) CMD OK: /usr/local/bin/send-report.sh

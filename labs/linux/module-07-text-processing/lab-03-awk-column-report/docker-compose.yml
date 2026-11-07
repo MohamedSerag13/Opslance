@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-07-lab-03-awk-column-report:
+    build: .
+    container_name: lab-07-03-awk-column-report
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 07"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Sales Totals with awk"
+      - "lab.id=module-07-lab-03-awk-column-report"

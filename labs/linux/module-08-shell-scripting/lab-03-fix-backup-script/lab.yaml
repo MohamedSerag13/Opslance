@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-08-lab-03-fix-backup-script
+title: Debug the Backup Script
+category: linux
+domain: scripting
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: scripting
+  weight: 25
+  prompt: backup.sh passes a bash syntax check (bash -n)
+  context: null
+  hints:
+  - title: Syntax check first
+    content: '`bash -n script` parses the script without executing it — the fastest way to catch mangled
+      lines.'
+  - title: The shebang
+    content: 'It must read exactly `#!/bin/bash`. Anything else (like #bash/bin) is just a comment to
+      sh and the script runs under the wrong shell.'
+  - title: Compress while archiving
+    content: '`tar czf <file>.tar.gz <dir>` compresses with gzip in one step — the ''z'' flag is what
+      the current script is missing.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: backup.sh passes a bash syntax check (bash -n)
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: scripting
+  weight: 20
+  prompt: backup.sh is executable
+  context: null
+  hints:
+  - title: Syntax check first
+    content: '`bash -n script` parses the script without executing it — the fastest way to catch mangled
+      lines.'
+  - title: The shebang
+    content: 'It must read exactly `#!/bin/bash`. Anything else (like #bash/bin) is just a comment to
+      sh and the script runs under the wrong shell.'
+  - title: Compress while archiving
+    content: '`tar czf <file>.tar.gz <dir>` compresses with gzip in one step — the ''z'' flag is what
+      the current script is missing.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: backup.sh is executable
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: scripting
+  weight: 35
+  prompt: running backup.sh produces /tmp/backups/app-backup.tar.gz
+  context: null
+  hints:
+  - title: Syntax check first
+    content: '`bash -n script` parses the script without executing it — the fastest way to catch mangled
+      lines.'
+  - title: The shebang
+    content: 'It must read exactly `#!/bin/bash`. Anything else (like #bash/bin) is just a comment to
+      sh and the script runs under the wrong shell.'
+  - title: Compress while archiving
+    content: '`tar czf <file>.tar.gz <dir>` compresses with gzip in one step — the ''z'' flag is what
+      the current script is missing.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: running backup.sh produces /tmp/backups/app-backup.tar.gz
+  time_target_minutes: 5
+- id: check_4
+  order: 4
+  domain: scripting
+  weight: 20
+  prompt: the archive contains the app's index.html
+  context: null
+  hints:
+  - title: Syntax check first
+    content: '`bash -n script` parses the script without executing it — the fastest way to catch mangled
+      lines.'
+  - title: The shebang
+    content: 'It must read exactly `#!/bin/bash`. Anything else (like #bash/bin) is just a comment to
+      sh and the script runs under the wrong shell.'
+  - title: Compress while archiving
+    content: '`tar czf <file>.tar.gz <dir>` compresses with gzip in one step — the ''z'' flag is what
+      the current script is missing.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: the archive contains the app's index.html
+  time_target_minutes: 5

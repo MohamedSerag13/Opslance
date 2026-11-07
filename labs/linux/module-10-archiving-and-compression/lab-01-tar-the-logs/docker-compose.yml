@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-10-lab-01-tar-the-logs:
+    build: .
+    container_name: lab-10-01-tar-the-logs
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 10"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Tar Up the Logs"
+      - "lab.id=module-10-lab-01-tar-the-logs"

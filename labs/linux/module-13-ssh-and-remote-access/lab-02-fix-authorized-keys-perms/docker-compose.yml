@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-13-lab-02-fix-authorized-keys-perms:
+    build: .
+    container_name: lab-13-02-fix-authorized-keys-perms
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 13"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=SSH Ignores My Key"
+      - "lab.id=module-13-lab-02-fix-authorized-keys-perms"

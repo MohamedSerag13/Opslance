@@ -1,0 +1,88 @@
+schema_version: 2
+lab: module-04-lab-04-debug-failed-systemd-service
+title: Debug a Failed Systemd Service
+category: linux
+domain: services
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: services
+  weight: 40
+  prompt: systemctl reports broken-app as active (running)
+  context: null
+  hints:
+  - title: Trigger the failure and read the error
+    content: Run 'systemctl start broken-app'. It will fail. Then run 'systemctl status broken-app' to
+      see the Active line change to 'failed'. The last few log lines shown in the status output will hint
+      at the cause.
+  - title: Dig deeper with journalctl
+    content: Run 'journalctl -u broken-app' to see the full journal for this unit. Look for a line containing
+      'No such file or directory' — it will tell you exactly which file is missing.
+  - title: Read the unit file to find the expected path
+    content: Run 'cat /etc/systemd/system/broken-app.service' and look at the ExecStart= line. That is
+      the exact path the service manager will try to execute.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: systemctl reports broken-app as active (running)
+  time_target_minutes: 8
+- id: check_2
+  order: 2
+  domain: services
+  weight: 30
+  prompt: /opt/app/start.sh exists and is executable
+  context: null
+  hints:
+  - title: Trigger the failure and read the error
+    content: Run 'systemctl start broken-app'. It will fail. Then run 'systemctl status broken-app' to
+      see the Active line change to 'failed'. The last few log lines shown in the status output will hint
+      at the cause.
+  - title: Dig deeper with journalctl
+    content: Run 'journalctl -u broken-app' to see the full journal for this unit. Look for a line containing
+      'No such file or directory' — it will tell you exactly which file is missing.
+  - title: Read the unit file to find the expected path
+    content: Run 'cat /etc/systemd/system/broken-app.service' and look at the ExecStart= line. That is
+      the exact path the service manager will try to execute.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: /opt/app/start.sh exists and is executable
+  time_target_minutes: 8
+- id: check_3
+  order: 3
+  domain: services
+  weight: 30
+  prompt: broken-app journal log contains a successful start entry
+  context: null
+  hints:
+  - title: Trigger the failure and read the error
+    content: Run 'systemctl start broken-app'. It will fail. Then run 'systemctl status broken-app' to
+      see the Active line change to 'failed'. The last few log lines shown in the status output will hint
+      at the cause.
+  - title: Dig deeper with journalctl
+    content: Run 'journalctl -u broken-app' to see the full journal for this unit. Look for a line containing
+      'No such file or directory' — it will tell you exactly which file is missing.
+  - title: Read the unit file to find the expected path
+    content: Run 'cat /etc/systemd/system/broken-app.service' and look at the ExecStart= line. That is
+      the exact path the service manager will try to execute.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: broken-app journal log contains a successful start entry
+  time_target_minutes: 8

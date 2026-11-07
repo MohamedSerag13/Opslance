@@ -1,0 +1,61 @@
+schema_version: 2
+lab: module-03-lab-03-application-cannot-write-logs
+title: Application Cannot Write Logs
+category: linux
+domain: ownership
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: ownership
+  weight: 40
+  prompt: /home/intern/logs/app.log is owned by intern
+  context: null
+  hints:
+  - title: Inspect file details
+    content: Run 'ls -l logs/app.log' to see who owns the file and what permissions are set. The third
+      and fourth columns show the owning user and group.
+  - title: Change ownership
+    content: The 'chown' command changes file ownership. The syntax is 'chown user:group file'. You will
+      need sudo to change ownership of a file you do not own.
+  - title: Full solution pattern
+    content: Run 'sudo chown intern:intern logs/app.log' to take ownership, then 'echo "Application started"
+      >> logs/app.log' to write the log entry.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/logs/app.log is owned by intern
+  time_target_minutes: 8
+- id: check_2
+  order: 2
+  domain: ownership
+  weight: 60
+  prompt: /home/intern/logs/app.log contains the line 'Application started'
+  context: null
+  hints:
+  - title: Inspect file details
+    content: Run 'ls -l logs/app.log' to see who owns the file and what permissions are set. The third
+      and fourth columns show the owning user and group.
+  - title: Change ownership
+    content: The 'chown' command changes file ownership. The syntax is 'chown user:group file'. You will
+      need sudo to change ownership of a file you do not own.
+  - title: Full solution pattern
+    content: Run 'sudo chown intern:intern logs/app.log' to take ownership, then 'echo "Application started"
+      >> logs/app.log' to write the log entry.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: app.log contains the line 'Application started'
+  time_target_minutes: 8

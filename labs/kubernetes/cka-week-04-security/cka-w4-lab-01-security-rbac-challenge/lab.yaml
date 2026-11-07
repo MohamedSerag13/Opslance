@@ -1,0 +1,337 @@
+schema_version: 2
+lab: cka-w4-lab-01-security-rbac-challenge
+title: CKA Week 4 Challenge - RBAC, Certificates, Security Contexts
+category: kubernetes
+domain: CKA Week 4 - Security, RBAC and Certificates
+pass_mark: 66
+grading_scale: points
+total: 120
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: task_01
+  order: 1
+  domain: CKA Week 4 - Security, RBAC and Certificates
+  weight: 10
+  prompt: ServiceAccount dev-sa exists in ns dev
+  context: null
+  hints:
+  - title: Prove, do not assume
+    content: Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails,
+      read the can-i output before touching RBAC again.
+  - title: The CSR pipeline
+    content: openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest
+      with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate
+      approve. The issued cert lands in status.certificate (base64).
+  - title: jane kubeconfig
+    content: Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything.
+      A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: task
+    description: ServiceAccount dev-sa exists in ns dev
+  time_target_minutes: 12
+  description: Create ServiceAccount dev-sa in namespace dev. The check runs `kubectl get sa dev-sa -n
+    dev`.
+- id: task_02
+  order: 2
+  domain: CKA Week 4 - Security, RBAC and Certificates
+  weight: 10
+  prompt: Role pods-reader in dev allows get,list,watch on pods
+  context: null
+  hints:
+  - title: Prove, do not assume
+    content: Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails,
+      read the can-i output before touching RBAC again.
+  - title: The CSR pipeline
+    content: openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest
+      with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate
+      approve. The issued cert lands in status.certificate (base64).
+  - title: jane kubeconfig
+    content: Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything.
+      A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: task
+    description: Role pods-reader in dev allows get,list,watch on pods
+  time_target_minutes: 12
+  description: Create Role pods-reader in dev allowing get, list and watch on pods. The check verifies
+    rules.resources and verbs.
+- id: task_03
+  order: 3
+  domain: CKA Week 4 - Security, RBAC and Certificates
+  weight: 10
+  prompt: RoleBinding pods-reader-binding binds pods-reader to SA dev:dev-sa
+  context: null
+  hints:
+  - title: Prove, do not assume
+    content: Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails,
+      read the can-i output before touching RBAC again.
+  - title: The CSR pipeline
+    content: openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest
+      with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate
+      approve. The issued cert lands in status.certificate (base64).
+  - title: jane kubeconfig
+    content: Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything.
+      A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: task
+    description: RoleBinding pods-reader-binding binds pods-reader to SA dev:dev-sa
+  time_target_minutes: 12
+  description: Create RoleBinding pods-reader-binding in dev binding Role pods-reader to ServiceAccount
+    dev:dev-sa. The check verifies roleRef and subjects.
+- id: task_04
+  order: 4
+  domain: CKA Week 4 - Security, RBAC and Certificates
+  weight: 10
+  prompt: 'auth can-i: the SA CAN list pods in dev'
+  context: null
+  hints:
+  - title: Prove, do not assume
+    content: Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails,
+      read the can-i output before touching RBAC again.
+  - title: The CSR pipeline
+    content: openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest
+      with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate
+      approve. The issued cert lands in status.certificate (base64).
+  - title: jane kubeconfig
+    content: Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything.
+      A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: task
+    description: 'auth can-i: the SA CAN list pods in dev'
+  time_target_minutes: 12
+  description: With dev-sa's credentials, `kubectl auth can-i list pods -n dev` must answer yes. The check
+    runs auth can-i as the SA.
+- id: task_05
+  order: 5
+  domain: CKA Week 4 - Security, RBAC and Certificates
+  weight: 10
+  prompt: 'auth can-i: the SA CANNOT delete pods in dev (least privilege)'
+  context: null
+  hints:
+  - title: Prove, do not assume
+    content: Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails,
+      read the can-i output before touching RBAC again.
+  - title: The CSR pipeline
+    content: openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest
+      with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate
+      approve. The issued cert lands in status.certificate (base64).
+  - title: jane kubeconfig
+    content: Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything.
+      A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 5
+    kind: task
+    description: 'auth can-i: the SA CANNOT delete pods in dev (least privilege)'
+  time_target_minutes: 12
+  description: 'Least privilege: `kubectl auth can-i delete pods -n dev` as dev-sa must answer no. The
+    check asserts the negative — do not grant more than needed.'
+- id: task_06
+  order: 6
+  domain: CKA Week 4 - Security, RBAC and Certificates
+  weight: 10
+  prompt: ClusterRole node-reader allows get,list,watch on nodes
+  context: null
+  hints:
+  - title: Prove, do not assume
+    content: Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails,
+      read the can-i output before touching RBAC again.
+  - title: The CSR pipeline
+    content: openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest
+      with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate
+      approve. The issued cert lands in status.certificate (base64).
+  - title: jane kubeconfig
+    content: Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything.
+      A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 6
+    kind: task
+    description: ClusterRole node-reader allows get,list,watch on nodes
+  time_target_minutes: 12
+  description: Create ClusterRole node-reader allowing get, list, watch on nodes (cluster-scoped resource).
+    The check verifies the ClusterRole rules.
+- id: task_07
+  order: 7
+  domain: CKA Week 4 - Security, RBAC and Certificates
+  weight: 10
+  prompt: ClusterRoleBinding grants node-reader to dev-sa; can-i get nodes -> yes
+  context: null
+  hints:
+  - title: Prove, do not assume
+    content: Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails,
+      read the can-i output before touching RBAC again.
+  - title: The CSR pipeline
+    content: openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest
+      with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate
+      approve. The issued cert lands in status.certificate (base64).
+  - title: jane kubeconfig
+    content: Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything.
+      A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 7
+    kind: task
+    description: ClusterRoleBinding grants node-reader to dev-sa; can-i get nodes -> yes
+  time_target_minutes: 12
+  description: Bind node-reader to dev-sa with a ClusterRoleBinding; `auth can-i get nodes` as the SA
+    must answer yes. The check verifies both the binding and can-i.
+- id: task_08
+  order: 8
+  domain: CKA Week 4 - Security, RBAC and Certificates
+  weight: 10
+  prompt: CSR jane-csr Approved with certificate issued
+  context: null
+  hints:
+  - title: Prove, do not assume
+    content: Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails,
+      read the can-i output before touching RBAC again.
+  - title: The CSR pipeline
+    content: openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest
+      with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate
+      approve. The issued cert lands in status.certificate (base64).
+  - title: jane kubeconfig
+    content: Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything.
+      A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 8
+    kind: task
+    description: CSR jane-csr Approved with certificate issued
+  time_target_minutes: 12
+  description: 'The CSR jane-csr is pending: approve it so the certificate is issued. The check verifies
+    .status.conditions contains Approved and a certificate is present.'
+- id: task_09
+  order: 9
+  domain: CKA Week 4 - Security, RBAC and Certificates
+  weight: 10
+  prompt: /home/intern/jane.kubeconfig authenticates jane (can-i prints no)
+  context: null
+  hints:
+  - title: Prove, do not assume
+    content: Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails,
+      read the can-i output before touching RBAC again.
+  - title: The CSR pipeline
+    content: openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest
+      with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate
+      approve. The issued cert lands in status.certificate (base64).
+  - title: jane kubeconfig
+    content: Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything.
+      A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 9
+    kind: task
+    description: /home/intern/jane.kubeconfig authenticates jane (can-i prints no)
+  time_target_minutes: 12
+  description: The issued jane certificate plus /home/intern/jane.kubeconfig must authenticate as jane
+    — `auth can-i` with that kubeconfig prints no (no permissions granted). The check uses the kubeconfig.
+- id: task_10
+  order: 10
+  domain: CKA Week 4 - Security, RBAC and Certificates
+  weight: 10
+  prompt: Pod sc-pod runs as non-root (runAsNonRoot=true, runAsUser=1000)
+  context: null
+  hints:
+  - title: Prove, do not assume
+    content: Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails,
+      read the can-i output before touching RBAC again.
+  - title: The CSR pipeline
+    content: openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest
+      with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate
+      approve. The issued cert lands in status.certificate (base64).
+  - title: jane kubeconfig
+    content: Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything.
+      A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 10
+    kind: task
+    description: Pod sc-pod runs as non-root (runAsNonRoot=true, runAsUser=1000)
+  time_target_minutes: 12
+  description: Create pod sc-pod with securityContext runAsNonRoot=true and runAsUser=1000. The check
+    verifies both fields.
+- id: task_11
+  order: 11
+  domain: CKA Week 4 - Security, RBAC and Certificates
+  weight: 10
+  prompt: Pod sc-pod drops ALL capabilities and adds NET_BIND_SERVICE
+  context: null
+  hints:
+  - title: Prove, do not assume
+    content: Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails,
+      read the can-i output before touching RBAC again.
+  - title: The CSR pipeline
+    content: openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest
+      with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate
+      approve. The issued cert lands in status.certificate (base64).
+  - title: jane kubeconfig
+    content: Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything.
+      A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 11
+    kind: task
+    description: Pod sc-pod drops ALL capabilities and adds NET_BIND_SERVICE
+  time_target_minutes: 12
+  description: On sc-pod, drop ALL Linux capabilities and add only NET_BIND_SERVICE. The check verifies
+    .securityContext.capabilities.
+- id: task_12
+  order: 12
+  domain: CKA Week 4 - Security, RBAC and Certificates
+  weight: 10
+  prompt: ns secure enforces PSA baseline; a hostPath pod is rejected there
+  context: null
+  hints:
+  - title: Prove, do not assume
+    content: Tasks 4, 5 and 7 are auth can-i --as checks - the exam does exactly this. If a check fails,
+      read the can-i output before touching RBAC again.
+  - title: The CSR pipeline
+    content: openssl genrsa + req -new -subj /CN=jane, base64 the .csr, apply a CertificateSigningRequest
+      with signerName kubernetes.io/kube-apiserver-client and usages [client auth], then kubectl certificate
+      approve. The issued cert lands in status.certificate (base64).
+  - title: jane kubeconfig
+    content: Use --certificate-authority /etcd-tls/etcd/ca.crt (it is the cluster CA) and embed everything.
+      A working authn shows can-i = no, because jane has no RBAC yet - that no IS the success signal.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 12
+    kind: task
+    description: ns secure enforces PSA baseline; a hostPath pod is rejected there
+  time_target_minutes: 12
+  description: Namespace secure must enforce Pod Security Admission baseline — a hostPath pod applied
+    there must be REJECTED. The check verifies the namespace label and attempts the violation.

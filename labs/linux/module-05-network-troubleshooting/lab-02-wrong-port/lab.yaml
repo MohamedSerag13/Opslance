@@ -1,0 +1,82 @@
+schema_version: 2
+lab: module-05-lab-02-wrong-port
+title: App on the Wrong Port
+category: linux
+domain: networking
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: networking
+  weight: 40
+  prompt: /home/intern/actual_port.txt contains '8081'
+  context: null
+  hints:
+  - title: Confirm the failure
+    content: Run 'curl localhost:8080'. You'll get Connection refused. Before assuming the app is down,
+      check whether it's listening somewhere else.
+  - title: List all listeners
+    content: Run 'ss -tulnp'. Look at every entry in the Local Address:Port column. Is there a port other
+      than 8080 showing a python3 process?
+  - title: Record the actual port
+    content: 'Once you find the real port number, run: echo "8081" > /home/intern/actual_port.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: actual_port.txt contains '8081'
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: networking
+  weight: 30
+  prompt: Port 8081 is currently listening
+  context: null
+  hints:
+  - title: Confirm the failure
+    content: Run 'curl localhost:8080'. You'll get Connection refused. Before assuming the app is down,
+      check whether it's listening somewhere else.
+  - title: List all listeners
+    content: Run 'ss -tulnp'. Look at every entry in the Local Address:Port column. Is there a port other
+      than 8080 showing a python3 process?
+  - title: Record the actual port
+    content: 'Once you find the real port number, run: echo "8081" > /home/intern/actual_port.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: Port 8081 is currently listening
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: networking
+  weight: 30
+  prompt: curl localhost:8081 returns HTTP 200
+  context: null
+  hints:
+  - title: Confirm the failure
+    content: Run 'curl localhost:8080'. You'll get Connection refused. Before assuming the app is down,
+      check whether it's listening somewhere else.
+  - title: List all listeners
+    content: Run 'ss -tulnp'. Look at every entry in the Local Address:Port column. Is there a port other
+      than 8080 showing a python3 process?
+  - title: Record the actual port
+    content: 'Once you find the real port number, run: echo "8081" > /home/intern/actual_port.txt'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: curl localhost:8081 returns HTTP 200
+  time_target_minutes: 5

@@ -1,0 +1,105 @@
+schema_version: 2
+lab: module-11-lab-01-whats-eating-the-disk
+title: What's Eating the Disk?
+category: linux
+domain: storage
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: storage
+  weight: 20
+  prompt: /home/intern/findings.txt exists
+  context: null
+  hints:
+  - title: The du pipeline
+    content: '`du -ah /var` lists every file and directory with its size; `sort -rh` sorts human-readable
+      sizes biggest-first; `head -5` shows the worst offenders.'
+  - title: 'Alternative: find by size'
+    content: '`sudo find /var -type f -size +20M` lists files bigger than 20 MB — often faster when you
+      already know the threshold.'
+  - title: Record, then delete
+    content: Write findings.txt BEFORE rm — the ticket needs the evidence even after the file is gone.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/findings.txt exists
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: storage
+  weight: 40
+  prompt: findings records largest=40MB
+  context: null
+  hints:
+  - title: The du pipeline
+    content: '`du -ah /var` lists every file and directory with its size; `sort -rh` sorts human-readable
+      sizes biggest-first; `head -5` shows the worst offenders.'
+  - title: 'Alternative: find by size'
+    content: '`sudo find /var -type f -size +20M` lists files bigger than 20 MB — often faster when you
+      already know the threshold.'
+  - title: Record, then delete
+    content: Write findings.txt BEFORE rm — the ticket needs the evidence even after the file is gone.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: findings records largest=40MB
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: storage
+  weight: 25
+  prompt: the 40MB core.dump has been deleted
+  context: null
+  hints:
+  - title: The du pipeline
+    content: '`du -ah /var` lists every file and directory with its size; `sort -rh` sorts human-readable
+      sizes biggest-first; `head -5` shows the worst offenders.'
+  - title: 'Alternative: find by size'
+    content: '`sudo find /var -type f -size +20M` lists files bigger than 20 MB — often faster when you
+      already know the threshold.'
+  - title: Record, then delete
+    content: Write findings.txt BEFORE rm — the ticket needs the evidence even after the file is gone.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: the 40MB core.dump has been deleted
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: storage
+  weight: 15
+  prompt: the legitimate backup old-2024.tar.gz survived
+  context: null
+  hints:
+  - title: The du pipeline
+    content: '`du -ah /var` lists every file and directory with its size; `sort -rh` sorts human-readable
+      sizes biggest-first; `head -5` shows the worst offenders.'
+  - title: 'Alternative: find by size'
+    content: '`sudo find /var -type f -size +20M` lists files bigger than 20 MB — often faster when you
+      already know the threshold.'
+  - title: Record, then delete
+    content: Write findings.txt BEFORE rm — the ticket needs the evidence even after the file is gone.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: the legitimate backup old-2024.tar.gz survived
+  time_target_minutes: 4

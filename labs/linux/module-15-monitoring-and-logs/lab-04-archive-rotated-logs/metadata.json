@@ -1,0 +1,72 @@
+{
+  "id": "module-15-lab-04-archive-rotated-logs",
+  "module_number": 15,
+  "module_title": "System Monitoring & Logs",
+  "title": "Rotate Out the Rotated Logs",
+  "difficulty": "intermediate",
+  "estimated_minutes": 20,
+  "points": 125,
+  "category": "linux",
+  "subcategory": "monitoring",
+  "skills": [
+    "gzip",
+    "for loops",
+    "mv",
+    "log hygiene",
+    "wildcards"
+  ],
+  "description": "Compress app.log.1-7 into /var/log/app/archive/ while leaving the active app.log untouched.",
+  "scenario": "The app's rotated logs (app.log.1 through app.log.7) are eating space in /var/log/app and this host has no logrotate config yet. Compress each rotated log with gzip, then move the .gz files into /var/log/app/archive/ (create the directory). The ACTIVE app.log must stay exactly where it is, uncompressed.",
+  "symptoms": [
+    "/var/log/app holds the active app.log plus seven rotated logs",
+    "The rotated logs are uncompressed and waste space",
+    "The house convention: compressed logs live in /var/log/app/archive/",
+    "The active app.log must never be compressed or moved"
+  ],
+  "mission": "gzip the seven app.log.N files and move them into /var/log/app/archive/, leaving app.log untouched at /var/log/app/app.log.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Match the rotated set precisely",
+      "content": "The glob `app.log.[0-9]` matches app.log.1-7 but NOT the active app.log — that precision is the whole game."
+    },
+    {
+      "number": 2,
+      "title": "gzip in place",
+      "content": "`gzip file` replaces the file with file.gz — no extra cleanup needed before the mv."
+    },
+    {
+      "number": 3,
+      "title": "Wildcard the move",
+      "content": "After gzip, `app.log.*.gz` matches exactly the seven archives; move them into the archive directory in one mv."
+    },
+    {
+      "number": 4,
+      "title": "Why the [0-9] matters",
+      "content": "`app.log.*` would ALSO match the active log — one careless glob and the live log is compressed mid-write."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/var/log/app/archive directory exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "all 7 rotated logs are archived as .gz in archive/",
+      "weight": 30
+    },
+    {
+      "id": "check_3",
+      "description": "no uncompressed rotated logs remain in /var/log/app",
+      "weight": 30
+    },
+    {
+      "id": "check_4",
+      "description": "the active app.log is untouched in place",
+      "weight": 20
+    }
+  ]
+}

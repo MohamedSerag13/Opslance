@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-09-lab-01-install-missing-tool:
+    build: .
+    container_name: lab-09-01-install-missing-tool
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 09"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=Install the Missing Tool"
+      - "lab.id=module-09-lab-01-install-missing-tool"

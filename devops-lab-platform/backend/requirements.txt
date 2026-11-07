@@ -16,3 +16,4 @@ bcrypt==4.0.1
 stripe
 requests
 openpyxl
+pyyaml

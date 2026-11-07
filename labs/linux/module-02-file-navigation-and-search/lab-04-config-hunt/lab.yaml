@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-02-lab-04-config-hunt
+title: The Config Hunt (Capstone)
+category: linux
+domain: fundamentals
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/conf_files.txt exists and contains paths to .conf files under /etc/myapp/
+  context: null
+  hints:
+  - title: Wildcards in find
+    content: Use *.conf as the -name pattern to match any file ending in .conf. Make sure to quote the
+      pattern so the shell does not expand it before passing it to find.
+  - title: Extracting a config value
+    content: '''grep KEY /path/to/file'' prints the full line containing that key. If you are not sure
+      which file contains it, search the whole directory with -r to scan all files at once.'
+  - title: Counting errors
+    content: '''grep -c PATTERN file'' returns a single number: the count of lines that match. Redirect
+      that number directly to your output file with >.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: conf_files.txt exists and contains .conf
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/db_host.txt exists and contains the DB_HOST line from the myapp config
+  context: null
+  hints:
+  - title: Wildcards in find
+    content: Use *.conf as the -name pattern to match any file ending in .conf. Make sure to quote the
+      pattern so the shell does not expand it before passing it to find.
+  - title: Extracting a config value
+    content: '''grep KEY /path/to/file'' prints the full line containing that key. If you are not sure
+      which file contains it, search the whole directory with -r to scan all files at once.'
+  - title: Counting errors
+    content: '''grep -c PATTERN file'' returns a single number: the count of lines that match. Redirect
+      that number directly to your output file with >.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: db_host.txt exists and contains DB_HOST
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/error_count.txt exists and contains a number greater than 0
+  context: null
+  hints:
+  - title: Wildcards in find
+    content: Use *.conf as the -name pattern to match any file ending in .conf. Make sure to quote the
+      pattern so the shell does not expand it before passing it to find.
+  - title: Extracting a config value
+    content: '''grep KEY /path/to/file'' prints the full line containing that key. If you are not sure
+      which file contains it, search the whole directory with -r to scan all files at once.'
+  - title: Counting errors
+    content: '''grep -c PATTERN file'' returns a single number: the count of lines that match. Redirect
+      that number directly to your output file with >.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: error_count.txt exists and contains a number greater than 0
+  time_target_minutes: 5
+- id: check_4
+  order: 4
+  domain: fundamentals
+  weight: 25
+  prompt: /home/intern/deploy_tail.txt exists and contains the last 10 lines of /opt/myapp/deploy.log
+  context: null
+  hints:
+  - title: Wildcards in find
+    content: Use *.conf as the -name pattern to match any file ending in .conf. Make sure to quote the
+      pattern so the shell does not expand it before passing it to find.
+  - title: Extracting a config value
+    content: '''grep KEY /path/to/file'' prints the full line containing that key. If you are not sure
+      which file contains it, search the whole directory with -r to scan all files at once.'
+  - title: Counting errors
+    content: '''grep -c PATTERN file'' returns a single number: the count of lines that match. Redirect
+      that number directly to your output file with >.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: deploy_tail.txt exists and is non-empty
+  time_target_minutes: 5

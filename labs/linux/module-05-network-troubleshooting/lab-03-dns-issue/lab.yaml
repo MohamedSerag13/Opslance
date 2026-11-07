@@ -1,0 +1,85 @@
+schema_version: 2
+lab: module-05-lab-03-dns-issue
+title: Broken DNS Resolution
+category: linux
+domain: networking
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: networking
+  weight: 35
+  prompt: /etc/resolv.conf no longer contains broken nameserver 1.2.3.4
+  context: null
+  hints:
+  - title: Back up before you change anything
+    content: 'Run: cp /etc/resolv.conf /tmp/resolv.conf.bak — good habit: always keep a copy of what you''re
+      about to change.'
+  - title: Prove it's DNS, not the network
+    content: Run 'ping -c 3 8.8.8.8'. If pings succeed, the IP layer is fine. Then run 'dig google.com'.
+      If dig fails but ping 8.8.8.8 works, the problem is ONLY in name resolution, not connectivity.
+  - title: Read the broken config
+    content: 'Run: cat /etc/resolv.conf — look at the nameserver line. Does that IP (1.2.3.4) look like
+      a real DNS server to you?'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /etc/resolv.conf no longer contains broken nameserver 1.2.3.4
+  time_target_minutes: 7
+- id: check_2
+  order: 2
+  domain: networking
+  weight: 35
+  prompt: /etc/resolv.conf contains a known-good nameserver (8.8.8.8 or 1.1.1.1)
+  context: null
+  hints:
+  - title: Back up before you change anything
+    content: 'Run: cp /etc/resolv.conf /tmp/resolv.conf.bak — good habit: always keep a copy of what you''re
+      about to change.'
+  - title: Prove it's DNS, not the network
+    content: Run 'ping -c 3 8.8.8.8'. If pings succeed, the IP layer is fine. Then run 'dig google.com'.
+      If dig fails but ping 8.8.8.8 works, the problem is ONLY in name resolution, not connectivity.
+  - title: Read the broken config
+    content: 'Run: cat /etc/resolv.conf — look at the nameserver line. Does that IP (1.2.3.4) look like
+      a real DNS server to you?'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: /etc/resolv.conf contains a known-good nameserver (8.8.8.8 or 1.1.1.1)
+  time_target_minutes: 7
+- id: check_3
+  order: 3
+  domain: networking
+  weight: 30
+  prompt: dig google.com resolves successfully
+  context: null
+  hints:
+  - title: Back up before you change anything
+    content: 'Run: cp /etc/resolv.conf /tmp/resolv.conf.bak — good habit: always keep a copy of what you''re
+      about to change.'
+  - title: Prove it's DNS, not the network
+    content: Run 'ping -c 3 8.8.8.8'. If pings succeed, the IP layer is fine. Then run 'dig google.com'.
+      If dig fails but ping 8.8.8.8 works, the problem is ONLY in name resolution, not connectivity.
+  - title: Read the broken config
+    content: 'Run: cat /etc/resolv.conf — look at the nameserver line. Does that IP (1.2.3.4) look like
+      a real DNS server to you?'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: dig google.com resolves successfully
+  time_target_minutes: 7

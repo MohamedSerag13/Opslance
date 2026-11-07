@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-14-lab-03-systemd-timer
+title: Modern Scheduling with systemd Timers
+category: linux
+domain: scheduling
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: scheduling
+  weight: 25
+  prompt: both app-maintenance.service and app-maintenance.timer exist
+  context: null
+  hints:
+  - title: Unit pair naming
+    content: The timer foo.timer automatically triggers foo.service — the names must match, which is why
+      both start with app-maintenance.
+  - title: OnCalendar syntax
+    content: '`OnCalendar=*-*-* 03:00:00` means every day at 03:00 (the keyword `daily` is equivalent).
+      Calendar events beat the old five-field cron syntax for readability.'
+  - title: Persistent=true
+    content: Without it, a server powered off at 03:00 skips the run forever. Persistent catches up on
+      the next boot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: both app-maintenance.service and app-maintenance.timer exist
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: scheduling
+  weight: 25
+  prompt: the service unit runs /usr/local/bin/maintenance.sh
+  context: null
+  hints:
+  - title: Unit pair naming
+    content: The timer foo.timer automatically triggers foo.service — the names must match, which is why
+      both start with app-maintenance.
+  - title: OnCalendar syntax
+    content: '`OnCalendar=*-*-* 03:00:00` means every day at 03:00 (the keyword `daily` is equivalent).
+      Calendar events beat the old five-field cron syntax for readability.'
+  - title: Persistent=true
+    content: Without it, a server powered off at 03:00 skips the run forever. Persistent catches up on
+      the next boot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: the service unit runs /usr/local/bin/maintenance.sh
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: scheduling
+  weight: 25
+  prompt: the timer fires daily at 03:00 (OnCalendar)
+  context: null
+  hints:
+  - title: Unit pair naming
+    content: The timer foo.timer automatically triggers foo.service — the names must match, which is why
+      both start with app-maintenance.
+  - title: OnCalendar syntax
+    content: '`OnCalendar=*-*-* 03:00:00` means every day at 03:00 (the keyword `daily` is equivalent).
+      Calendar events beat the old five-field cron syntax for readability.'
+  - title: Persistent=true
+    content: Without it, a server powered off at 03:00 skips the run forever. Persistent catches up on
+      the next boot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: the timer fires daily at 03:00 (OnCalendar)
+  time_target_minutes: 5
+- id: check_4
+  order: 4
+  domain: scheduling
+  weight: 25
+  prompt: the timer is Persistent and wired to timers.target
+  context: null
+  hints:
+  - title: Unit pair naming
+    content: The timer foo.timer automatically triggers foo.service — the names must match, which is why
+      both start with app-maintenance.
+  - title: OnCalendar syntax
+    content: '`OnCalendar=*-*-* 03:00:00` means every day at 03:00 (the keyword `daily` is equivalent).
+      Calendar events beat the old five-field cron syntax for readability.'
+  - title: Persistent=true
+    content: Without it, a server powered off at 03:00 skips the run forever. Persistent catches up on
+      the next boot.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: the timer is Persistent and wired to timers.target
+  time_target_minutes: 5

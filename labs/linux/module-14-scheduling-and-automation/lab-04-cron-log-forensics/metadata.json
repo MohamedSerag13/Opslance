@@ -1,0 +1,61 @@
+{
+  "id": "module-14-lab-04-cron-log-forensics",
+  "module_number": 14,
+  "module_title": "Job Scheduling & Automation",
+  "title": "Cron Log Forensics",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "scheduling",
+  "skills": [
+    "log analysis",
+    "grep",
+    "awk timestamps",
+    "cron logging"
+  ],
+  "description": "Analyse /var/log/cron.log: count backup failures and find the first failure's timestamp.",
+  "scenario": "The backup script 'ran' all night according to cron, yet this morning's restore attempt failed. Analyse /var/log/cron.log: count how many backup.sh runs FAILED, and record the timestamp of the first failure. Write both answers to /home/intern/cron-report.txt as `failed-backups=<n>` and `first-failure=<timestamp>`.",
+  "symptoms": [
+    "The nightly restore failed even though cron shows the job ran",
+    "/var/log/cron.log records CMD OK and CMD FAILED lines per run",
+    "Nobody knows how many runs failed or when the failures started",
+    "The incident ticket wants the answers in /home/intern/cron-report.txt"
+  ],
+  "mission": "Create /home/intern/cron-report.txt with `failed-backups=3` and `first-failure=Jun 16 02:15:02`, both derived from /var/log/cron.log with grep/awk.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Filter twice",
+      "content": "First select the failure lines (`grep 'CMD FAILED'`), then narrow to this job (`grep backup.sh`) — combining both in one regex also works: `grep 'CMD FAILED.*backup.sh'`."
+    },
+    {
+      "number": 2,
+      "title": "Timestamps are the first three fields",
+      "content": "Syslog lines start with 'Month Day Time' — awk '{print $1, $2, $3}' extracts it: Jun 16 02:15:02."
+    },
+    {
+      "number": 3,
+      "title": "head -1 after sorting by time",
+      "content": "Log lines are chronological, so the first failure is the first matching line."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/cron-report.txt exists",
+      "weight": 20
+    },
+    {
+      "id": "check_2",
+      "description": "report states failed-backups=3",
+      "weight": 45
+    },
+    {
+      "id": "check_3",
+      "description": "report states first-failure=Jun 16 02:15:02",
+      "weight": 35
+    }
+  ]
+}

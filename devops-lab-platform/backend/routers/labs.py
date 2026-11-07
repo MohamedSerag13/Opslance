@@ -66,6 +66,7 @@ def get_lab_detail(lab_id: str, db: Session = Depends(get_db), student=Depends(r
     return {
         "id": lab.id,
         "title": lab.title,
+        "category": lab.category,
         "module": f"Module {lab.module_number}: {lab.module_title}",
         "difficulty": lab.difficulty,
         "estimated_minutes": lab.estimated_minutes,

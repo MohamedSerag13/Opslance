@@ -1,0 +1,82 @@
+schema_version: 2
+lab: module-12-lab-04-login-shell-fix
+title: The Silent Login Shell
+category: linux
+domain: shell-config
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: shell-config
+  weight: 35
+  prompt: .profile references .bashrc (the wiring exists)
+  context: null
+  hints:
+  - title: Two kinds of shells
+    content: Login shells (SSH, console, bash -l) read ~/.profile; non-login interactive shells (terminal
+      tabs) read ~/.bashrc. Ubuntu wires them together FROM .profile — and that wiring is missing here.
+  - title: The standard guard
+    content: '`[ -n "$BASH_VERSION" ] && . "$HOME/.bashrc"` sources .bashrc only under bash (sh/dash would
+      choke on bashisms).'
+  - title: Prove it
+    content: '`bash -l` starts a login shell: it reads .profile → sources .bashrc → APP_MODE must appear.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: .profile references .bashrc (the wiring exists)
+  time_target_minutes: 7
+- id: check_2
+  order: 2
+  domain: shell-config
+  weight: 40
+  prompt: a login shell (bash -l) sees APP_MODE=training
+  context: null
+  hints:
+  - title: Two kinds of shells
+    content: Login shells (SSH, console, bash -l) read ~/.profile; non-login interactive shells (terminal
+      tabs) read ~/.bashrc. Ubuntu wires them together FROM .profile — and that wiring is missing here.
+  - title: The standard guard
+    content: '`[ -n "$BASH_VERSION" ] && . "$HOME/.bashrc"` sources .bashrc only under bash (sh/dash would
+      choke on bashisms).'
+  - title: Prove it
+    content: '`bash -l` starts a login shell: it reads .profile → sources .bashrc → APP_MODE must appear.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: a login shell (bash -l) sees APP_MODE=training
+  time_target_minutes: 7
+- id: check_3
+  order: 3
+  domain: shell-config
+  weight: 25
+  prompt: .profile passes a bash syntax check
+  context: null
+  hints:
+  - title: Two kinds of shells
+    content: Login shells (SSH, console, bash -l) read ~/.profile; non-login interactive shells (terminal
+      tabs) read ~/.bashrc. Ubuntu wires them together FROM .profile — and that wiring is missing here.
+  - title: The standard guard
+    content: '`[ -n "$BASH_VERSION" ] && . "$HOME/.bashrc"` sources .bashrc only under bash (sh/dash would
+      choke on bashisms).'
+  - title: Prove it
+    content: '`bash -l` starts a login shell: it reads .profile → sources .bashrc → APP_MODE must appear.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: .profile passes a bash syntax check
+  time_target_minutes: 7

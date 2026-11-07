@@ -1,0 +1,109 @@
+schema_version: 2
+lab: module-10-lab-01-tar-the-logs
+title: Tar Up the Logs
+category: linux
+domain: archiving
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: archiving
+  weight: 25
+  prompt: /home/intern/app-logs.tar.gz exists
+  context: null
+  hints:
+  - title: The three flags
+    content: 'tar czf = **c**reate an archive, compress with g**z**ip, write to **f**ile. In that order:
+      `tar -czf out.tar.gz paths...`.'
+  - title: Control the paths inside
+    content: '`-C /var/log app` first cds to /var/log, then archives the app directory — so entries come
+      out as app/app.log instead of absolute paths.'
+  - title: Verify before sending
+    content: '`tar -tzf` (t = list) prints the contents without extracting. A truncated or corrupt archive
+      fails here, not at the recipient''s end.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/app-logs.tar.gz exists
+  time_target_minutes: 4
+- id: check_2
+  order: 2
+  domain: archiving
+  weight: 25
+  prompt: the file is a valid gzipped tar archive
+  context: null
+  hints:
+  - title: The three flags
+    content: 'tar czf = **c**reate an archive, compress with g**z**ip, write to **f**ile. In that order:
+      `tar -czf out.tar.gz paths...`.'
+  - title: Control the paths inside
+    content: '`-C /var/log app` first cds to /var/log, then archives the app directory — so entries come
+      out as app/app.log instead of absolute paths.'
+  - title: Verify before sending
+    content: '`tar -tzf` (t = list) prints the contents without extracting. A truncated or corrupt archive
+      fails here, not at the recipient''s end.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: the file is a valid gzipped tar archive
+  time_target_minutes: 4
+- id: check_3
+  order: 3
+  domain: archiving
+  weight: 25
+  prompt: the archive contains app.log
+  context: null
+  hints:
+  - title: The three flags
+    content: 'tar czf = **c**reate an archive, compress with g**z**ip, write to **f**ile. In that order:
+      `tar -czf out.tar.gz paths...`.'
+  - title: Control the paths inside
+    content: '`-C /var/log app` first cds to /var/log, then archives the app directory — so entries come
+      out as app/app.log instead of absolute paths.'
+  - title: Verify before sending
+    content: '`tar -tzf` (t = list) prints the contents without extracting. A truncated or corrupt archive
+      fails here, not at the recipient''s end.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: the archive contains app.log
+  time_target_minutes: 4
+- id: check_4
+  order: 4
+  domain: archiving
+  weight: 25
+  prompt: the archive contains audit.log
+  context: null
+  hints:
+  - title: The three flags
+    content: 'tar czf = **c**reate an archive, compress with g**z**ip, write to **f**ile. In that order:
+      `tar -czf out.tar.gz paths...`.'
+  - title: Control the paths inside
+    content: '`-C /var/log app` first cds to /var/log, then archives the app directory — so entries come
+      out as app/app.log instead of absolute paths.'
+  - title: Verify before sending
+    content: '`tar -tzf` (t = list) prints the contents without extracting. A truncated or corrupt archive
+      fails here, not at the recipient''s end.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 4
+    kind: run_check
+    description: the archive contains audit.log
+  time_target_minutes: 4

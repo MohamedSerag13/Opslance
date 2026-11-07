@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-09-lab-03-package-forensics:
+    build: .
+    container_name: lab-09-03-package-forensics
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 09"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Package Forensics"
+      - "lab.id=module-09-lab-03-package-forensics"

@@ -1,0 +1,61 @@
+{
+  "id": "module-12-lab-03-alias-rescue",
+  "module_number": 12,
+  "module_title": "Shell Environment & Configuration",
+  "title": "Bring Back the Aliases",
+  "difficulty": "beginner",
+  "estimated_minutes": 10,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "shell-config",
+  "skills": [
+    "alias",
+    "unalias",
+    ".bashrc",
+    "shell productivity"
+  ],
+  "description": "Recreate the ll and grep aliases that a cleanup script removed from .bashrc.",
+  "scenario": "A 'cleanup' script gutted everyone's .bashrc yesterday and the team lost its muscle-memory aliases. Restore the two documented standards to /home/intern/.bashrc: `alias ll='ls -alF'` and `alias grep='grep --color=auto'`. Aliases only exist in interactive shells, so they live in .bashrc — and they must survive sourcing in a non-interactive test too.",
+  "symptoms": [
+    "`ll` answers 'command not found' in new terminals",
+    "grep output has no colour highlighting",
+    "The team's .bashrc standard defines exactly two aliases: ll and grep",
+    "A cleanup script rewrote .bashrc without the alias block"
+  ],
+  "mission": "Add `alias ll='ls -alF'` and `alias grep='grep --color=auto'` to /home/intern/.bashrc.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Alias syntax",
+      "content": "`alias name='expansion'` — with the equals sign attached to the name and the expansion quoted. Spaces around = are an error."
+    },
+    {
+      "number": 2,
+      "title": "Where aliases live",
+      "content": "Aliases are for interactive convenience, so .bashrc is their home. They are NOT inherited by scripts (that's deliberate — scripts need predictable commands)."
+    },
+    {
+      "number": 3,
+      "title": "Verify by sourcing",
+      "content": "Aliases defined in .bashrc apply after the file is sourced. Test with: `bash -c 'source ~/.bashrc; alias ll'`."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": ".bashrc defines alias ll='ls -alF'",
+      "weight": 35
+    },
+    {
+      "id": "check_2",
+      "description": ".bashrc defines alias grep='grep --color=auto'",
+      "weight": 35
+    },
+    {
+      "id": "check_3",
+      "description": "sourcing .bashrc in a fresh shell defines the ll alias",
+      "weight": 30
+    }
+  ]
+}

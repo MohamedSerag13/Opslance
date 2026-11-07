@@ -1,0 +1,66 @@
+{
+  "id": "module-13-lab-04-fingerprint-audit",
+  "module_number": 13,
+  "module_title": "SSH & Remote Access",
+  "title": "Fingerprints and Stale Hosts",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "ssh",
+  "skills": [
+    "ssh-keygen -lf",
+    "known_hosts",
+    "ssh-keygen -R",
+    "host key rotation"
+  ],
+  "description": "Produce a fingerprint report for your keypair and remove the stale 10.0.0.9 entry from known_hosts.",
+  "scenario": "The staging network was renumbered and host 10.0.0.9 was retired, but your ~/.ssh/known_hosts still carries its old key — a stale entry that will one day collide with a recycled IP. Produce a fingerprint report of YOUR keypair in /home/intern/fingerprints.txt (ssh-keygen -lf), and remove the retired host from known_hosts with ssh-keygen -R.",
+  "symptoms": [
+    "known_hosts contains an entry for the retired host 10.0.0.9",
+    "Nobody has a written record of the team key's fingerprint",
+    "The compliance checklist wants /home/intern/fingerprints.txt",
+    "A recycled 10.0.0.9 would trigger scary MITM warnings"
+  ],
+  "mission": "Write your key's fingerprint report to /home/intern/fingerprints.txt and remove the 10.0.0.9 entry from ~/.ssh/known_hosts.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Fingerprints",
+      "content": "`ssh-keygen -lf keyfile` prints the bit length, SHA256 fingerprint and key type — the compact identity of a key that humans can compare."
+    },
+    {
+      "number": 2,
+      "title": "Retire a known host",
+      "content": "`ssh-keygen -R 10.0.0.9` removes every entry for that host and keeps the old file as known_hosts.old — the supported way, no manual editing."
+    },
+    {
+      "number": 3,
+      "title": "Report first, cleanup second",
+      "content": "Generate the compliance report before touching known_hosts — the report is the deliverable, the cleanup is the hygiene."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "/home/intern/fingerprints.txt exists",
+      "weight": 25
+    },
+    {
+      "id": "check_2",
+      "description": "the report contains the ED25519 key fingerprint",
+      "weight": 30
+    },
+    {
+      "id": "check_3",
+      "description": "the report contains a SHA256 fingerprint string",
+      "weight": 25
+    },
+    {
+      "id": "check_4",
+      "description": "the retired host 10.0.0.9 is gone from known_hosts",
+      "weight": 20
+    }
+  ]
+}

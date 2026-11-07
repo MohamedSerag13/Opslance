@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-06-lab-04-sudo-access-audit:
+    build: .
+    container_name: lab-06-04-sudo-access-audit
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 06"
+      - "lab.category=linux"
+      - "lab.difficulty=beginner"
+      - "lab.title=The Missing Sudo Grant"
+      - "lab.id=module-06-lab-04-sudo-access-audit"

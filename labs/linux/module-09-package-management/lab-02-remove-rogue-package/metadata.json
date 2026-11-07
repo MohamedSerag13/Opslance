@@ -1,0 +1,62 @@
+{
+  "id": "module-09-lab-02-remove-rogue-package",
+  "module_number": 9,
+  "module_title": "Package Management",
+  "title": "Remove the Rogue Package",
+  "difficulty": "beginner",
+  "estimated_minutes": 15,
+  "points": 100,
+  "category": "linux",
+  "subcategory": "packages",
+  "skills": [
+    "apt remove",
+    "apt purge",
+    "dpkg -s",
+    "dpkg -l",
+    "autoremove"
+  ],
+  "description": "A novelty package 'sl' was installed on a staging box; remove and purge it completely.",
+  "scenario": "The quarterly software audit found the novelty package 'sl' (the steam locomotive) installed on this staging server. Policy says unapproved packages must be removed AND purged — removal alone leaves config files behind. Remove it, purge its leftovers, and confirm both the package record and the binary are gone.",
+  "symptoms": [
+    "dpkg -s sl reports the package as installed",
+    "Typing 'sl' by accident (instead of 'ls') launches a steam locomotive in the terminal",
+    "Security policy requires the purge of config files, not just removal",
+    "The audit ticket is not closed until dpkg no longer knows the package"
+  ],
+  "mission": "Remove the sl package and purge its configuration files so that `dpkg -s sl` fails and the binary is no longer on the PATH.",
+  "hints": [
+    {
+      "number": 1,
+      "title": "Check before you change",
+      "content": "`dpkg -s sl` prints the package record including its status; after a successful purge the same command exits non-zero."
+    },
+    {
+      "number": 2,
+      "title": "remove vs purge",
+      "content": "`apt-get remove` deletes the program but keeps config files under /etc. `apt-get purge` deletes the program AND its configs."
+    },
+    {
+      "number": 3,
+      "title": "Verify both layers",
+      "content": "The binary disappearing (`command -v sl`) proves removal; `dpkg -s sl` failing proves the package database is clean too."
+    }
+  ],
+  "verification_command": "bash /check.sh",
+  "acceptance_criteria": [
+    {
+      "id": "check_1",
+      "description": "sl is no longer registered in the package database",
+      "weight": 45
+    },
+    {
+      "id": "check_2",
+      "description": "the sl binary is gone from the PATH",
+      "weight": 35
+    },
+    {
+      "id": "check_3",
+      "description": "the dpkg package database is still readable and has installed packages",
+      "weight": 20
+    }
+  ]
+}

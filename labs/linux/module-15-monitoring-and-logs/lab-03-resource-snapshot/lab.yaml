@@ -1,0 +1,82 @@
+schema_version: 2
+lab: module-15-lab-03-resource-snapshot
+title: Health Snapshot
+category: linux
+domain: monitoring
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: monitoring
+  weight: 20
+  prompt: /home/intern/health-report.txt exists
+  context: null
+  hints:
+  - title: free -m
+    content: 'Shows total/used/free memory in MEGABYTES (-m). The Mem: row is the one everyone quotes.'
+  - title: uptime
+    content: The three load averages (1/5/15-minute) appear after 'load average:' — the quick pulse of
+      CPU pressure.
+  - title: Group redirection
+    content: '`{ free -m; uptime; } > file` runs both commands and sends their COMBINED output to one
+      file.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/health-report.txt exists
+  time_target_minutes: 3
+- id: check_2
+  order: 2
+  domain: monitoring
+  weight: 40
+  prompt: 'report contains the free -m Mem: row'
+  context: null
+  hints:
+  - title: free -m
+    content: 'Shows total/used/free memory in MEGABYTES (-m). The Mem: row is the one everyone quotes.'
+  - title: uptime
+    content: The three load averages (1/5/15-minute) appear after 'load average:' — the quick pulse of
+      CPU pressure.
+  - title: Group redirection
+    content: '`{ free -m; uptime; } > file` runs both commands and sends their COMBINED output to one
+      file.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: 'report contains the free -m Mem: row'
+  time_target_minutes: 3
+- id: check_3
+  order: 3
+  domain: monitoring
+  weight: 40
+  prompt: report contains the uptime load average line
+  context: null
+  hints:
+  - title: free -m
+    content: 'Shows total/used/free memory in MEGABYTES (-m). The Mem: row is the one everyone quotes.'
+  - title: uptime
+    content: The three load averages (1/5/15-minute) appear after 'load average:' — the quick pulse of
+      CPU pressure.
+  - title: Group redirection
+    content: '`{ free -m; uptime; } > file` runs both commands and sends their COMBINED output to one
+      file.'
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: report contains the uptime load average line
+  time_target_minutes: 3

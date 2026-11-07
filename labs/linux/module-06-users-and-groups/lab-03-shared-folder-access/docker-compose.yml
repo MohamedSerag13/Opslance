@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  linux-module-06-lab-03-shared-folder-access:
+    build: .
+    container_name: lab-06-03-shared-folder-access
+    restart: "no"
+    labels:
+      - "lab.module=MODULE 06"
+      - "lab.category=linux"
+      - "lab.difficulty=intermediate"
+      - "lab.title=Shared Folder Access"
+      - "lab.id=module-06-lab-03-shared-folder-access"

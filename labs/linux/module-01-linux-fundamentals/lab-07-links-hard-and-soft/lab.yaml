@@ -1,0 +1,76 @@
+schema_version: 2
+lab: module-01-lab-07-links-hard-and-soft
+title: Links Hard and Soft
+category: linux
+domain: fundamentals
+pass_mark: 70
+grading_scale: percent
+total: 100
+time_limit_minutes: null
+generated:
+  from: metadata.json + check.sh
+  at: '2026-11-06'
+questions:
+- id: check_1
+  order: 1
+  domain: fundamentals
+  weight: 40
+  prompt: ~/current exists and is a symlink
+  context: null
+  hints:
+  - title: Creating Symlinks
+    content: 'Use `ln -s` to create a symbolic link: e.g. `ln -s target link_name`.'
+  - title: Creating Hard Links
+    content: 'Use `ln` without any flags to create a hard link: e.g. `ln source_file backup_file`.'
+  - title: How to verify inodes
+    content: You can verify that two files share an inode using `ls -i` or `stat -c %i`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 1
+    kind: run_check
+    description: /home/intern/current is a symbolic link
+  time_target_minutes: 5
+- id: check_2
+  order: 2
+  domain: fundamentals
+  weight: 20
+  prompt: ~/current points to releases/v2.0
+  context: null
+  hints:
+  - title: Creating Symlinks
+    content: 'Use `ln -s` to create a symbolic link: e.g. `ln -s target link_name`.'
+  - title: Creating Hard Links
+    content: 'Use `ln` without any flags to create a hard link: e.g. `ln source_file backup_file`.'
+  - title: How to verify inodes
+    content: You can verify that two files share an inode using `ls -i` or `stat -c %i`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 2
+    kind: run_check
+    description: /home/intern/current points to releases/v2.0
+  time_target_minutes: 5
+- id: check_3
+  order: 3
+  domain: fundamentals
+  weight: 40
+  prompt: ~/releases/v1.0/app.conf.bak is a hard link of app.conf sharing the same inode
+  context: null
+  hints:
+  - title: Creating Symlinks
+    content: 'Use `ln -s` to create a symbolic link: e.g. `ln -s target link_name`.'
+  - title: Creating Hard Links
+    content: 'Use `ln` without any flags to create a hard link: e.g. `ln source_file backup_file`.'
+  - title: How to verify inodes
+    content: You can verify that two files share an inode using `ls -i` or `stat -c %i`.
+  solution: null
+  explanation: null
+  check:
+    script: /check.sh
+    index: 3
+    kind: run_check
+    description: app.conf.bak shares the same inode as app.conf
+  time_target_minutes: 5

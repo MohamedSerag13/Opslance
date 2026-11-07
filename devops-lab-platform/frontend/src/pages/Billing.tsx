@@ -57,8 +57,8 @@ export default function Billing() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">SaaS Billing & Subscriptions</h1>
-        <p className="text-lg text-gray-600 mt-3 max-w-2xl mx-auto">
+        <h1 className="text-4xl font-extrabold text-content tracking-tight">SaaS Billing & Subscriptions</h1>
+        <p className="text-lg text-muted mt-3 max-w-2xl mx-auto">
           Manage your subscription tier, view invoices, or upgrade to Pro to unlock advanced modules.
         </p>
       </div>
@@ -67,8 +67,8 @@ export default function Billing() {
         <div
           className={`mb-8 p-4 rounded-xl shadow-sm border ${
             alert.type === 'success'
-              ? 'bg-green-50 border-green-200 text-green-800'
-              : 'bg-red-50 border-red-200 text-red-800'
+              ? 'bg-success/10 border-success/40 text-success'
+              : 'bg-danger/10 border-danger/40 text-danger'
           }`}
         >
           <div className="flex items-center gap-3 font-semibold">
@@ -81,30 +81,30 @@ export default function Billing() {
       {/* Pricing Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         {/* Free Tier */}
-        <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm flex flex-col justify-between transition hover:shadow-md">
+        <div className="bg-surface rounded-3xl border border-border p-8 shadow-sm flex flex-col justify-between transition hover:shadow-md">
           <div>
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Free Plan</h2>
+              <h2 className="text-2xl font-bold text-content">Free Plan</h2>
               {status?.tier === 'free' && (
-                <span className="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-full uppercase">
+                <span className="bg-primary/15 text-primary-strong text-xs font-bold px-3 py-1 rounded-full uppercase">
                   Current Tier
                 </span>
               )}
             </div>
-            <p className="text-5xl font-black text-gray-900 mb-6">$0<span className="text-lg text-gray-500 font-normal"> / month</span></p>
-            <p className="text-gray-600 mb-8 font-medium">Perfect for starters looking to learn the basic CLI utilities.</p>
+            <p className="text-5xl font-black text-content mb-6">$0<span className="text-lg text-muted font-normal"> / month</span></p>
+            <p className="text-muted mb-8 font-medium">Perfect for starters looking to learn the basic CLI utilities.</p>
             
             <ul className="space-y-4 mb-8">
-              <li className="flex items-start gap-3 text-sm text-gray-700">
-                <span className="text-green-500 font-bold">✓</span>
+              <li className="flex items-start gap-3 text-sm text-content">
+                <span className="text-success font-bold">✓</span>
                 <span>Access to <strong>Module 01 (Linux Fundamentals)</strong> only</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-gray-700">
-                <span className="text-green-500 font-bold">✓</span>
+              <li className="flex items-start gap-3 text-sm text-content">
+                <span className="text-success font-bold">✓</span>
                 <span>Max <strong>1 concurrent lab</strong> session</span>
               </li>
-              <li className="flex items-start gap-3 text-sm text-gray-700">
-                <span className="text-green-500 font-bold">✓</span>
+              <li className="flex items-start gap-3 text-sm text-content">
+                <span className="text-success font-bold">✓</span>
                 <span>Auto-stop containers after <strong>30 minutes</strong></span>
               </li>
             </ul>
@@ -112,27 +112,27 @@ export default function Billing() {
 
           <button
             disabled
-            className="w-full py-4 px-6 rounded-2xl font-bold bg-gray-100 text-gray-400 cursor-not-allowed text-center transition"
+            className="w-full py-4 px-6 rounded-2xl font-bold bg-surface-2 text-muted cursor-not-allowed text-center transition"
           >
             Included in Signup
           </button>
         </div>
 
         {/* Pro Tier */}
-        <div className="bg-slate-900 rounded-3xl border border-indigo-500 p-8 shadow-lg flex flex-col justify-between relative transition hover:shadow-xl">
-          <div className="absolute top-0 right-1/2 transform translate-x-1/2 -translate-y-1/2 bg-indigo-600 text-white font-extrabold text-xs px-4 py-1.5 rounded-full uppercase tracking-wider shadow">
+        <div className="bg-slate-900 rounded-3xl border border-primary/40 p-8 shadow-lg flex flex-col justify-between relative transition hover:shadow-xl">
+          <div className="absolute top-0 right-1/2 transform translate-x-1/2 -translate-y-1/2 bg-primary text-white font-extrabold text-xs px-4 py-1.5 rounded-full uppercase tracking-wider shadow">
             RECOMMENDED
           </div>
           <div>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-white">Pro Plan</h2>
               {status?.tier === 'pro' && (
-                <span className="bg-green-100 text-green-800 text-xs font-bold px-3 py-1 rounded-full uppercase">
+                <span className="bg-success/15 text-success text-xs font-bold px-3 py-1 rounded-full uppercase">
                   Active
                 </span>
               )}
             </div>
-            <p className="text-5xl font-black text-white mb-6">$19<span className="text-lg text-slate-400 font-normal"> / month</span></p>
+            <p className="text-5xl font-black text-white mb-6">$19<span className="text-lg text-muted font-normal"> / month</span></p>
             <p className="text-slate-300 mb-8 font-medium">Complete access for serious systems engineering students.</p>
             
             <ul className="space-y-4 mb-8 text-slate-200">
@@ -159,14 +159,14 @@ export default function Billing() {
             status?.portal_url ? (
               <a
                 href={status.portal_url}
-                className="w-full py-4 px-6 rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white text-center transition shadow-md hover:shadow-lg"
+                className="w-full py-4 px-6 rounded-2xl font-bold bg-primary hover:bg-primary text-white text-center transition shadow-md hover:shadow-lg"
               >
                 Manage Subscription Portal
               </a>
             ) : (
               <button
                 disabled
-                className="w-full py-4 px-6 rounded-2xl font-bold bg-indigo-700 text-white opacity-80 cursor-not-allowed text-center transition"
+                className="w-full py-4 px-6 rounded-2xl font-bold bg-primary text-white opacity-80 cursor-not-allowed text-center transition"
               >
                 Subscription Active (Portal Loading)
               </button>
@@ -175,7 +175,7 @@ export default function Billing() {
             <button
               onClick={handleUpgrade}
               disabled={loading}
-              className="w-full py-4 px-6 rounded-2xl font-bold bg-indigo-600 hover:bg-indigo-700 text-white text-center transition shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+              className="w-full py-4 px-6 rounded-2xl font-bold bg-primary hover:bg-primary text-white text-center transition shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
               {loading ? (
                 <span>Loading checkout...</span>
@@ -192,19 +192,19 @@ export default function Billing() {
 
       {/* Subscription Details Portal Box */}
       {status?.tier === 'pro' && (
-        <div className="bg-indigo-50 border border-indigo-100 rounded-3xl p-8 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="bg-primary/10 border border-primary/30 rounded-3xl p-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div>
-            <h3 className="text-xl font-bold text-gray-900">Subscription Status</h3>
-            <div className="mt-2 space-y-1.5 text-sm text-gray-600 font-medium">
-              <p>Plan Name: <strong className="text-indigo-700">{status?.plan}</strong></p>
-              <p>Next Renewal Date: <strong className="text-indigo-700">{status?.next_billing_date}</strong></p>
-              <p>Billing Status: <strong className="text-indigo-700">{status?.cancellation_status}</strong></p>
+            <h3 className="text-xl font-bold text-content">Subscription Status</h3>
+            <div className="mt-2 space-y-1.5 text-sm text-muted font-medium">
+              <p>Plan Name: <strong className="text-primary-strong">{status?.plan}</strong></p>
+              <p>Next Renewal Date: <strong className="text-primary-strong">{status?.next_billing_date}</strong></p>
+              <p>Billing Status: <strong className="text-primary-strong">{status?.cancellation_status}</strong></p>
             </div>
           </div>
           {status?.portal_url && (
             <a
               href={status.portal_url}
-              className="px-8 py-3 rounded-2xl border border-indigo-300 text-indigo-700 font-bold bg-white hover:bg-indigo-100 transition shadow-sm"
+              className="px-8 py-3 rounded-2xl border border-primary/40 text-primary-strong font-bold bg-surface hover:bg-primary/15 transition shadow-sm"
             >
               Billing Portal & Invoices
             </a>
