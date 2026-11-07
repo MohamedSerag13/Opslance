@@ -17,3 +17,4 @@ stripe
 requests
 openpyxl
 pyyaml
+structlog

@@ -4,6 +4,9 @@ from typing import List
 from schemas import LabOut, LabUpdate
 from database import get_db
 import models
+from logging_setup import get_logger
+
+logger = get_logger("admin_labs")
 from dependencies import require_admin
 import json
 import os
@@ -42,7 +45,7 @@ def sync_labs(db: Session = Depends(get_db), admin=Depends(require_admin)):
                     with open(meta_path) as f:
                         meta = json.load(f)
                 except Exception as e:
-                    print(f"Error parsing {meta_path}: {e}")
+                    logger.warning("lab_yaml_parse_failed", error=str(e), meta_path=meta_path)
             
             item = os.path.basename(root_dir)
             lab_id = meta.get("id", item)

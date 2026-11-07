@@ -14,6 +14,8 @@ test.describe('theme + design system', () => {
   });
 
   test('/design page lists tokens and components', async ({ page }) => {
+    // the design-system showcase is now auth-gated (internal reference)
+    await login(page);
     await page.goto('/design');
     await expect(page.getByRole('heading', { name: 'Opslance Design System' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Color tokens' })).toBeVisible();

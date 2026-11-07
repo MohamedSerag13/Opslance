@@ -11,15 +11,24 @@ from sqlalchemy.orm import Session
 from sqlalchemy import create_engine
 from database import SessionLocal
 import models
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import subprocess
 import shutil
 
 redis_client = redis.from_url(os.getenv("REDIS_URL", "redis://redis:6379/0"))
-docker_client = docker.from_env()
+try:
+    docker_client = docker.from_env()
+except Exception as _docker_err:  # unit tests / daemons without docker
+    docker_client = None
+    print(f"[worker] Docker daemon unavailable: {_docker_err}")
 
 SUDOERS_HOST_PATH = os.path.join(os.path.dirname(__file__), "sudoers-lab-student")
 SUDOERS_CONTAINER_PATH = "/etc/sudoers.d/lab-student"
+
+def _utcnow():
+    """Naive UTC now (_utcnow() is deprecated in 3.12+)."""
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
 
 
 def _resolve_labs_host_path(mountinfo_path: str = "/proc/self/mountinfo") -> str:
@@ -376,8 +385,8 @@ def _start_lab_impl(data):
         ttl_minutes = 120 if student_tier == "pro" else 30
 
         print(f"[session] TTL set to {ttl_minutes} min for lab {lab_id} (tier: {student_tier})")
-        session.expires_at = datetime.utcnow() + timedelta(minutes=ttl_minutes)
-        session.last_activity_at = datetime.utcnow()
+        session.expires_at = _utcnow() + timedelta(minutes=ttl_minutes)
+        session.last_activity_at = _utcnow()
         db.commit()
     db.close()
 
@@ -434,7 +443,7 @@ def cleanup_idle_labs():
     db = SessionLocal()
     try:
         idle_timeout_min = int(os.getenv("LAB_IDLE_TIMEOUT_MINUTES", 20))
-        now = datetime.utcnow()
+        now = _utcnow()
         idle_threshold = now - timedelta(minutes=idle_timeout_min)
         
         expired_sessions = db.query(models.LabSession).filter(
@@ -510,7 +519,7 @@ def run_worker():
         try:
             expired = db.query(models.LabSession).filter(
                 models.LabSession.status == "running",
-                models.LabSession.expires_at < datetime.utcnow()
+                models.LabSession.expires_at < _utcnow()
             ).all()
             for sess in expired:
                 print(f"[expiry] stopping session {sess.id} for student {sess.student_id}")
@@ -526,5 +535,23 @@ def run_worker():
         finally:
             db.close()
 
+def _serve_internal_api():
+    """Run the internal exec/PTY API on the compose network only (no published
+    port). The backend proxies verification + terminal here, so it never needs
+    the Docker socket itself."""
+    import threading
+    import uvicorn
+    from api import app as internal_app
+
+    thread = threading.Thread(
+        target=uvicorn.run,
+        args=(internal_app,),
+        kwargs={"host": "0.0.0.0", "port": 8100, "log_level": "warning"},
+        daemon=True,
+    )
+    thread.start()
+
+
 if __name__ == "__main__":
+    _serve_internal_api()
     run_worker()

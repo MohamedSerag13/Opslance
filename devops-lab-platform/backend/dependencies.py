@@ -32,7 +32,7 @@ def get_current_student(user = Depends(get_current_user)):
     return user
 
 def require_admin(user = Depends(get_current_user)):
-    if type(user) == dict and user.get("role") == "admin":
+    if isinstance(user, dict) and user.get("role") == "admin":
         return user
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
 

@@ -28,6 +28,11 @@ if [ -z "${POSTGRES_PASSWORD:-}" ] && [ -s "$SECRETS_DIR/postgres_password" ]; t
     POSTGRES_PASSWORD="$(cat "$SECRETS_DIR/postgres_password")"
 fi
 
+if [ -z "${REDIS_URL:-}" ] && [ -s "$SECRETS_DIR/redis_password" ]; then
+    REDIS_URL="redis://:$(cat "$SECRETS_DIR/redis_password")@redis:6379/0"
+    export REDIS_URL
+fi
+
 if [ -z "${DATABASE_URL:-}" ] && [ -n "${POSTGRES_PASSWORD:-}" ]; then
     # +psycopg2 pinned: SQLAlchemy >= 2.1 would otherwise pick psycopg (v3),
     # which is not installed in this image

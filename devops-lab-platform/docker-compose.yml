@@ -65,13 +65,14 @@ services:
   backend:
     build:
       context: ./backend
-    ports:
-      - "${BACKEND_PORT:-8000}:8000"
+    # No published port: the backend is reachable only through nginx (:80),
+    # so its CSP headers and rate-limit view can't be bypassed from outside.
     environment:
       # Empty values fall back to the generated secrets (backend/docker-entrypoint.sh)
       - DATABASE_URL=${DATABASE_URL:-}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-}
-      - REDIS_URL=redis://redis:6379/0
+      # empty: docker-entrypoint.sh fills it from the generated redis_password
+      - REDIS_URL=${REDIS_URL:-}
       - SECRET_KEY=${SECRET_KEY:-}
       - ADMIN_EMAIL=${ADMIN_EMAIL}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
@@ -79,8 +80,11 @@ services:
       - CORS_ORIGINS=${CORS_ORIGINS:-}
       # Backend role: entrypoint waits for the DB, syncs labs (non-fatal)
       - DB_WAIT=1
+      # Container exec + terminal PTY are proxied to the lab-manager over the
+      # internal network — the backend holds no Docker socket of its own.
+      - LAB_MANAGER_URL=http://lab-manager:8100
+      - LOG_FORMAT=${LOG_FORMAT:-json}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
       - ${LABS_HOST_PATH:-../labs}:/labs-repo:ro
       - ./backend/alembic:/app/alembic
       - app_secrets:/secrets:ro
@@ -108,9 +112,13 @@ services:
       context: .
       dockerfile: lab-manager/Dockerfile
     environment:
-      - REDIS_URL=redis://redis:6379/0
+      # empty: docker-entrypoint.sh fills it from the generated redis_password
+      - REDIS_URL=${REDIS_URL:-}
       - DATABASE_URL=${DATABASE_URL:-}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-}
+      # Shared token for the internal exec/PTY API (falls back to SECRET_KEY)
+      - LAB_API_TOKEN=${SECRET_KEY:-}
+      - LOG_FORMAT=${LOG_FORMAT:-json}
       # Host-absolute path of the labs dir, used to rewrite bind mounts for
       # lab containers (resolved by the host Docker daemon). Leave empty to
       # auto-detect it from this container's mount table (worker.py).
@@ -153,8 +161,23 @@ services:
 
   redis:
     image: redis:7-alpine
+    # requirepass from the generated secrets + AOF persistence so leaderboard
+    # and rate-limit state survive restarts.
+    command: ["/bin/sh", "-c", "exec redis-server --requirepass \"$$(cat /secrets/redis_password)\" --appendonly yes --appendfsync everysec"]
+    volumes:
+      - redis_data:/data
+      - app_secrets:/secrets:ro
+    depends_on:
+      secrets-init:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$(cat /secrets/redis_password) ping | grep PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     restart: always
 
 volumes:
   postgres_data:
+  redis_data:
   app_secrets:

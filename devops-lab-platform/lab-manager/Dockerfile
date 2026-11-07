@@ -21,6 +21,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 COPY backend/database.py .
 COPY backend/models.py .
 COPY lab-manager/worker.py .
+COPY lab-manager/api.py .
 # Sudoers whitelist injected into student lab containers at runtime
 COPY lab-manager/sudoers-lab-student .
 

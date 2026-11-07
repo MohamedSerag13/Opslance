@@ -39,3 +39,16 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+/**
+ * Exchange the Bearer token for a one-time, 30-second WebSocket ticket
+ * (POST /api/ws/ticket). Terminal tickets are pinned to one session id.
+ * The long-lived JWT never appears in a WebSocket URL this way.
+ */
+export async function fetchWsTicket(scope: 'terminal' | 'events', sessionId?: string): Promise<string> {
+  const { data } = await api.post('/ws/ticket', {
+    scope,
+    ...(sessionId ? { session_id: sessionId } : {}),
+  });
+  return data.ticket as string;
+}

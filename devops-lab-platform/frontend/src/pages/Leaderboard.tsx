@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { api } from '../api/client';
+import { api, fetchWsTicket } from '../api/client';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import AppNav from '../components/layout/AppNav';
@@ -55,12 +55,21 @@ export default function Leaderboard() {
     let retryTimer: ReturnType<typeof setTimeout> | null = null;
     let closed = false;
 
-    // Same origin — nginx (compose) and the vite proxy both forward /api/ws/
-    // to the backend with WebSocket upgrade headers.
-    const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/api/ws/events?token=${token}`;
-
-    const connect = () => {
+    const connect = async () => {
       if (closed) return;
+      // One-time 30s ticket per connection — the JWT never goes into the URL.
+      let ticket: string;
+      try {
+        ticket = await fetchWsTicket('events');
+      } catch {
+        if (!closed) retryTimer = setTimeout(connect, 5000);
+        return;
+      }
+      if (closed) return;
+
+      // Same origin — nginx (compose) and the vite proxy both forward /api/ws/
+      // to the backend with WebSocket upgrade headers.
+      const wsUrl = `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}/api/ws/events?ticket=${ticket}`;
       try {
         ws = new WebSocket(wsUrl);
         ws.onopen = () => setLive(true);
@@ -79,7 +88,8 @@ export default function Leaderboard() {
         ws.onerror = () => ws?.close();
       } catch { /* WS unavailable — page still works without live updates */ }
     };
-    connect();
+
+    void connect();
 
     return () => {
       closed = true;

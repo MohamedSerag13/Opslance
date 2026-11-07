@@ -6,10 +6,17 @@ from database import get_db
 import models
 from dependencies import get_current_student
 from email_service import send_subscription_email_task
+from logging_setup import get_logger
 import stripe
+
+logger = get_logger("billing")
 
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
+# Unverified (mock) webhooks must never be reachable by accident: they bypass
+# signature checks and could grant Pro for free. They only load with an
+# explicit STRIPE_DEV_MODE=1 alongside the missing webhook secret.
+STRIPE_DEV_MODE = os.getenv("STRIPE_DEV_MODE") == "1"
 STRIPE_PRO_PRICE_ID = os.getenv("STRIPE_PRO_PRICE_ID")
 FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost")
 
@@ -46,7 +53,9 @@ def create_checkout_session(db: Session = Depends(get_db), student=Depends(get_c
         )
         return {"url": checkout_session.url}
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        # checkout internals (Stripe API errors) stay in the logs, not the response
+        logger.error("stripe_checkout_failed", error=str(e))
+        raise HTTPException(status_code=400, detail="Could not create checkout session")
 
 @router.post("/webhook")
 async def stripe_webhook(request: Request, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
@@ -54,13 +63,21 @@ async def stripe_webhook(request: Request, background_tasks: BackgroundTasks, db
     sig_header = request.headers.get("stripe-signature")
     
     if not STRIPE_WEBHOOK_SECRET:
-        # Mock/Development webhook handler if secret is not set
+        if not STRIPE_DEV_MODE:
+            # Fail closed: no signature secret configured and dev mode not
+            # explicitly enabled — never process unverified upgrade events.
+            logger.error("Refusing unverified Stripe webhook: STRIPE_WEBHOOK_SECRET missing and STRIPE_DEV_MODE not enabled")
+            raise HTTPException(
+                status_code=503,
+                detail="Webhook verification is not configured",
+            )
+        # Mock/Development webhook handler — only with STRIPE_DEV_MODE=1
         try:
             data = json.loads(payload)
             event_type = data.get("type")
             event_object = data.get("data", {}).get("object", {})
-            print(f"[stripe-mock] Received unverified event {event_type}")
-        except Exception as e:
+            logger.warning("[stripe-mock] Accepted UNVERIFIED event %s (STRIPE_DEV_MODE=1)", event_type)
+        except Exception:
             raise HTTPException(status_code=400, detail="Invalid payload")
     else:
         try:
@@ -69,6 +86,11 @@ async def stripe_webhook(request: Request, background_tasks: BackgroundTasks, db
             )
             event_type = event["type"]
             event_object = event["data"]["object"]
+            # StripeObject has no .get() (attribute access maps through
+            # __getitem__, so obj.get("metadata") raises KeyError('get')).
+            # to_dict() converts recursively to plain dicts — same shape as
+            # the dev-mode branch.
+            event_object = event_object.to_dict()
         except stripe.error.SignatureVerificationError:
             raise HTTPException(status_code=400, detail="Invalid signature")
         except Exception:
@@ -94,7 +116,7 @@ async def stripe_webhook(request: Request, background_tasks: BackgroundTasks, db
             from datetime import datetime
             billing_date = datetime.now().strftime("%B %d, %Y")
             background_tasks.add_task(send_subscription_email_task, student.email, "Pro Tier Plan", billing_date)
-            print(f"[stripe] Student {student.id} upgraded to Pro tier")
+            logger.info("stripe_student_upgraded", student_id=str(student.id), tier="pro")
             
     elif event_type in ["customer.subscription.deleted", "invoice.payment_failed"]:
         subscription = event_object
@@ -104,7 +126,7 @@ async def stripe_webhook(request: Request, background_tasks: BackgroundTasks, db
             if student:
                 student.subscription_tier = "free"
                 db.commit()
-                print(f"[stripe] Student {student.id} downgraded to Free tier")
+                logger.info("stripe_student_downgraded", student_id=str(student.id), tier="free")
                 
     return {"status": "success"}
 
@@ -127,7 +149,7 @@ def get_billing_status(db: Session = Depends(get_db), student=Depends(get_curren
                 next_billing_date = datetime.fromtimestamp(sub.current_period_end).strftime("%B %d, %Y")
                 cancellation_status = "Cancelled (ends at period end)" if sub.cancel_at_period_end else "Active"
         except Exception as e:
-            print(f"Error querying subscription: {e}")
+            logger.error("stripe_subscription_query_failed", error=str(e), customer_id=customer_id)
             
     if customer_id:
         try:
@@ -137,7 +159,7 @@ def get_billing_status(db: Session = Depends(get_db), student=Depends(get_curren
             )
             portal_url = portal_session.url
         except Exception as e:
-            print(f"Error creating billing portal: {e}")
+            logger.error("stripe_portal_creation_failed", error=str(e), customer_id=customer_id)
             
     return {
         "tier": tier,

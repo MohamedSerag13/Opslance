@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database import get_db
+import json
 import models
 from tracks import TRACKS
 from dependencies import get_current_student
@@ -93,15 +94,20 @@ def get_dashboard(db: Session = Depends(get_db), student=Depends(get_current_stu
     active_attempts = db.query(models.ExamAttempt).filter_by(
         student_id=student.id, status="active"
     ).order_by(models.ExamAttempt.started_at.desc()).all()
+    # one IN query instead of a lookup per attempt (N+1)
+    attempt_sessions = {
+        s.id: s for s in db.query(models.LabSession).filter(
+            models.LabSession.id.in_([a.session_id for a in active_attempts])
+        ).all()
+    } if active_attempts else {}
     for a in active_attempts:
         lab = labs_by_id.get(a.lab_id)
-        sess = db.query(models.LabSession).filter_by(id=a.session_id).first()
+        sess = attempt_sessions.get(a.session_id)
         if not lab or not sess or sess.status != "running":
             continue
         attempt_lab_ids.add(a.lab_id)
-        import json as _json
         try:
-            q_count = len(_json.loads(a.question_ids or "[]"))
+            q_count = len(json.loads(a.question_ids or "[]"))
         except Exception:
             q_count = 0
         continue_items.append({

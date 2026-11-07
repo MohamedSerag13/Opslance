@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { api } from '../api/client';
 import Terminal from '../components/Terminal';
-import { Badge, Button, Modal, ProgressBar, ProgressRing, useToast } from '../components/ui';
+import { Badge, Button, Modal, ProgressBar, ProgressRing, Skeleton, useToast } from '../components/ui';
 import confetti from 'canvas-confetti';
 
 /**
@@ -528,8 +528,18 @@ export default function LabRunner() {
         {/* left: question panel */}
         <aside className="md:w-[440px] shrink-0 flex flex-col min-h-0 border-b md:border-b-0 md:border-r border-border bg-surface">
           {attemptLoading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+            /* startup skeleton mirrors the real panel: meta row, prompt, actions */
+            <div className="flex-1 space-y-4 p-6" aria-label="Loading lab">
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-6 w-24" />
+                <Skeleton className="h-6 w-16 rounded-full" />
+              </div>
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-24 w-full rounded-xl" />
+              <div className="flex gap-2">
+                <Skeleton className="h-9 w-28 rounded-lg" />
+                <Skeleton className="h-9 w-20 rounded-lg" />
+              </div>
             </div>
           ) : showModePicker ? (
             <div className="flex-1 overflow-y-auto p-6 space-y-4">

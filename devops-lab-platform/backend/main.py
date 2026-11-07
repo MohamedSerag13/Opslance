@@ -1,11 +1,15 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
     auth, admin_groups, admin_students, admin_labs, admin_environments,
-    labs, sessions, progress, websocket, gamification, billing, admin_analytics
+    labs, sessions, runner, progress, websocket, gamification, billing, admin_analytics
 )
 from security import SecurityHeadersMiddleware
+from logging_setup import setup_logging, get_logger, new_request_id, request_id_var
+
+setup_logging()
+logger = get_logger("main")
 
 app = FastAPI(title="DevOps Lab Platform API")
 
@@ -18,6 +22,18 @@ except OSError:
 
 # Hardening headers on every API response (CSP for HTML lives in nginx).
 app.add_middleware(SecurityHeadersMiddleware)
+
+
+@app.middleware("http")
+async def request_id_middleware(request: Request, call_next):
+    """Correlate every log line with the request it belongs to and hand the id
+    back to the client (X-Request-ID) for support triage."""
+    rid = request.headers.get("x-request-id") or new_request_id()
+    request_id_var.set(rid)
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = rid
+    return response
+
 
 # CORS: the app is same-origin through nginx, so cross-origin access is only
 # needed for external integrations. Set CORS_ORIGINS="https://a.com,https://b.com"
@@ -41,9 +57,20 @@ app.include_router(admin_environments.router, prefix="/api/admin/environments", 
 app.include_router(admin_analytics.router, prefix="/api/admin/analytics", tags=["admin_analytics"])
 app.include_router(labs.router, prefix="/api/labs", tags=["student_labs"])
 app.include_router(sessions.router, prefix="/api/sessions", tags=["sessions"])
+# Runner shares the /api/sessions prefix — the attempt endpoints moved here
+# from sessions.py; the URLs are unchanged.
+app.include_router(runner.router, prefix="/api/sessions", tags=["exam_runner"])
 app.include_router(progress.router, prefix="/api", tags=["progress"])
 app.include_router(gamification.router, prefix="/api/gamification", tags=["gamification"])
 app.include_router(websocket.router, prefix="/api/ws", tags=["websocket"])
+
+
+@app.on_event("startup")
+def on_startup():
+    # One-time seed of the achievement catalog (was per-submission before).
+    from verification import ensure_achievement_catalog_on_startup
+    ensure_achievement_catalog_on_startup()
+
 
 @app.get("/api/health")
 def health_check():

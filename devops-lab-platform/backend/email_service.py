@@ -1,4 +1,7 @@
 import os
+from logging_setup import get_logger
+
+logger = get_logger("email")
 import requests
 from dataclasses import dataclass
 
@@ -82,7 +85,7 @@ def get_subscription_template(plan_name: str, billing_date: str) -> EmailTemplat
 
 def send_email(to_email: str, subject: str, html_body: str):
     if not SENDGRID_API_KEY:
-        print(f"[email-mock] Mock send to {to_email} | Subject: {subject}", flush=True)
+        logger.info("email_mock_send", to=to_email, subject=subject)
         return
         
     url = "https://api.sendgrid.com/v3/mail/send"
@@ -108,11 +111,11 @@ def send_email(to_email: str, subject: str, html_body: str):
     try:
         response = requests.post(url, headers=headers, json=data, timeout=10)
         if response.status_code >= 300:
-            print(f"[email-error] SendGrid failed with code {response.status_code}: {response.text}", flush=True)
+            logger.error("email_sendgrid_failed", status=response.status_code, to=to_email)
         else:
-            print(f"[email-success] Email sent to {to_email} successfully", flush=True)
+            logger.info("email_sent", to=to_email)
     except Exception as e:
-        print(f"[email-error] Error sending mail: {e}", flush=True)
+        logger.error("email_send_failed", error=str(e), to=to_email)
 
 def send_welcome_email_task(to_email: str, username: str):
     tmpl = get_welcome_template(username)

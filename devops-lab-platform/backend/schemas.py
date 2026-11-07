@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, field_validator
-from typing import Optional, List
+from typing import Optional, List, Literal
 from datetime import datetime
 from uuid import UUID
 
@@ -136,3 +136,20 @@ class SubmissionOut(BaseModel):
     passed: bool
     score: int
     verification_output: Optional[str] = None
+
+class LogoutData(BaseModel):
+    refresh_token: Optional[str] = None
+
+class PreferencesData(BaseModel):
+    opt_out_completion: Optional[bool] = None
+
+class AttemptCreate(BaseModel):
+    mode: str = "practice"
+
+class QuestionUpdate(BaseModel):
+    flagged: Optional[bool] = None
+    current: Optional[bool] = None
+
+class WsTicketData(BaseModel):
+    scope: Literal["terminal", "events"]
+    session_id: Optional[str] = None

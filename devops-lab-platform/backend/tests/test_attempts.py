@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import pytest
 
 import models
-import routers.sessions as sessions_mod
+import verification as verification_mod  # canonical exec/verification module
 from tests.conftest import (
     CKA_LAB_ID, CKA_MOCK_EXAM_ID, LAB_V2_ID, fake_checker, force_running, login_headers,
 )
@@ -77,7 +77,7 @@ def test_per_question_check_pass_and_fail(v2_setup, client, monkeypatch):
     st, lab, sid, h = v2_setup()
     attempt = client.post(f"/api/sessions/{sid}/attempts", json={"mode": "practice"}, headers=h).json()
     aid = attempt["id"]
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker(lab_pass_output(4, pass_idx=[0])))
     r = client.post(f"/api/sessions/{sid}/attempts/{aid}/questions/check_1/check", headers=h)
     assert r.status_code == 200
@@ -107,7 +107,7 @@ def test_per_question_check_uses_single_task_dispatch(v2_setup, client, monkeypa
             return 0, "  FAIL [    0] check 3 failed"
         return 0, lab_pass_output(4)
 
-    monkeypatch.setattr(sessions_mod, "exec_in_container", dispatched_checker)
+    monkeypatch.setattr(verification_mod, "exec_in_container", dispatched_checker)
     r = client.post(f"/api/sessions/{sid}/attempts/{aid}/questions/check_3/check", headers=h)
     assert r.status_code == 200
     body = r.json()
@@ -123,7 +123,7 @@ def test_per_question_check_uses_single_task_dispatch(v2_setup, client, monkeypa
     assert all(by_id[f"check_{i}"]["status"] == "unanswered" for i in (1, 2, 4))
 
     commands.clear()
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         lambda c, cmd: (commands.append(cmd), (0, "  PASS [+25 pts] check 1 ok"))[1])
     r2 = client.post(f"/api/sessions/{sid}/attempts/{aid}/questions/check_1/check", headers=h)
     assert commands == ["bash /check.sh 1"]
@@ -187,13 +187,13 @@ def test_finish_grades_and_records_submission(v2_setup, client, db, monkeypatch)
     attempt = client.post(f"/api/sessions/{sid}/attempts", json={"mode": "practice"}, headers=h).json()
     aid = attempt["id"]
     # live checks pass Q1+Q2
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker(lab_pass_output(4, pass_idx=[0, 1])))
     client.post(f"/api/sessions/{sid}/attempts/{aid}/questions/check_1/check", headers=h)
     client.post(f"/api/sessions/{sid}/attempts/{aid}/questions/check_2/check", headers=h)
 
     # final authoritative run: Q1..Q3 pass
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker(lab_pass_output(4, pass_idx=[0, 1, 2])))
     r = client.post(f"/api/sessions/{sid}/attempts/{aid}/finish", headers=h)
     body = r.json()
@@ -212,7 +212,7 @@ def test_finish_below_pass_mark_fails(v2_setup, client, monkeypatch):
     st, lab, sid, h = v2_setup()
     attempt = client.post(f"/api/sessions/{sid}/attempts", json={"mode": "practice"}, headers=h).json()
     aid = attempt["id"]
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker(lab_pass_output(4, pass_idx=[0])))
     r = client.post(f"/api/sessions/{sid}/attempts/{aid}/finish", headers=h)
     body = r.json()
@@ -224,13 +224,13 @@ def test_finish_with_container_gone_grades_from_states(v2_setup, client, monkeyp
     st, lab, sid, h = v2_setup()
     attempt = client.post(f"/api/sessions/{sid}/attempts", json={"mode": "practice"}, headers=h).json()
     aid = attempt["id"]
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker(lab_pass_output(4, pass_idx=[0])))
     client.post(f"/api/sessions/{sid}/attempts/{aid}/questions/check_1/check", headers=h)
 
     def _gone(container_name, command):
-        raise sessions_mod.HTTPException(400, "Container not found — it may have expired")
-    monkeypatch.setattr(sessions_mod, "exec_in_container", _gone)
+        raise verification_mod.HTTPException(400, "Container not found — it may have expired")
+    monkeypatch.setattr(verification_mod, "exec_in_container", _gone)
     r = client.post(f"/api/sessions/{sid}/attempts/{aid}/finish", headers=h)
     body = r.json()
     assert body["status"] == "completed"
@@ -240,7 +240,7 @@ def test_finish_with_container_gone_grades_from_states(v2_setup, client, monkeyp
 def test_review_payload_reveals_solutions(v2_setup, client, monkeypatch):
     st, lab, sid, h = v2_setup()
     attempt = client.post(f"/api/sessions/{sid}/attempts", json={"mode": "practice"}, headers=h).json()
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker(lab_pass_output(4, pass_idx=[0])))
     client.post(f"/api/sessions/{sid}/attempts/{attempt['id']}/finish", headers=h)
     r = client.get(f"/api/sessions/{sid}/attempts/{attempt['id']}", headers=h)
@@ -255,7 +255,7 @@ def test_retry_failed_creates_subset_attempt(v2_setup, client, monkeypatch):
     st, lab, sid, h = v2_setup()
     attempt = client.post(f"/api/sessions/{sid}/attempts", json={"mode": "practice"}, headers=h).json()
     aid = attempt["id"]
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker(lab_pass_output(4, pass_idx=[0, 3])))
     client.post(f"/api/sessions/{sid}/attempts/{aid}/finish", headers=h)
     r = client.post(f"/api/sessions/{sid}/attempts/{aid}/retry-failed", headers=h)
@@ -270,7 +270,7 @@ def test_retry_failed_creates_subset_attempt(v2_setup, client, monkeypatch):
 def test_retry_rejected_with_nothing_failed(v2_setup, client, monkeypatch):
     st, lab, sid, h = v2_setup()
     attempt = client.post(f"/api/sessions/{sid}/attempts", json={"mode": "practice"}, headers=h).json()
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker(lab_pass_output(4)))
     client.post(f"/api/sessions/{sid}/attempts/{attempt['id']}/finish", headers=h)
     r = client.post(f"/api/sessions/{sid}/attempts/{attempt['id']}/retry-failed", headers=h)

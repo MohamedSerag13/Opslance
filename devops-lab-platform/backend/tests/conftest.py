@@ -61,6 +61,7 @@ from database import SessionLocal  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
 import routers.sessions as sessions_mod  # noqa: E402
+import verification as verification_mod  # noqa: E402
 
 TEST_CLIENT = TestClient(app_main.app)
 
@@ -173,7 +174,7 @@ def force_running(db, session_id: str, container="container-x") -> None:
 
 
 def fake_checker(output: str, exit_code: int = 0):
-    """Stub for sessions.exec_in_container with a canned check.sh output."""
+    """Stub for verification.exec_in_container with a canned check.sh output."""
     return lambda container_name, command: (exit_code, output)
 
 
@@ -198,7 +199,7 @@ def full_pass_flow(client, db, make_student, make_lab, monkeypatch):
         assert r.status_code == 200, r.text
         sid = r.json()["session_id"]
         force_running(db, sid)
-        monkeypatch.setattr(sessions_mod, "exec_in_container",
+        monkeypatch.setattr(verification_mod, "exec_in_container",
                             fake_checker(checker_output or
                                          "✅ PASS [100%]: all good\nSCORE: 100/100"))
         r = client.post(f"/api/sessions/{sid}/submit",

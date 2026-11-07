@@ -18,6 +18,7 @@ const Achievements = lazyPage(() => import('./pages/Achievements'));
 const Leaderboard = lazyPage(() => import('./pages/Leaderboard'));
 const Billing = lazyPage(() => import('./pages/Billing'));
 const DesignSystem = lazyPage(() => import('./pages/DesignSystem'));
+const NotFound = lazyPage(() => import('./pages/NotFound'));
 const AdminDashboard = lazyPage(() => import('./pages/admin/AdminDashboard'));
 const AdminAnalytics = lazyPage(() => import('./pages/admin/AdminAnalytics'));
 const GroupsList = lazyPage(() => import('./pages/admin/GroupsList'));
@@ -75,7 +76,8 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/reset-password" element={<ResetPasswordRoute />} />
-          <Route path="/design" element={<DesignSystem />} />
+          {/* design system showcase — internal reference, requires sign-in */}
+          <Route path="/design" element={<ProtectedRoute><DesignSystem /></ProtectedRoute>} />
 
           {/* Student Routes */}
           <Route path="/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
@@ -97,7 +99,8 @@ function App() {
           <Route path="/admin/environments" element={<ProtectedRoute requireAdmin><Environments /></ProtectedRoute>} />
           <Route path="/admin/leaderboard" element={<ProtectedRoute requireAdmin><AdminLeaderboard /></ProtectedRoute>} />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          {/* 404 — unknown routes get a real not-found page, not a silent redirect */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
     </ToastProvider>

@@ -24,4 +24,5 @@ gen_secret() {
 echo "[secrets-init] Ensuring generated secrets in $SECRETS_DIR ..."
 gen_secret "$SECRETS_DIR/postgres_password" 32
 gen_secret "$SECRETS_DIR/secret_key" 64
+gen_secret "$SECRETS_DIR/redis_password" 24
 echo "[secrets-init] Done."

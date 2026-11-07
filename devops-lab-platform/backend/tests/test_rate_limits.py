@@ -3,6 +3,7 @@ import pytest
 
 import models
 import routers.sessions as sessions_mod
+import verification as verification_mod
 from tests.conftest import FAKE_REDIS, fake_checker, force_running, login_headers
 
 
@@ -54,7 +55,7 @@ def test_check_gate_1_per_2s(client, db, make_student, make_lab, monkeypatch):
     h = login_headers(st.email, "Passw0rd!")
     sid = client.post("/api/sessions/", json={"lab_id": lab.id}, headers=h).json()["session_id"]
     force_running(db, sid)
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker("✅ PASS [100%]: ok\nSCORE: 100/100"))
     r1 = client.post(f"/api/sessions/{sid}/check", headers=h)
     assert r1.status_code == 200
@@ -69,7 +70,7 @@ def test_check_window_30_per_5min(client, db, make_student, make_lab, monkeypatc
     h = login_headers(st.email, "Passw0rd!")
     sid = client.post("/api/sessions/", json={"lab_id": lab.id}, headers=h).json()["session_id"]
     force_running(db, sid)
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker("✅ PASS [100%]: ok\nSCORE: 100/100"))
     for i in range(30):
         FAKE_REDIS.delete(f"check_gate:{st.id}")
@@ -87,7 +88,7 @@ def test_submit_window_10_per_5min(client, db, make_student, make_lab, monkeypat
     sid = client.post("/api/sessions/", json={"lab_id": lab.id}, headers=h).json()["session_id"]
     force_running(db, sid)
     # failing checks keep the session `running` so submits can repeat
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker("❌ FAIL [0%]: no\nSCORE: 0/100", exit_code=1))
     for i in range(10):
         r = client.post(f"/api/sessions/{sid}/submit", headers=h)
@@ -104,7 +105,7 @@ def test_runner_question_check_gate(client, db, make_student, make_lab, monkeypa
     sid = client.post("/api/sessions/", json={"lab_id": lab.id}, headers=h).json()["session_id"]
     force_running(db, sid)
     aid = client.post(f"/api/sessions/{sid}/attempts", json={"mode": "practice"}, headers=h).json()["id"]
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker("✅ PASS [100%]: a\n✅ PASS [100%]: b\n✅ PASS [100%]: c\n✅ PASS [100%]: d"))
     r1 = client.post(f"/api/sessions/{sid}/attempts/{aid}/questions/check_1/check", headers=h)
     assert r1.status_code == 200

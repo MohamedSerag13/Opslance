@@ -1,11 +1,13 @@
 import os
+import hmac
+import json
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from datetime import datetime
-from schemas import LoginData, Token, RefreshData, UserMe, PasswordResetRequest
+from schemas import LoginData, Token, RefreshData, LogoutData, UserMe, PreferencesData, PasswordResetRequest
 from database import get_db
 import models
-from auth import verify_password, get_password_hash, create_access_token, create_refresh_token, decode_token
+from auth import verify_password, get_password_hash, create_access_token, create_refresh_token, decode_token, utcnow
 from dependencies import get_current_user, get_current_student, enforce_rate_limit, redis_client
 
 router = APIRouter()
@@ -13,6 +15,11 @@ router = APIRouter()
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 ADMIN_FULL_NAME = os.getenv("ADMIN_FULL_NAME", "Admin")
+
+# Refresh-token denylist: logged-out (and rotated-out) tokens land here with
+# their remaining validity as TTL, so a stolen refresh token dies at logout
+# instead of surviving up to 7 days.
+REFRESH_DENYLIST_PREFIX = "refresh_deny:"
 
 # Brute-force guard: 10 failed attempts per 15 min, tracked independently per
 # email and per client IP (X-Forwarded-For first hop when proxied).
@@ -24,6 +31,18 @@ def _client_ip(request: Request) -> str:
     forwarded = request.headers.get("x-forwarded-for", "")
     first_hop = forwarded.split(",")[0].strip() if forwarded else ""
     return first_hop or (request.client.host if request.client else "unknown")
+
+
+def _revoke_refresh_token(refresh_token: str) -> None:
+    """Put a refresh token's jti on the Redis denylist until its exp."""
+    payload = decode_token(refresh_token)
+    if not payload:
+        return
+    jti = payload.get("jti")
+    if not jti:
+        return  # token predates jti — it simply expires naturally
+    ttl = max(1, int(payload.get("exp", 0)) - int(utcnow().timestamp()))
+    redis_client.setex(f"{REFRESH_DENYLIST_PREFIX}{jti}", ttl, "1")
 
 
 @router.post("/login", response_model=Token)
@@ -38,8 +57,13 @@ def login(data: LoginData, request: Request, db: Session = Depends(get_db)):
                 detail="Too many failed login attempts — try again in a few minutes.",
             )
 
-    # Admin login — not a Student row, flag does not apply
-    if data.email == ADMIN_EMAIL and data.password == ADMIN_PASSWORD:
+    # Admin login — not a Student row, flag does not apply. compare_digest keeps
+    # the check constant-time so response timing can't probe the password.
+    email_ok = hmac.compare_digest(
+        (data.email or "").encode(), (ADMIN_EMAIL or "").encode())
+    password_ok = ADMIN_PASSWORD is not None and hmac.compare_digest(
+        (data.password or "").encode(), ADMIN_PASSWORD.encode())
+    if email_ok and password_ok:
         user_id = "admin"
         role = "admin"
         must_reset = False
@@ -53,7 +77,7 @@ def login(data: LoginData, request: Request, db: Session = Depends(get_db)):
         if not student.is_active:
             raise HTTPException(status_code=401, detail="Account is inactive")
 
-        student.last_login = datetime.utcnow()
+        student.last_login = utcnow()
         db.commit()
         user_id = str(student.id)
         role = "student"
@@ -80,6 +104,10 @@ def refresh(data: RefreshData):
     if not payload:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
+    jti = payload.get("jti")
+    if jti and redis_client.get(f"{REFRESH_DENYLIST_PREFIX}{jti}"):
+        raise HTTPException(status_code=401, detail="Refresh token has been revoked")
+
     user_id = payload.get("sub")
     role = payload.get("role")
     email = payload.get("email")
@@ -87,15 +115,20 @@ def refresh(data: RefreshData):
     access_token = create_access_token(data={"sub": user_id, "role": role, "email": email})
     new_refresh = create_refresh_token(data={"sub": user_id, "role": role, "email": email})
 
+    # Rotation: the presented token can never be redeemed a second time.
+    _revoke_refresh_token(data.refresh_token)
+
     return {"access_token": access_token, "refresh_token": new_refresh, "token_type": "bearer"}
 
 @router.post("/logout")
-def logout():
+def logout(data: LogoutData | None = None):
+    if data and data.refresh_token:
+        _revoke_refresh_token(data.refresh_token)
     return {"message": "Logged out successfully"}
 
 @router.get("/me", response_model=UserMe)
 def get_me(current_user = Depends(get_current_user)):
-    if type(current_user) == dict:
+    if isinstance(current_user, dict):
         return UserMe(id="admin", email=current_user["email"], full_name=ADMIN_FULL_NAME, role="admin")
     else:
         return UserMe(
@@ -107,10 +140,9 @@ def get_me(current_user = Depends(get_current_user)):
         )
 
 @router.put("/preferences")
-def update_preferences(data: dict, db: Session = Depends(get_db), student=Depends(get_current_student)):
-    opt_out = data.get("opt_out_completion")
-    if opt_out is not None:
-        student.opt_out_completion = opt_out
+def update_preferences(data: PreferencesData, db: Session = Depends(get_db), student=Depends(get_current_student)):
+    if data.opt_out_completion is not None:
+        student.opt_out_completion = data.opt_out_completion
         db.commit()
     return {
         "message": "Preferences updated successfully",

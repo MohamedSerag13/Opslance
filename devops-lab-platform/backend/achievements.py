@@ -25,8 +25,16 @@ ACHIEVEMENT_CATALOG = [
 ]
 
 
+_CATALOG_SEEDED = False
+
+
 def ensure_achievement_catalog(db) -> None:
-    """Insert any catalog rows missing from the DB. Safe to call every request."""
+    """Insert any catalog rows missing from the DB. The catalog is seeded once
+    at application startup (main.py); after that this is a no-op, so passing a
+    submission doesn't re-query the whole table every time."""
+    global _CATALOG_SEEDED
+    if _CATALOG_SEEDED:
+        return
     existing_ids = {a.id for a in db.query(models.Achievement).all()}
     for spec in ACHIEVEMENT_CATALOG:
         if spec["id"] not in existing_ids:
@@ -35,6 +43,7 @@ def ensure_achievement_catalog(db) -> None:
                 icon=spec["icon"], xp_reward=spec["xp_reward"],
             ))
     db.commit()
+    _CATALOG_SEEDED = True
 
 
 def award_progress_achievements(db, student) -> int:

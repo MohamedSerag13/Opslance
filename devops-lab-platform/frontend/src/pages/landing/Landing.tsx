@@ -16,6 +16,7 @@ const TerminalDemo = lazy(() => import('./TerminalDemo'));
 const LandingNav: React.FC = () => {
   const { token } = useAuthStore();
   const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -32,7 +33,7 @@ const LandingNav: React.FC = () => {
   ];
 
   return (
-    <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled ? 'glass border-b border-border' : 'bg-transparent'}`}>
+    <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${scrolled || menuOpen ? 'glass border-b border-border' : 'bg-transparent'}`}>
       <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4 sm:px-6 lg:px-8">
         <Link to="/" aria-label="Opslance home"><Logo /></Link>
         <nav aria-label="Main" className="ml-4 hidden items-center gap-1 lg:flex">
@@ -52,8 +53,45 @@ const LandingNav: React.FC = () => {
               <Link to="/login"><Button variant="accent" size="sm">Get started</Button></Link>
             </>
           )}
+          {/* mobile: the lg nav is hidden below 1024px — section links live here */}
+          <button
+            type="button"
+            aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((o) => !o)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-content lg:hidden"
+          >
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              {menuOpen ? (
+                <path d="M4 4l10 10M14 4L4 14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              ) : (
+                <path d="M2 4.5h14M2 9h14M2 13.5h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              )}
+            </svg>
+          </button>
         </div>
       </div>
+      {menuOpen && (
+        <nav aria-label="Mobile" className="border-t border-border bg-surface/95 backdrop-blur lg:hidden">
+          <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
+            {links.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={() => setMenuOpen(false)}
+                className="block rounded-lg px-3 py-2.5 text-sm font-medium text-content transition-colors hover:bg-surface-2"
+              >
+                {l.label}
+              </a>
+            ))}
+            {!token && (
+              <Link to="/login" onClick={() => setMenuOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-primary sm:hidden">
+                Sign in
+              </Link>
+            )}
+          </div>
+        </nav>
+      )}
     </header>
   );
 };

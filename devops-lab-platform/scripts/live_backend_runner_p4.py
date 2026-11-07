@@ -40,7 +40,7 @@ shutil.rmtree(PG_DIR, ignore_errors=True)
 server = pgserver.get_server(PG_DIR)
 DATABASE_URL = server.get_uri()
 
-env = {**os.environ, "DATABASE_URL": DATABASE_URL, "ADMIN_EMAIL": "admin@opslance.local",
+env = {**os.environ, "DATABASE_URL": DATABASE_URL, "SECRET_KEY": os.environ.get("SECRET_KEY", "stub_runner_secret_key"), "ADMIN_EMAIL": "admin@opslance.local",
        "ADMIN_PASSWORD": "Admin@2025!", "LABS_HOST_PATH": LABS}
 r = subprocess.run(["sh", "-c",
                     'alembic upgrade head && PYTHONPATH="$PWD" python scripts/seed_admin.py '

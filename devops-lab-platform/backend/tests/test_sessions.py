@@ -5,12 +5,14 @@ import pytest
 
 import models
 import routers.sessions as sessions_mod
+import verification as verification_mod
 from tests.conftest import force_running, fake_checker, login_headers
 
 
 def test_create_session_requires_lab_id(client, student_headers):
     r = client.post("/api/sessions/", json={}, headers=student_headers)
-    assert r.status_code == 400
+    # Pydantic body validation (schema hardening): missing lab_id is a 422 now
+    assert r.status_code == 422
 
 
 def test_create_session_unknown_lab_404(client, student_headers):
@@ -91,7 +93,7 @@ def test_check_with_passing_output(client, db, make_student, make_lab, monkeypat
     h = login_headers(st.email, "Passw0rd!")
     sid = client.post("/api/sessions/", json={"lab_id": lab.id}, headers=h).json()["session_id"]
     force_running(db, sid)
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker("✅ PASS [100%]: done\nSCORE: 100/100"))
     r = client.post(f"/api/sessions/{sid}/check", headers=h)
     assert r.status_code == 200
@@ -106,7 +108,7 @@ def test_check_score_parsed_from_output(client, db, make_student, make_lab, monk
     h = login_headers(st.email, "Passw0rd!")
     sid = client.post("/api/sessions/", json={"lab_id": lab.id}, headers=h).json()["session_id"]
     force_running(db, sid)
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker("✅ PASS [60%]: half done\nSCORE: 60/100", exit_code=1))
     r = client.post(f"/api/sessions/{sid}/check", headers=h)
     body = r.json()
@@ -149,7 +151,7 @@ def test_failed_submit_does_not_award(client, db, make_student, make_lab, monkey
     h = login_headers(st.email, "Passw0rd!")
     sid = client.post("/api/sessions/", json={"lab_id": lab.id}, headers=h).json()["session_id"]
     force_running(db, sid)
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker("❌ FAIL [0%]: nope\nSCORE: 0/100", exit_code=1))
     r = client.post(f"/api/sessions/{sid}/submit", headers=h)
     body = r.json()
@@ -192,7 +194,7 @@ def test_hint_reveal_and_score_deduction(client, db, make_student, make_lab, mon
     assert r3.status_code == 404
 
     # submitting now deducts 10/hint
-    monkeypatch.setattr(sessions_mod, "exec_in_container",
+    monkeypatch.setattr(verification_mod, "exec_in_container",
                         fake_checker("✅ PASS [100%]: done\nSCORE: 100/100"))
     r = client.post(f"/api/sessions/{sid}/submit", headers=h)
     assert r.json()["score"] == 80  # 100 - 20 hint deduction
