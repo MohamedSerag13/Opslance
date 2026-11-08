@@ -54,6 +54,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
     const go = (to: string) => () => { navigate(to); onClose(); };
     const nav: PaletteItem[] = [
       { id: 'nav-dashboard', label: 'Dashboard', group: 'Go to', hint: '/', run: go('/dashboard') },
+      { id: 'nav-courses', label: 'Courses', group: 'Go to', hint: 'c', run: go('/courses') },
       { id: 'nav-progress', label: 'Progress', group: 'Go to', run: go('/progress') },
       { id: 'nav-achievements', label: 'Achievements', group: 'Go to', run: go('/achievements') },
       { id: 'nav-leaderboard', label: 'Leaderboard', group: 'Go to', run: go('/leaderboard') },

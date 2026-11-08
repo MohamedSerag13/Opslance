@@ -6,6 +6,7 @@ import { CommandPalette, useCommandPalette } from '../CommandPalette';
 
 const NAV_LINKS = [
   { to: '/dashboard', label: 'Dashboard' },
+  { to: '/courses', label: 'Courses' },
   { to: '/progress', label: 'Progress' },
   { to: '/achievements', label: 'Achievements' },
   { to: '/leaderboard', label: 'Leaderboard' },

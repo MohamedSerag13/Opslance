@@ -88,6 +88,19 @@ def reset_password(student_id: str, data: ResetPassword, db: Session = Depends(g
     db.commit()
     return {"message": "password reset"}
 
+@router.post("/{student_id}/points")
+def adjust_points(student_id: str, data: PointsUpdate, db: Session = Depends(get_db), admin=Depends(require_admin)):
+    """Manual XP adjustment from the admin console (delta can be negative).
+    Level is recomputed from the same 100-XP-per-level curve as grading."""
+    s = db.query(models.Student).filter(models.Student.id == student_id).first()
+    if not s:
+        raise HTTPException(404)
+    s.xp = max(0, (s.xp or 0) + data.xp)
+    s.level = 1 + (s.xp // 100)
+    db.commit()
+    return {"message": f"XP adjusted by {data.xp}", "xp": s.xp, "level": s.level, "reason": data.reason}
+
+
 @router.post("/bulk")
 async def bulk_create_students(background_tasks: BackgroundTasks, file: UploadFile = File(...), db: Session = Depends(get_db), admin=Depends(require_admin)):
     contents = await file.read()

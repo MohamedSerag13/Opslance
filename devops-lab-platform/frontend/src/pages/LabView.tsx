@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate, Link, Navigate, useSearchParams } from 'react-router-dom';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { api } from '../api/client';
 import Terminal from '../components/Terminal';
 import HintPanel from '../components/HintPanel';
 import DifficultyBadge from '../components/DifficultyBadge';
+import { Badge, ProgressRing } from '../components/ui';
+import { CountUp } from '../components/fx';
 import confetti from 'canvas-confetti';
 
 export default function LabView() {
@@ -20,6 +23,7 @@ export default function LabView() {
   const [solution, setSolution] = useState<string | null>(null);
   const [showSolution, setShowSolution] = useState(false);
   const [feedback, setFeedback] = useState<{ passed: boolean, output: string, message: string } | null>(null);
+  const [completion, setCompletion] = useState<{ score: number; nextLabId: string | null } | null>(null);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [isPro, setIsPro] = useState(false);
   const [extending, setExtending] = useState(false);
@@ -428,10 +432,30 @@ export default function LabView() {
             Click "Start Lab" to spawn your isolated environment.
           </div>
         ) : loading && !session ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-muted">
-            <div className="w-10 h-10 border-4 border-primary/40 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-lg font-semibold text-muted">Spawning Isolated Environment...</p>
-            <p className="text-sm mt-2 transition-opacity duration-500 ease-in-out">{loadingMessages[msgIdx]}</p>
+          <div className="flex-1 flex flex-col items-center justify-center px-10 text-muted">
+            <p className="text-lg font-semibold text-content">Spawning Isolated Environment...</p>
+            <div className="mt-5 h-2.5 w-full max-w-md overflow-hidden rounded-full bg-surface-2" role="progressbar" aria-label="Environment startup progress">
+              <motion.div
+                className="h-full rounded-full bg-primary"
+                initial={{ width: '0%' }}
+                animate={{ width: ['4%', '92%', '100%'] }}
+                transition={{ duration: 8, times: [0, 0.85, 1], ease: 'easeInOut' }}
+              />
+            </div>
+            <div className="mt-4 h-6 text-sm font-semibold text-muted">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={msgIdx}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.35 }}
+                  className="inline-block"
+                >
+                  {loadingMessages[msgIdx]}
+                </motion.span>
+              </AnimatePresence>
+            </div>
           </div>
         ) : (
           <>
@@ -465,6 +489,63 @@ export default function LabView() {
           </>
         )}
       </div>
+
+      {/* Completion Modal — score ring, XP counter, next-lab CTA */}
+      <AnimatePresence>
+        {completion && (
+          <motion.div
+            key="completion-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Lab completed"
+          >
+            <motion.div
+              initial={{ scale: 0.92, y: 16 }}
+              animate={{ scale: 1, y: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+              className="bg-surface rounded-2xl shadow-xl w-full max-w-md p-8 text-center border border-border"
+            >
+              <ProgressRing value={completion.score} size={120} label="Final score">
+                <div className="text-center">
+                  <CountUp value={completion.score} className="block text-2xl font-black tabular-nums text-content" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted">score</span>
+                </div>
+              </ProgressRing>
+              <h2 className="mt-4 font-display text-2xl font-bold text-content">🎉 Lab complete!</h2>
+              <p className="mt-1 text-sm font-medium text-muted">
+                XP added to your total — <CountUp value={completion.score} className="font-bold text-primary" /> points earned.
+              </p>
+              <div className="mt-6 flex justify-center gap-3">
+                {completion.nextLabId ? (
+                  <button
+                    onClick={() => { setCompletion(null); navigate(`/labs/${completion.nextLabId}`); }}
+                    className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition hover:bg-primary-strong"
+                  >
+                    Next lab →
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { setCompletion(null); navigate('/dashboard'); }}
+                    className="rounded-xl bg-primary px-5 py-2.5 font-semibold text-white transition hover:bg-primary-strong"
+                  >
+                    Back to dashboard →
+                  </button>
+                )}
+                <button
+                  onClick={() => setCompletion(null)}
+                  className="rounded-xl border border-border bg-surface px-5 py-2.5 font-semibold text-content transition hover:border-primary/40"
+                >
+                  Stay in lab
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Solution Modal */}
       {showSolution && (

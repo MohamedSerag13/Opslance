@@ -239,3 +239,62 @@ class QuestionState(Base):
     __table_args__ = (
         UniqueConstraint("attempt_id", "question_id", name="uq_attempt_question"),
     )
+
+
+class Course(Base):
+    __tablename__ = "courses"
+
+    id = Column(String, primary_key=True)                       # e.g. "cka-8-weeks"
+    slug = Column(String, unique=True, nullable=False)
+    title = Column(String, nullable=False)
+    subtitle = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
+    author = Column(String, nullable=True)
+    published_at = Column(DateTime(timezone=True), nullable=True)
+    duration_weeks = Column(Integer, nullable=True)
+    hours_per_week = Column(Integer, nullable=True)
+    exam_domain = Column(String, nullable=True)                 # "CKA", "Linux" …
+    pass_mark = Column(Integer, nullable=True)                  # 66 for CKA
+    difficulty = Column(String, default="intermediate")         # beginner/intermediate/advanced
+    tags = Column(Text, nullable=True)                          # JSON list
+    is_active = Column(Boolean, default=True)
+    cover_color = Column(String, nullable=True)                 # CSS gradient token
+
+    weeks = relationship("CourseWeek", back_populates="course",
+                         order_by="CourseWeek.week_number",
+                         cascade="all, delete-orphan")
+
+
+class CourseWeek(Base):
+    __tablename__ = "course_weeks"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    course_id = Column(String, ForeignKey("courses.id"), nullable=False)
+    week_number = Column(Integer, nullable=False)
+    title = Column(String, nullable=False)
+    dates = Column(String, nullable=True)                       # "Oct 30 – Nov 5"
+    focus = Column(Text, nullable=True)
+    exam_domain = Column(String, nullable=True)
+    gate = Column(Text, nullable=True)                          # pass condition text
+    days = Column(Text, nullable=True)                          # JSON: list of day objects
+
+    course = relationship("Course", back_populates="weeks")
+
+
+class StudentCourseProgress(Base):
+    __tablename__ = "student_course_progress"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    student_id = Column(UUID(as_uuid=True), ForeignKey("students.id"), nullable=False)
+    course_id = Column(String, ForeignKey("courses.id"), nullable=False)
+    week_number = Column(Integer, nullable=False)
+    day_index = Column(Integer, nullable=False)                 # 0-based within the week
+    tick_read = Column(Boolean, default=False)
+    tick_course = Column(Boolean, default=False)
+    tick_lab = Column(Boolean, default=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("student_id", "course_id", "week_number", "day_index",
+                         name="uq_student_course_day"),
+    )

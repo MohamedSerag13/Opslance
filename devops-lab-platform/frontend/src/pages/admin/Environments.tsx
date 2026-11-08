@@ -1,75 +1,147 @@
 import React, { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { api } from '../../api/client';
-import { Link } from 'react-router-dom';
+import { Badge, Button, Card, Modal, EmptyState, useToast } from '../../components/ui';
+import { PulseBadge } from '../../components/fx';
 
+interface EnvRow {
+  session_id: string;
+  student_name: string;
+  lab_title: string;
+  started_at: string | null;
+  expires_at: string | null;
+  container_name: string;
+}
+
+function fmtStarted(iso: string | null): string {
+  if (!iso) return '—';
+  const mins = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (mins < 60) return `${mins} min ago`;
+  return `${Math.floor(mins / 60)}h ${mins % 60}m ago`;
+}
+
+/** Live lab environments: 10s auto-refresh, status badges, force stop with confirm. */
 export default function Environments() {
-  const [envs, setEnvs] = useState<any[]>([]);
+  const { toast } = useToast();
+  const [envs, setEnvs] = useState<EnvRow[] | null>(null);
+  const [killTarget, setKillTarget] = useState<EnvRow | null>(null);
+  const [failed, setFailed] = useState(false);
 
   const fetchEnvs = async () => {
     try {
       const res = await api.get('/admin/environments');
       setEnvs(res.data);
-    } catch (e) {}
+      setFailed(false);
+    } catch (e) {
+      setFailed(true);
+    }
   };
 
   useEffect(() => {
     fetchEnvs();
-    const interval = setInterval(fetchEnvs, 10000); // auto-refresh every 10s
+    const interval = setInterval(fetchEnvs, 10_000);
     return () => clearInterval(interval);
   }, []);
 
-  const handleKill = async (containerName: string) => {
-    if (!window.confirm(`Force kill container ${containerName}?`)) return;
+  const handleKill = async (env: EnvRow) => {
     try {
-      await api.delete(`/admin/environments/${containerName}`);
-      fetchEnvs();
+      await api.delete(`/admin/environments/${env.container_name}`);
+      setEnvs((list) => (list ?? []).filter((e) => e.session_id !== env.session_id));
+      setKillTarget(null);
+      toast(`${env.student_name}'s environment was force-stopped.`, 'success');
     } catch (e) {
-      alert('Failed to kill environment');
+      toast('Force stop failed — the container may have already exited.', 'error');
+      setKillTarget(null);
     }
   };
 
+  const runningCount = envs?.length ?? 0;
+  const oldestMin = (envs ?? []).reduce((max, e) =>
+    e.started_at ? Math.max(max, (Date.now() - new Date(e.started_at).getTime()) / 60000) : max, 0);
+  const oldestLabel = oldestMin >= 60 ? `${Math.floor(oldestMin / 60)}h ${Math.round(oldestMin % 60)}m` : `${Math.round(oldestMin)}m`;
+
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <Link to="/admin" className="text-primary-strong mb-4 inline-block">← Dashboard</Link>
-      <div className="flex justify-between items-center mb-6">
+    <div className="mx-auto max-w-7xl space-y-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-content">Live Environments</h1>
-          <p className="text-muted mt-1">Currently running lab containers (auto-refreshes every 10s)</p>
-        </div>
-        <div className="text-primary-strong font-bold bg-primary/10 px-4 py-2 rounded border border-primary/40">
-          Running: {envs.length}
+          <h1 className="flex items-center gap-3 font-display text-3xl font-bold tracking-tight text-content">
+            Live Environments
+            <PulseBadge tone="success" className="translate-y-0.5">
+              <span className="h-2 w-2 rounded-full bg-success animate-pulse-glow" aria-hidden />
+              Live
+            </PulseBadge>
+          </h1>
+          <p className="mt-1 font-medium text-muted">Currently running lab containers — auto-refreshes every 10 seconds.</p>
         </div>
       </div>
 
-      <div className="bg-surface shadow rounded-lg border">
-        <table className="min-w-full divide-y divide-border">
-          <thead className="bg-surface-2">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Student</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Lab</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Container</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Started</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-muted uppercase">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {envs.map(e => (
-              <tr key={e.session_id}>
-                <td className="px-6 py-4 font-medium">{e.student_name}</td>
-                <td className="px-6 py-4">{e.lab_title}</td>
-                <td className="px-6 py-4 text-sm font-mono text-muted">{e.container_name}</td>
-                <td className="px-6 py-4">{new Date(e.started_at).toLocaleTimeString()}</td>
-                <td className="px-6 py-4">
-                  <button onClick={() => handleKill(e.container_name)} className="text-danger hover:text-white hover:bg-danger px-3 py-1 rounded transition border border-danger/40 text-sm font-medium">
-                    Kill
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {envs.length === 0 && <tr><td colSpan={5} className="px-6 py-8 text-center text-muted italic">No live environments right now.</td></tr>}
-          </tbody>
-        </table>
+      {/* resource summary */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <Card className="p-5 text-center">
+          <p className="font-display text-2xl font-black tabular-nums text-content">{runningCount}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-muted">environments running</p>
+        </Card>
+        <Card className="p-5 text-center">
+          <p className="font-display text-2xl font-black tabular-nums text-content">{new Set((envs ?? []).map((e) => e.student_name)).size}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-muted">students active</p>
+        </Card>
+        <Card className="p-5 text-center">
+          <p className="font-display text-2xl font-black tabular-nums text-content">{runningCount ? oldestLabel : '—'}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-muted">oldest session</p>
+        </Card>
       </div>
+
+      {failed ? (
+        <EmptyState icon={<span className="text-2xl">⚠️</span>} title="Couldn't load environments"
+                    description="The backend didn't respond." action={<Button variant="primary" onClick={fetchEnvs}>Retry</Button>} />
+      ) : !envs ? (
+        <Card className="p-6"><div className="h-40 animate-pulse rounded-xl bg-surface-2" /></Card>
+      ) : (
+        <Card className="overflow-hidden p-0">
+          {envs.length === 0 ? (
+            <p className="px-6 py-14 text-center text-sm font-medium text-muted">No live environments right now — the lab queue is quiet.</p>
+          ) : (
+            <ul className="divide-y divide-border">
+              <AnimatePresence initial={false}>
+                {envs.map((e) => (
+                  <motion.li
+                    key={e.session_id}
+                    layout
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, x: 60 }}
+                    transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+                    className="flex flex-wrap items-center gap-4 px-6 py-4"
+                  >
+                    <span aria-hidden className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-black text-primary">
+                      {e.student_name.charAt(0).toUpperCase()}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-bold text-content">{e.student_name}</span>
+                      <span className="block truncate text-xs font-semibold text-muted">{e.lab_title} · <span className="font-mono">{e.container_name}</span></span>
+                    </span>
+                    <span className="text-xs font-bold tabular-nums text-muted">{fmtStarted(e.started_at)}</span>
+                    <Badge variant="success" dot>running</Badge>
+                    <Button variant="danger" size="sm" onClick={() => setKillTarget(e)}>Force Stop</Button>
+                  </motion.li>
+                ))}
+              </AnimatePresence>
+            </ul>
+          )}
+        </Card>
+      )}
+
+      <Modal open={killTarget !== null} onClose={() => setKillTarget(null)} title="Force stop environment" className="max-w-md">
+        <p className="text-sm font-medium text-muted">
+          Stop <strong className="text-content">{killTarget?.student_name}</strong>'s container
+          (<span className="font-mono text-xs">{killTarget?.container_name}</span>)? Unsaved lab work is
+          lost and the session is marked <em>killed</em> immediately.
+        </p>
+        <div className="mt-6 flex justify-end gap-3">
+          <Button variant="ghost" onClick={() => setKillTarget(null)}>Cancel</Button>
+          <Button variant="danger" onClick={() => killTarget && handleKill(killTarget)}>Force stop</Button>
+        </div>
+      </Modal>
     </div>
   );
 }

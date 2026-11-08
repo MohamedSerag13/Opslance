@@ -174,3 +174,93 @@
   .scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
   .scrollbar-thin::-webkit-scrollbar-thumb { background: rgb(var(--c-border)); border-radius: 8px; }
 }
+
+/* ============================================================
+   Immersive-experience layer (courses + student redesign)
+   ============================================================ */
+
+/* Animated gradient mesh background — applied to .mesh-bg elements */
+@keyframes mesh-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.mesh-bg {
+  background: linear-gradient(
+    135deg,
+    rgb(var(--c-primary)/0.08) 0%,
+    rgb(var(--c-bg)) 40%,
+    rgb(var(--c-accent)/0.06) 80%,
+    rgb(var(--c-primary)/0.04) 100%
+  );
+  background-size: 400% 400%;
+  animation: mesh-shift 18s ease infinite;
+}
+
+/* Floating particle pseudo-element helpers */
+.particle { position: absolute; border-radius: 50%; pointer-events: none; }
+
+/* Neon glow on interactive elements */
+.glow-on-hover:hover { box-shadow: 0 0 24px rgb(var(--c-primary)/0.4); transition: box-shadow 0.3s; }
+
+/* XP bar pulse when gaining XP */
+@keyframes xp-pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+.xp-gain { animation: xp-pulse 0.6s ease 2; }
+
+/* Course cover bands: slow conic gradient drift, token-colored */
+@keyframes cover-drift {
+  0%   { transform: rotate(0deg) scale(1.4); }
+  50%  { transform: rotate(180deg) scale(1.6); }
+  100% { transform: rotate(360deg) scale(1.4); }
+}
+.cover-band { position: relative; overflow: hidden; }
+.cover-band::before {
+  content: '';
+  position: absolute;
+  inset: -40%;
+  background: conic-gradient(
+    from 0deg,
+    rgb(var(--c-cover)/0.55),
+    transparent 22%,
+    rgb(var(--c-cover)/0.35) 45%,
+    transparent 65%,
+    rgb(var(--c-cover)/0.55) 100%
+  );
+  animation: cover-drift 16s linear infinite;
+}
+.cover-band::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 30%, rgb(var(--c-surface)/0.92));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mesh-bg, .cover-band::before, .xp-gain { animation: none; }
+}
+
+/* PulseBadge living glow */
+@keyframes pulse-badge {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(var(--pulse-rgb)/0.45); }
+  50%      { box-shadow: 0 0 14px 3px rgb(var(--pulse-rgb)/0.35); }
+}
+.animate-pulse-badge { animation: pulse-badge 2.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-badge { animation: none; }
+}
+
+/* Markdown rendering for course descriptions (token-colored, no hardcoded hex) */
+.prose-courses h2 { font-family: var(--font-display, inherit); font-size: 1.25rem; font-weight: 700; color: rgb(var(--c-content)); margin: 1.4rem 0 0.6rem; }
+.prose-courses h3 { font-size: 1.05rem; font-weight: 700; color: rgb(var(--c-content)); margin: 1.1rem 0 0.5rem; }
+.prose-courses p { color: rgb(var(--c-muted)); margin: 0.5rem 0; line-height: 1.65; }
+.prose-courses ul { margin: 0.6rem 0; padding-left: 1.2rem; list-style: disc; }
+.prose-courses li { color: rgb(var(--c-muted)); margin: 0.25rem 0; line-height: 1.55; }
+.prose-courses ol { margin: 0.6rem 0; padding-left: 1.4rem; list-style: decimal; }
+.prose-courses strong { color: rgb(var(--c-content)); font-weight: 700; }
+.prose-courses table { width: 100%; border-collapse: collapse; margin: 0.9rem 0; font-size: 0.875rem; }
+.prose-courses th { position: sticky; top: 0; background: rgb(var(--c-surface-2)); color: rgb(var(--c-content)); text-align: left; font-weight: 700; padding: 0.5rem 0.75rem; border-bottom: 1px solid rgb(var(--c-border)); }
+.prose-courses td { color: rgb(var(--c-muted)); padding: 0.5rem 0.75rem; border-bottom: 1px solid rgb(var(--c-border)); }
+.prose-courses pre { background: rgb(var(--c-bg)); border: 1px solid rgb(var(--c-border)); border-radius: 0.75rem; padding: 1rem; overflow-x: auto; margin: 0.9rem 0; }
+.prose-courses code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85em; color: rgb(var(--c-accent)); }
+.prose-courses pre code { color: rgb(var(--c-content)); line-height: 1.6; }
+.prose-courses blockquote { border-left: 3px solid rgb(var(--c-primary)); padding-left: 1rem; color: rgb(var(--c-muted)); }

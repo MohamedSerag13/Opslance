@@ -1,354 +1,309 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { api } from '../../api/client';
+import { Card, Badge, Button, Input, Skeleton, EmptyState, useToast } from '../../components/ui';
+import { CountUp } from '../../components/fx';
 
+interface StudentDetailData {
+  id: string;
+  full_name: string;
+  email: string;
+  group_id: string | null;
+  group_name?: string | null;
+  is_active: boolean;
+  subscription_tier: string | null;
+  xp: number;
+  level: number;
+  last_login: string | null;
+  created_at?: string;
+}
+
+interface SubRow {
+  lab_id: string;
+  lab_title: string;
+  score: number;
+  passed: boolean;
+  submitted_at: string | null;
+}
+
+const PLAN_BADGE = (tier: string | null) =>
+  tier === 'pro' ? <Badge variant="accent">Pro</Badge>
+    : tier === 'enterprise' ? <Badge variant="primary">Enterprise</Badge>
+      : <Badge>Free</Badge>;
+
+/** Cumulative-XP timeline from the student's submissions (SVG, no library). */
+const XpTimeline: React.FC<{ subs: SubRow[] }> = ({ subs }) => {
+  const ordered = useMemo(() => [...subs]
+    .filter((s) => s.submitted_at)
+    .sort((a, b) => new Date(a.submitted_at!).getTime() - new Date(b.submitted_at!).getTime()), [subs]);
+  if (ordered.length < 2) {
+    return <p className="px-6 py-4 text-sm text-muted">Not enough history for a timeline yet.</p>;
+  }
+  let acc = 0;
+  const points = ordered.map((s) => { acc += s.score; return acc; });
+  const max = Math.max(1, acc);
+  const W = 560;
+  const H = 120;
+  const step = W / (points.length - 1);
+  const path = points.map((v, i) => `${i === 0 ? 'M' : 'L'} ${i * step} ${H - (v / max) * (H - 12) - 4}`).join(' ');
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="h-28 w-full" role="img" aria-label="XP accumulated over time">
+      <path d={`${path} L ${W} ${H} L 0 ${H} Z`} className="fill-primary/15" />
+      <motion.path d={path} fill="none" className="stroke-primary" strokeWidth={2}
+                   initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.9 }} />
+    </svg>
+  );
+};
+
+/** Full student profile: stats + history on the right, actions + danger zone left. */
 export default function StudentDetail() {
-  const { id } = useParams();
-  const [student, setStudent] = useState<any>(null);
-  const [groups, setGroups] = useState<any[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({ full_name: '', email: '', group_id: '', is_active: true });
-
-  // Reset password state
-  const [showResetModal, setShowResetModal] = useState(false);
+  const { id } = useParams<{ id: string }>();
+  const { toast } = useToast();
+  const [student, setStudent] = useState<StudentDetailData | null>(null);
+  const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
+  const [subs, setSubs] = useState<SubRow[]>([]);
+  const [failed, setFailed] = useState(false);
+  const [confirm, setConfirm] = useState<{ title: string; body: string; action: () => Promise<void> } | null>(null);
+  const [xpDelta, setXpDelta] = useState('');
+  const [xpReason, setXpReason] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [resetError, setResetError] = useState('');
-  const [resetLoading, setResetLoading] = useState(false);
+  const [moveGroupId, setMoveGroupId] = useState('');
 
-  // Edit points state
-  const [showPointsModal, setShowPointsModal] = useState(false);
-  const [editPointsXP, setEditPointsXP] = useState<number>(0);
-  const [editPointsReason, setEditPointsReason] = useState('');
-  const [pointsLoading, setPointsLoading] = useState(false);
-
-  // Edit plan state
-  const [showPlanModal, setShowPlanModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState('free');
-  const [planLoading, setPlanLoading] = useState(false);
-
-  // Success Banner State
-  const [successBanner, setSuccessBanner] = useState('');
+  const fetchStudent = async () => {
+    try {
+      const [sRes, gRes, aRes] = await Promise.all([
+        api.get(`/admin/students/${id}`),
+        api.get('/admin/groups'),
+        api.get('/admin/analytics?days=90').catch(() => null),
+      ]);
+      setStudent(sRes.data);
+      setGroups(gRes.data);
+      const mine: SubRow[] = (aRes?.data?.recent ?? [])
+        .filter((r: { student_name: string }) => r.student_name === sRes.data.full_name)
+        .slice(0, 20);
+      setSubs(mine);
+    } catch (err) {
+      setFailed(true);
+    }
+  };
 
   useEffect(() => {
-    const fetchStudent = async () => {
-      try {
-        const res = await api.get(`/admin/students/${id}`);
-        setStudent(res.data);
-      } catch (e) {}
-    };
-    
-    const fetchGroups = async () => {
-      try {
-        const res = await api.get('/admin/groups');
-        setGroups(res.data);
-      } catch (e) {}
-    };
-
     fetchStudent();
-    fetchGroups();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const handleEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const payload: any = { ...editData };
-      if (payload.group_id === '') payload.group_id = null;
-      await api.put(`/admin/students/${id}`, payload);
-      setStudent({ ...student, ...payload });
-      setIsEditing(false);
-    } catch (e: any) {
-      alert("Failed to update student: " + (e.response?.data?.detail || e.message));
-    }
-  };
+  if (failed || !student) {
+    return (
+      <div className="mx-auto max-w-5xl space-y-4">
+        <Link to="/admin/students" className="text-sm font-bold text-primary hover:underline">← Students</Link>
+        {failed
+          ? <EmptyState icon={<span className="text-2xl">⚠️</span>} title="Couldn't load student" description="The backend didn't respond." action={<Button variant="primary" onClick={fetchStudent}>Retry</Button>} />
+          : <Skeleton className="h-96 w-full" />}
+      </div>
+    );
+  }
 
-  const handleResetPass = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setResetError('');
-    setSuccessBanner('');
-    if (newPassword.length < 8) {
-      setResetError('Password must be at least 8 characters');
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setResetError('Passwords do not match');
-      return;
-    }
-    setResetLoading(true);
-    try {
-      await api.post(`/admin/students/${id}/reset-password`, { password: newPassword });
-      setShowResetModal(false);
+  const avgScore = subs.length ? Math.round(subs.reduce((s, r) => s + r.score, 0) / subs.length) : 0;
+  const labsCompleted = new Set(subs.filter((s) => s.passed).map((s) => s.lab_id)).size;
+
+  const withConfirm = (title: string, body: string, action: () => Promise<void>) =>
+    setConfirm({ title, body, action });
+
+  const changePlan = (plan: string) => withConfirm(
+    'Change plan',
+    `Set ${student.full_name}'s subscription to ${plan}?`,
+    async () => {
+      await api.patch(`/admin/students/${student.id}/plan`, { plan });
+      setStudent({ ...student, subscription_tier: plan });
+      toast(`Plan updated to ${plan}.`, 'success');
+    },
+  );
+
+  const resetPassword = () => withConfirm(
+    'Reset password',
+    `Generate a new password for ${student.full_name}? They will be forced to set a new one at next login.`,
+    async () => {
+      await api.post(`/admin/students/${student.id}/reset-password`, { password: newPassword || `Opslance-${Math.random().toString(36).slice(2, 10)}!` });
       setNewPassword('');
-      setConfirmPassword('');
-      setSuccessBanner('Password reset successful');
-      setTimeout(() => setSuccessBanner(''), 5000);
-    } catch (e) {
-      setResetError('Reset failed. Try again.');
-    } finally {
-      setResetLoading(false);
-    }
-  };
+      toast('Password reset — the must-reset flow is armed.', 'success');
+    },
+  );
 
-  const handleEditPoints = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editPointsXP < 0) {
-      alert("XP cannot be negative");
-      return;
-    }
-    setPointsLoading(true);
-    try {
-      const res = await api.patch(`/admin/students/${id}/points`, { xp: editPointsXP, reason: editPointsReason });
+  const deactivate = () => withConfirm(
+    'Deactivate account',
+    `${student.full_name} will no longer be able to log in. This can be reversed.`,
+    async () => {
+      const res = await api.put(`/admin/students/${student.id}`, {
+        full_name: student.full_name, email: student.email, is_active: !student.is_active,
+      });
+      setStudent({ ...student, ...res.data });
+      toast(student.is_active ? 'Account deactivated.' : 'Account reactivated.', 'success');
+    },
+  );
+
+  const adjustXp = () => withConfirm(
+    'Adjust XP',
+    `Apply ${Number(xpDelta) >= 0 ? '+' : ''}${xpDelta} XP to ${student.full_name}${xpReason ? ` (${xpReason})` : ''}?`,
+    async () => {
+      const res = await api.post(`/admin/students/${student.id}/points`, { xp: Number(xpDelta), reason: xpReason || null });
       setStudent({ ...student, xp: res.data.xp, level: res.data.level });
-      setShowPointsModal(false);
-      setEditPointsReason('');
-      setSuccessBanner('Points updated successfully');
-      setTimeout(() => setSuccessBanner(''), 5000);
-    } catch (err: any) {
-      alert('Failed to update points: ' + (err.response?.data?.detail || err.message));
-    } finally {
-      setPointsLoading(false);
-    }
-  };
+      setXpDelta('');
+      setXpReason('');
+      toast('XP adjusted.', 'success');
+    },
+  );
 
-  const handleEditPlan = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPlanLoading(true);
-    try {
-      const res = await api.patch(`/admin/students/${id}/plan`, { plan: selectedPlan });
-      setStudent({ ...student, subscription_tier: res.data.plan });
-      setShowPlanModal(false);
-      setSuccessBanner('Plan updated successfully');
-      setTimeout(() => setSuccessBanner(''), 5000);
-    } catch (err: any) {
-      alert('Failed to update plan: ' + (err.response?.data?.detail || err.message));
-    } finally {
-      setPlanLoading(false);
-    }
-  };
-
-  if (!student) return <div className="p-8">Loading...</div>;
+  const moveToGroup = () => withConfirm(
+    'Move to group',
+    `Move ${student.full_name} to ${groups.find((g) => g.id === moveGroupId)?.name ?? 'the selected group'}?`,
+    async () => {
+      await api.put(`/admin/students/${student.id}`, { full_name: student.full_name, email: student.email, group_id: moveGroupId || null });
+      toast('Student moved.', 'success');
+      fetchStudent();
+    },
+  );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <Link to="/admin/students" className="text-primary-strong mb-4 inline-block">← Students List</Link>
-      
-      {successBanner && (
-        <div className="bg-success/15 border border-success/40 text-success px-4 py-3 rounded relative mb-4" role="alert">
-          <span className="block sm:inline">{successBanner}</span>
-        </div>
-      )}
+    <div className="mx-auto max-w-7xl space-y-6">
+      <Link to="/admin/students" className="text-sm font-bold text-primary hover:underline">← Students</Link>
 
-      <div className="bg-surface p-6 rounded-lg shadow border mb-6 flex justify-between items-start">
-        <div>
-          <h1 className="text-3xl font-bold">{student.full_name}</h1>
-          <p className="text-muted">{student.email}</p>
-          <div className="mt-4 flex flex-wrap gap-4 text-sm">
-            <span className="bg-surface-2 px-2 py-1 rounded">Joined: {new Date(student.created_at).toLocaleDateString()}</span>
-            <span className={student.is_active ? 'bg-success/15 text-success px-2 py-1 rounded font-medium' : 'bg-danger/15 text-danger px-2 py-1 rounded font-medium'}>
-              {student.is_active ? 'Active' : 'Inactive'}
-            </span>
-            {student.group_id && <span className="bg-primary/15 text-primary-strong px-2 py-1 rounded font-medium">Group ID: {student.group_id}</span>}
-            <span className="bg-warn/15 text-warn px-2 py-1 rounded font-medium">XP: {student.xp || 0}</span>
-            <span className="bg-primary/15 text-primary-strong px-2 py-1 rounded font-medium">Level: {student.level || 1}</span>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[340px_1fr]">
+        {/* left: profile + actions */}
+        <div className="space-y-5">
+          <Card className="p-6">
+            <div className="flex items-center gap-4">
+              <span aria-hidden className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 font-display text-xl font-black text-primary">
+                {student.full_name.charAt(0).toUpperCase()}
+              </span>
+              <div className="min-w-0">
+                <h1 className="truncate font-display text-xl font-bold text-content">{student.full_name}</h1>
+                <p className="truncate text-sm font-medium text-muted">{student.email}</p>
+              </div>
+            </div>
+            <div className="mt-4 flex items-center gap-2">
+              {PLAN_BADGE(student.subscription_tier)}
+              {student.is_active ? <Badge variant="success" dot>Active</Badge> : <Badge variant="danger" dot>Inactive</Badge>}
+            </div>
+            <dl className="mt-4 space-y-1.5 text-sm">
+              <div className="flex justify-between"><dt className="font-semibold text-muted">Group</dt><dd className="font-bold text-content">{student.group_name ?? '—'}</dd></div>
+              <div className="flex justify-between"><dt className="font-semibold text-muted">Last login</dt><dd className="font-bold text-content">{student.last_login ? new Date(student.last_login).toLocaleString() : 'never'}</dd></div>
+            </dl>
+          </Card>
+
+          <Card className="space-y-3 p-6">
+            <h2 className="font-display text-lg font-bold text-content">Subscription</h2>
+            <div className="flex flex-wrap gap-2">
+              {['free', 'pro', 'enterprise'].map((plan) => (
+                <Button key={plan} size="sm"
+                        variant={student.subscription_tier === plan ? 'primary' : 'secondary'}
+                        onClick={() => student.subscription_tier !== plan && changePlan(plan)}>
+                  {plan.charAt(0).toUpperCase() + plan.slice(1)}
+                </Button>
+              ))}
+            </div>
+            <h2 className="pt-2 font-display text-lg font-bold text-content">Adjust XP</h2>
+            <div className="flex gap-2">
+              <Input placeholder="+50 / -20" value={xpDelta} onChange={(e) => setXpDelta(e.target.value)} aria-label="XP delta" className="w-28" />
+              <Input placeholder="Reason" value={xpReason} onChange={(e) => setXpReason(e.target.value)} aria-label="Reason" className="flex-1" />
+            </div>
+            <Button size="sm" variant="secondary" disabled={!xpDelta || isNaN(Number(xpDelta))} onClick={adjustXp}>Apply XP change</Button>
+
+            <h2 className="pt-2 font-display text-lg font-bold text-content">Move group</h2>
+            <div className="flex gap-2">
+              <select value={moveGroupId} onChange={(e) => setMoveGroupId(e.target.value)} aria-label="Target group"
+                      className="flex-1 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-content">
+                <option value="">No group</option>
+                {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+              </select>
+              <Button size="sm" variant="secondary" onClick={moveToGroup}>Move</Button>
+            </div>
+
+            <h2 className="pt-2 font-display text-lg font-bold text-content">Reset password</h2>
+            <div className="flex gap-2">
+              <Input placeholder="New password (blank = generate)" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} aria-label="New password" className="flex-1" type="text" />
+              <Button size="sm" variant="secondary" onClick={resetPassword}>Reset</Button>
+            </div>
+
+            <h2 className="pt-2 font-display text-lg font-bold text-danger">Danger zone</h2>
+            <Button variant="danger" size="sm" onClick={deactivate}>
+              {student.is_active ? 'Deactivate account' : 'Reactivate account'}
+            </Button>
+          </Card>
+        </div>
+
+        {/* right: stats + history */}
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            {[
+              { label: 'XP', value: student.xp, accent: 'text-primary' },
+              { label: 'Level', value: student.level, accent: 'text-accent' },
+              { label: 'Labs Completed', value: labsCompleted, accent: 'text-content' },
+              { label: 'Avg Score', value: avgScore, accent: 'text-success' },
+            ].map((s) => (
+              <motion.div key={s.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                          className="rounded-2xl border border-border bg-surface p-4 text-center shadow-card">
+                <CountUp value={s.value} className={`block font-display text-2xl font-black tabular-nums ${s.accent}`} />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted">{s.label}</span>
+              </motion.div>
+            ))}
           </div>
 
-          <div className="mt-4 flex items-center gap-2">
-            <span className="text-sm font-medium text-content">Plan:</span>
-            {student.subscription_tier === 'enterprise' ? (
-              <span className="bg-primary/15 text-primary-strong px-2 py-1 rounded text-xs font-bold uppercase">Enterprise</span>
-            ) : student.subscription_tier === 'pro' ? (
-              <span className="bg-primary/15 text-primary-strong px-2 py-1 rounded text-xs font-bold uppercase">Pro</span>
+          <Card className="p-6">
+            <h2 className="font-display text-lg font-bold text-content">XP timeline</h2>
+            <XpTimeline subs={subs} />
+          </Card>
+
+          <Card className="overflow-hidden p-0">
+            <h2 className="border-b border-border px-6 py-4 font-display text-lg font-bold text-content">Submission history</h2>
+            {subs.length === 0 ? (
+              <p className="px-6 py-8 text-sm font-medium text-muted">No submissions in the last 90 days.</p>
             ) : (
-              <span className="bg-surface-2 text-content px-2 py-1 rounded text-xs font-bold uppercase">Free</span>
-            )}
-            <button 
-              onClick={() => {
-                setSelectedPlan(student.subscription_tier || 'free');
-                setShowPlanModal(true);
-              }}
-              className="ml-2 text-sm text-primary-strong hover:underline font-medium"
-            >
-              Change Plan
-            </button>
-          </div>
-        </div>
-        <div className="flex flex-col gap-2">
-          <button 
-            onClick={() => {
-              setEditData({ full_name: student.full_name, email: student.email, group_id: student.group_id || '', is_active: student.is_active });
-              setIsEditing(true);
-            }} 
-            className="px-4 py-2 border text-content hover:bg-surface-2 rounded font-medium animate-transition"
-          >
-            Edit Profile
-          </button>
-          <button 
-            onClick={() => {
-              setEditPointsXP(student.xp || 0);
-              setEditPointsReason('');
-              setShowPointsModal(true);
-            }}
-            className="px-4 py-2 border text-warn border-warn/40 hover:bg-warn/10 rounded font-medium"
-          >
-            Edit Points
-          </button>
-          <button 
-            onClick={() => {
-              setNewPassword('');
-              setConfirmPassword('');
-              setResetError('');
-              setShowResetModal(true);
-            }} 
-            className="px-4 py-2 border text-danger border-danger/40 hover:bg-danger/15 rounded font-medium"
-          >
-            Reset Password
-          </button>
-        </div>
-      </div>
-      
-      {/* Progress and History sections would go here */}
-      <div className="bg-surface p-6 rounded-lg shadow border">
-        <h2 className="text-xl font-bold mb-4">Activity History</h2>
-        <p className="text-muted italic">Detailed progress and command history API implementation pending in this view.</p>
-      </div>
-
-      {isEditing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-surface p-6 rounded-lg w-96 max-w-full">
-            <h2 className="text-xl font-bold mb-4">Edit Student</h2>
-            <form onSubmit={handleEdit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Full Name</label>
-                <input className="w-full border p-2 rounded" value={editData.full_name} onChange={e => setEditData({...editData, full_name: e.target.value})} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Email</label>
-                <input className="w-full border p-2 rounded" type="email" value={editData.email} onChange={e => setEditData({...editData, email: e.target.value})} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Group</label>
-                <select className="w-full border p-2 rounded bg-surface" value={editData.group_id} onChange={e => setEditData({...editData, group_id: e.target.value})}>
-                  <option value="">No Group</option>
-                  {groups.map(g => (
-                    <option key={g.id} value={g.id}>{g.name}</option>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-surface-2/50 text-left">
+                    <th scope="col" className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted">Lab</th>
+                    <th scope="col" className="px-3 py-3 text-right text-xs font-bold uppercase tracking-wider text-muted">Score</th>
+                    <th scope="col" className="px-3 py-3 text-center text-xs font-bold uppercase tracking-wider text-muted">Passed</th>
+                    <th scope="col" className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wider text-muted">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {subs.map((r, i) => (
+                    <tr key={`${r.lab_id}-${i}`} className="transition-colors hover:bg-surface-2/40">
+                      <td className="max-w-[280px] truncate px-5 py-3 font-semibold text-content">{r.lab_title}</td>
+                      <td className="px-3 py-3 text-right font-bold tabular-nums text-content">{r.score}</td>
+                      <td className="px-3 py-3 text-center">{r.passed ? '✅' : '❌'}</td>
+                      <td className="px-5 py-3 text-right text-xs font-semibold text-muted">
+                        {r.submitted_at ? new Date(r.submitted_at).toLocaleDateString() : ''}
+                      </td>
+                    </tr>
                   ))}
-                </select>
-              </div>
-              <div className="flex items-center gap-2">
-                <input type="checkbox" id="isActive" checked={editData.is_active} onChange={e => setEditData({...editData, is_active: e.target.checked})} />
-                <label htmlFor="isActive" className="text-sm font-medium">Account is Active</label>
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 text-muted border rounded">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-primary text-white rounded">Save Changes</button>
-              </div>
-            </form>
-          </div>
+                </tbody>
+              </table>
+            )}
+          </Card>
         </div>
-      )}
+      </div>
 
-      {showResetModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-surface p-6 rounded-lg w-96 max-w-full">
-            <h2 className="text-xl font-bold mb-4">Reset Password</h2>
-            <form onSubmit={handleResetPass} className="space-y-4">
-              {resetError && <p className="text-danger text-sm font-medium">{resetError}</p>}
-              <div>
-                <label className="block text-sm font-medium mb-1">New Password</label>
-                <input 
-                  className="w-full border p-2 rounded" 
-                  type="password" 
-                  value={newPassword} 
-                  onChange={e => setNewPassword(e.target.value)} 
-                  required 
-                  minLength={8}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Confirm Password</label>
-                <input 
-                  className="w-full border p-2 rounded" 
-                  type="password" 
-                  value={confirmPassword} 
-                  onChange={e => setConfirmPassword(e.target.value)} 
-                  required 
-                  minLength={8}
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowResetModal(false)} className="px-4 py-2 text-muted border rounded" disabled={resetLoading}>Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-danger text-white rounded disabled:opacity-50" disabled={resetLoading}>
-                  {resetLoading ? 'Resetting...' : 'Reset Password'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {showPointsModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-surface p-6 rounded-lg w-96 max-w-full">
-            <h2 className="text-xl font-bold mb-4">Edit Points</h2>
-            <p className="text-sm text-muted mb-4">Current XP: <span className="font-bold text-content">{student.xp || 0}</span></p>
-            <form onSubmit={handleEditPoints} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">New XP Value</label>
-                <input 
-                  className="w-full border p-2 rounded" 
-                  type="number" 
-                  min={0}
-                  value={editPointsXP} 
-                  onChange={e => setEditPointsXP(parseInt(e.target.value) || 0)} 
-                  required 
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Reason (Optional)</label>
-                <input 
-                  className="w-full border p-2 rounded" 
-                  placeholder="e.g. Extra credit, challenge reward"
-                  value={editPointsReason} 
-                  onChange={e => setEditPointsReason(e.target.value)} 
-                />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowPointsModal(false)} className="px-4 py-2 text-muted border rounded" disabled={pointsLoading}>Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-warn text-white rounded disabled:opacity-50" disabled={pointsLoading}>
-                  {pointsLoading ? 'Saving...' : 'Save XP'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {showPlanModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-surface p-6 rounded-lg w-96 max-w-full">
-            <h2 className="text-xl font-bold mb-4">Change Plan</h2>
-            <form onSubmit={handleEditPlan} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Select Subscription Plan</label>
-                <select 
-                  className="w-full border p-2 rounded bg-surface" 
-                  value={selectedPlan} 
-                  onChange={e => setSelectedPlan(e.target.value)}
-                  required
-                >
-                  <option value="free">Free</option>
-                  <option value="pro">Pro</option>
-                  <option value="enterprise">Enterprise</option>
-                </select>
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setShowPlanModal(false)} className="px-4 py-2 text-muted border rounded" disabled={planLoading}>Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-primary text-white rounded disabled:opacity-50" disabled={planLoading}>
-                  {planLoading ? 'Saving...' : 'Save Plan'}
-                </button>
-              </div>
-            </form>
-          </div>
+      {/* confirmation modal */}
+      {confirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true" aria-label={confirm.title}>
+          <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full max-w-md rounded-2xl border border-border bg-surface p-6">
+            <h2 className="font-display text-lg font-bold text-content">{confirm.title}</h2>
+            <p className="mt-2 text-sm font-medium text-muted">{confirm.body}</p>
+            <div className="mt-6 flex justify-end gap-3">
+              <Button variant="ghost" onClick={() => setConfirm(null)}>Cancel</Button>
+              <Button variant="accent" onClick={async () => {
+                try {
+                  await confirm.action();
+                } catch (err) {
+                  toast('Action failed — check the backend logs.', 'error');
+                }
+                setConfirm(null);
+              }}>Confirm</Button>
+            </div>
+          </motion.div>
         </div>
       )}
     </div>

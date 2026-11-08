@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { api } from '../api/client';
 import { useLabStore } from '../store/labStore';
 
@@ -147,12 +148,21 @@ export default function HintPanel({ sessionId }: { sessionId: string }) {
         {[1, 2, 3].map(i => (
           <div key={i}>
             {i <= hintsRevealed ? (
-              <div className="p-3.5 bg-warn/10 border border-warn/40 rounded-xl text-sm leading-relaxed text-content shadow-sm">
-                <div className="flex items-center gap-2 font-extrabold text-warn mb-1 text-xs uppercase tracking-wider">
-                  <span>✨</span> Hint {i}
-                </div>
-                <div>{hints[i - 1] || 'Loading...'}</div>
-              </div>
+              <AnimatePresence>
+                <motion.div
+                  key={`hint-${i}-${hintsRevealed}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+                  className="p-3.5 bg-warn/10 border border-warn/40 rounded-xl text-sm leading-relaxed text-content shadow-sm"
+                >
+                  <div className="flex items-center gap-2 font-extrabold text-warn mb-1 text-xs uppercase tracking-wider">
+                    <span>✨</span> Hint {i}
+                  </div>
+                  <div>{hints[i - 1] || 'Loading...'}</div>
+                </motion.div>
+              </AnimatePresence>
             ) : (
               <button 
                 disabled={i > hintsRevealed + 1 || (i === hintsRevealed + 1 && cooldown > 0)}

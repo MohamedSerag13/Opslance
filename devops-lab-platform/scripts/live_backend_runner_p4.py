@@ -44,6 +44,7 @@ env = {**os.environ, "DATABASE_URL": DATABASE_URL, "SECRET_KEY": os.environ.get(
        "ADMIN_PASSWORD": "Admin@2025!", "LABS_HOST_PATH": LABS}
 r = subprocess.run(["sh", "-c",
                     'alembic upgrade head && PYTHONPATH="$PWD" python scripts/seed_admin.py '
+                    '&& LABS_DIR="$LABS_HOST_PATH/linux" PYTHONPATH="$PWD" python scripts/seed_courses.py '
                     '&& LABS_HOST_PATH="$LABS_HOST_PATH" PYTHONPATH="$PWD" python scripts/sync_labs.py'],
                    cwd=BACKEND, env={**env, "LABS_HOST_PATH": LABS}, capture_output=True, text=True, timeout=600)
 if r.returncode != 0:

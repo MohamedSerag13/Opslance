@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import { useNavigate, Link } from 'react-router-dom';
+import { motion, useMotionValue, useReducedMotion, useSpring, AnimatePresence } from 'framer-motion';
 import AppNav from '../components/layout/AppNav';
-import { Card, Badge, Button, Skeleton, EmptyState, ProgressBar, ProgressRing } from '../components/ui';
-import { BlurFade } from '../components/fx';
+import { Card, Badge, Button, Skeleton, EmptyState, ProgressBar, ProgressRing, Modal } from '../components/ui';
+import { BlurFade, FloatingParticles, CountUp, PulseBadge, Typewriter, ShineBorder, cn } from '../components/fx';
 import Heatmap from '../components/dashboard/Heatmap';
+import CourseProgressPill from '../components/courses/CourseProgressPill';
 import type { continueItem, dashboardData } from './dashboard-types';
+import type { CourseSummary } from './courses-types';
 
 /* ---------------------------------- types ---------------------------------- */
 
@@ -20,6 +23,14 @@ function greeting(): string {
   if (h < 12) return 'Good morning';
   if (h < 18) return 'Good afternoon';
   return 'Good evening';
+}
+
+/** Flavor titles per level band — the Typewriter fades to this after the greeting. */
+function levelTitle(level: number): string {
+  if (level >= 15) return 'Infrastructure Wizard';
+  if (level >= 10) return 'Cluster Commander';
+  if (level >= 5) return 'SRE Apprentice';
+  return 'Shell Cadet';
 }
 
 function fmtCountdown(seconds: number): string {
@@ -154,40 +165,94 @@ const WeekStepper: React.FC<{ track: Track }> = ({ track }) => {
   );
 };
 
+/** 3D tilt wrapper (±8° max), flat under reduced motion. */
+const TiltCard: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => {
+  const reduce = useReducedMotion();
+  const rx = useSpring(useMotionValue(0), { stiffness: 300, damping: 24 });
+  const ry = useSpring(useMotionValue(0), { stiffness: 300, damping: 24 });
+
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (reduce) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width - 0.5;
+    const py = (e.clientY - rect.top) / rect.height - 0.5;
+    ry.set(px * 16);   // ±8°
+    rx.set(-py * 16);
+  };
+  const reset = () => { rx.set(0); ry.set(0); };
+
+  return (
+    <motion.div
+      onMouseMove={onMove}
+      onMouseLeave={reset}
+      style={{ rotateX: rx, rotateY: ry, transformPerspective: 800 }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
 /** Compact module cards for path tracks, with next-lab deep links. */
-const ModuleGrid: React.FC<{ track: Track }> = ({ track }) => {
+const ModuleGrid: React.FC<{ track: Track; locked: (m: Track['modules'][number]) => boolean; onLocked: (m: Track['modules'][number]) => void }> = ({ track, locked, onLocked }) => {
   const navigate = useNavigate();
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {track.modules.map((m) => {
         const done = m.completed_labs === m.total_labs;
+        const isLocked = locked(m);
         return (
-          <Card key={m.module_number} interactive className="flex flex-col justify-between gap-3 p-4">
-            <div className="flex items-center justify-between gap-2">
-              <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-primary">
-                Module {String(m.module_number).padStart(2, '0')}
-              </span>
-              {done && <Badge variant="success" dot>Complete</Badge>}
-            </div>
-            <div>
-              <h4 className="text-sm font-bold leading-snug text-content">{m.module_title}</h4>
-              <div className="mt-2.5 flex items-center gap-2">
-                <ProgressBar value={m.completed_labs} max={m.total_labs} className="flex-1" label={`${m.module_title} progress`} />
-                <span className="text-xs font-bold tabular-nums text-muted">{m.completed_labs}/{m.total_labs}</span>
+          <TiltCard key={m.module_number}>
+            <Card className="relative flex h-full flex-col justify-between gap-3 overflow-hidden p-4">
+              {done && <ShineBorder shineColor="rgb(var(--c-success))" />}
+              {done && (
+                <motion.span
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                  className="absolute right-3 top-3 text-lg"
+                  aria-hidden
+                >
+                  ✅
+                </motion.span>
+              )}
+              <div className="flex items-center justify-between gap-2">
+                <span className="rounded-full bg-primary/15 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-primary">
+                  Module {String(m.module_number).padStart(2, '0')}
+                </span>
+                {done && <Badge variant="success" dot>Complete</Badge>}
               </div>
-            </div>
-            {m.next_lab ? (
-              <button
-                onClick={() => navigate(`/labs/${m.next_lab!.lab_id}`)}
-                className="truncate text-left text-xs font-black text-primary hover:underline"
-                title={`Next: ${m.next_lab.title}`}
-              >
-                Next: {m.next_lab.title} →
-              </button>
-            ) : (
-              <span className="text-xs font-bold text-success">All labs passed 🎉</span>
-            )}
-          </Card>
+              <div>
+                <h4 className="text-sm font-bold leading-snug text-content">{m.module_title}</h4>
+                <div className="mt-2.5 flex items-center gap-2">
+                  <ProgressBar value={m.completed_labs} max={m.total_labs} className="flex-1" label={`${m.module_title} progress`} />
+                  <span className="text-xs font-bold tabular-nums text-muted">{m.completed_labs}/{m.total_labs}</span>
+                </div>
+              </div>
+              {m.next_lab ? (
+                <button
+                  onClick={() => navigate(`/labs/${m.next_lab!.lab_id}`)}
+                  className="truncate text-left text-xs font-black text-primary hover:underline"
+                  title={`Next: ${m.next_lab.title}`}
+                >
+                  Next: {m.next_lab.title} →
+                </button>
+              ) : (
+                <span className="text-xs font-bold text-success">All labs passed 🎉</span>
+              )}
+
+              {isLocked && (
+                <button
+                  onClick={() => onLocked(m)}
+                  className="absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl bg-bg/70 backdrop-blur-sm"
+                  aria-label={`${m.module_title} is locked — upgrade to Pro`}
+                >
+                  <span className="text-2xl" aria-hidden>🔒</span>
+                  <Badge variant="accent">Pro</Badge>
+                </button>
+              )}
+            </Card>
+          </TiltCard>
         );
       })}
     </div>
@@ -245,10 +310,14 @@ export default function StudentDashboard() {
 
   const [data, setData] = useState<dashboardData | null>(null);
   const [profile, setProfile] = useState<{ xp: number; level: number; current_streak: number; longest_streak: number } | null>(null);
+  const [courses, setCourses] = useState<CourseSummary[] | null>(null);
   const [optOutCompletion, setOptOutCompletion] = useState(false);
   const [updatingPrefs, setUpdatingPrefs] = useState(false);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const prevXp = useRef<number | null>(null);
+  const [xpFlash, setXpFlash] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -262,6 +331,8 @@ export default function StudentDashboard() {
       setData(dashRes.data);
       setProfile(profRes.data);
       setOptOutCompletion(meRes.data.opt_out_completion || false);
+      // courses strip is auxiliary — a failure here never blanks the dashboard
+      api.get('/courses').then((r) => setCourses(r.data)).catch(() => setCourses([]));
     } catch (err) {
       console.error('Failed to load dashboard data', err);
       setFailed(true);
@@ -273,6 +344,19 @@ export default function StudentDashboard() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // XP-gain flash when returning from a lab with points
+  const xpNow = profile?.xp ?? null;
+  useEffect(() => {
+    if (xpNow === null) return;
+    if (prevXp.current !== null && xpNow > prevXp.current) {
+      setXpFlash(true);
+      const t = setTimeout(() => setXpFlash(false), 1400);
+      prevXp.current = xpNow;
+      return () => clearTimeout(t);
+    }
+    prevXp.current = xpNow;
+  }, [xpNow]);
 
   const handlePreferenceToggle = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVal = e.target.checked;
@@ -287,6 +371,11 @@ export default function StudentDashboard() {
       setUpdatingPrefs(false);
     }
   };
+
+  const firstName = user?.full_name?.split(' ')[0] ?? 'there';
+  const tier = summary0(data)?.subscription_tier;
+  const isFree = tier === undefined ? true : tier === 'free';
+  const lockedFor = (m: Track['modules'][number]) => isFree && m.module_number !== 1;
 
   if (loading) {
     return (
@@ -339,108 +428,191 @@ export default function StudentDashboard() {
   return (
     <div className="min-h-screen bg-bg" id="main">
       <AppNav />
-      <div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-        {/* hero */}
-        <Card glow className="overflow-hidden">
-          <div className="flex flex-col items-start justify-between gap-6 bg-gradient-to-r from-primary/15 via-transparent to-accent/10 p-8">
-            <div>
-              <h1 className="font-display text-3xl font-bold tracking-tight text-content">
-                {greeting()}, {user?.full_name?.split(' ')[0]} 👋
-              </h1>
-              <p className="mt-1.5 font-medium text-muted">
-                {summary.total_labs_completed === 0
-                  ? 'Ready to break some servers and level up your DevOps skills?'
-                  : `${summary.completion_percentage}% of the catalog conquered — keep the streak alive.`}
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              {continueItems[0] ? (
-                <Button variant="accent" onClick={() => navigate(continueItems[0].kind === 'attempt' ? `/labs/${continueItems[0].lab_id}/run` : `/labs/${continueItems[0].lab_id}`)}>
-                  {continueItems[0].kind === 'attempt' ? '🏁 Resume exam' : continueItems[0].kind === 'session' ? 'Resume session' : continueItems[0].kind === 'retry' ? 'Retry last lab' : 'Start next lab'}
-                </Button>
-              ) : (
-                <Button variant="accent" onClick={() => document.getElementById('tracks')?.scrollIntoView({ behavior: 'smooth' })}>
-                  Browse learning tracks
-                </Button>
-              )}
-              <Link to="/billing"><Button variant="secondary" size="sm">{tierBadge} tier</Button></Link>
-              <Button variant="ghost" size="sm" onClick={logout} className="hover:text-danger">Log out</Button>
-            </div>
-          </div>
-        </Card>
-
-        {/* stat cards */}
-        <BlurFade className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {statCards.map((c) => (
-            <Card key={c.label} className="flex flex-col justify-between p-6">
-              <p className="text-sm font-bold uppercase tracking-wider text-muted">{c.label}</p>
-              <div className="mt-4 flex items-baseline justify-between">
-                <span className={`font-display text-3xl font-bold ${c.accent}`}>{c.value}</span>
-                <span className="text-sm font-semibold text-muted">{c.sub}</span>
-              </div>
-            </Card>
-          ))}
-        </BlurFade>
-
-        {/* continue where you left off */}
-        {continueItems.length > 0 && (
-          <section aria-label="Continue where you left off">
-            <h2 className="mb-4 font-display text-2xl font-bold text-content">Pick up where you left off</h2>
-            <BlurFade delay={0.08} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {continueItems.map((item, i) => <ContinueCard key={`${item.kind}-${item.lab_id}-${i}`} item={item} />)}
-            </BlurFade>
-          </section>
-        )}
-
-        {/* certification tracks */}
-        <section id="tracks" aria-label="Learning tracks" className="space-y-6">
-          <h2 className="font-display text-2xl font-bold text-content">Learning tracks</h2>
-          {ckaTrack && <WeekStepper track={ckaTrack} />}
-
-          {pathTrack && (
-            <Card className="p-6">
-              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-4">
-                  <ProgressRing value={pathTrack.completion} size={72} label={`${pathTrack.title} completion`}>
-                    <span className="text-sm font-black text-content">{pathTrack.completion}%</span>
-                  </ProgressRing>
-                  <div>
-                    <h3 className="font-display text-lg font-bold text-content">{pathTrack.title}</h3>
-                    <p className="mt-1 max-w-md text-sm font-medium text-muted">{pathTrack.tagline}</p>
-                    <p className="mt-2 text-xs font-bold uppercase tracking-wider text-muted">
-                      {pathTrack.completed_labs} / {pathTrack.total_labs} labs complete
-                    </p>
-                  </div>
+      <div className="mesh-bg min-h-screen">
+        <div className="relative">
+          <FloatingParticles count={28} className="fixed" />
+        </div>
+        <main className="relative mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+          {/* hero strip: greeting typewriter + live XP ring */}
+          <BlurFade className="relative overflow-hidden rounded-2xl border border-border mesh-bg">
+            <div className="relative flex min-h-[160px] flex-col justify-between gap-6 bg-gradient-to-r from-primary/15 via-transparent to-accent/10 p-8 lg:flex-row lg:items-center">
+              <div>
+                <h1 className="font-display text-3xl font-bold tracking-tight text-content">
+                  {greeting()}, {firstName} 👋
+                </h1>
+                <p className="mt-1.5 font-medium text-muted">
+                  <Typewriter text={`Level ${profile?.level ?? 1} · ${levelTitle(profile?.level ?? 1)}`} />
+                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {(profile?.current_streak ?? summary.current_streak) > 0 ? (
+                    <PulseBadge tone="warn">
+                      <motion.span
+                        aria-hidden
+                        className="inline-block"
+                        whileHover={{ scale: 1.3 }}
+                        animate={{ scale: [1, 1.12, 1] }}
+                        transition={{ repeat: Infinity, duration: 1.6 }}
+                      >
+                        🔥
+                      </motion.span>
+                      Streak: {profile?.current_streak ?? summary.current_streak} days
+                    </PulseBadge>
+                  ) : (
+                    <Badge>Start your streak today →</Badge>
+                  )}
                 </div>
               </div>
-            </Card>
+              <div className="flex items-center gap-6">
+                <div className="flex flex-wrap items-center gap-3">
+                  {continueItems[0] ? (
+                    <Button variant="accent" onClick={() => navigate(continueItems[0].kind === 'attempt' ? `/labs/${continueItems[0].lab_id}/run` : `/labs/${continueItems[0].lab_id}`)}>
+                      {continueItems[0].kind === 'attempt' ? '🏁 Resume exam' : continueItems[0].kind === 'session' ? 'Resume session' : continueItems[0].kind === 'retry' ? 'Retry last lab' : 'Start next lab'}
+                    </Button>
+                  ) : (
+                    <Button variant="accent" onClick={() => document.getElementById('tracks')?.scrollIntoView({ behavior: 'smooth' })}>
+                      Browse learning tracks
+                    </Button>
+                  )}
+                  <Link to="/billing"><Button variant="secondary" size="sm">{tierBadge} tier</Button></Link>
+                  <Button variant="ghost" size="sm" onClick={logout} className="hover:text-danger">Log out</Button>
+                </div>
+                <div className={cn('shrink-0', xpFlash && 'xp-gain')}>
+                  <ProgressRing
+                    value={nextLevelPct(profile?.xp ?? 0)}
+                    size={104}
+                    label={`XP progress to level ${(profile?.level ?? 1) + 1}`}
+                  >
+                    <div className="text-center">
+                      <CountUp value={profile?.xp ?? summary.total_points} className="block text-lg font-black tabular-nums text-content" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted">XP · L{profile?.level ?? 1}</span>
+                    </div>
+                  </ProgressRing>
+                </div>
+              </div>
+            </div>
+          </BlurFade>
+
+          {/* stat cards */}
+          <BlurFade className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {statCards.map((c) => (
+              <Card key={c.label} className="flex flex-col justify-between p-6">
+                <p className="text-sm font-bold uppercase tracking-wider text-muted">{c.label}</p>
+                <div className="mt-4 flex items-baseline justify-between">
+                  <span className={`font-display text-3xl font-bold ${c.accent}`}>{c.value}</span>
+                  <span className="text-sm font-semibold text-muted">{c.sub}</span>
+                </div>
+              </Card>
+            ))}
+          </BlurFade>
+
+          {/* continue where you left off */}
+          {continueItems.length > 0 && (
+            <section aria-label="Continue where you left off">
+              <h2 className="mb-4 font-display text-2xl font-bold text-content">Pick up where you left off</h2>
+              <BlurFade delay={0.08} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {continueItems.map((item, i) => <ContinueCard key={`${item.kind}-${item.lab_id}-${i}`} item={item} />)}
+              </BlurFade>
+            </section>
           )}
 
-          {pathTrack && <ModuleGrid track={pathTrack} />}
-        </section>
-
-        {/* sidebar row: heatmap + leaderboard + settings */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          <div className="space-y-8">
-            <Heatmap activity={activity} />
-            <Card className="space-y-4 p-6">
-              <h3 className="text-lg font-bold text-content">Email notifications</h3>
-              <p className="text-sm font-medium text-muted">
-                Customize which transactional onboarding or grading messages you receive in your inbox.
-              </p>
-              <div className="flex items-center justify-between pt-2">
-                <span className="text-sm font-semibold text-content">Opt out of lab completion emails</span>
-                <label className="relative inline-flex cursor-pointer items-center">
-                  <input type="checkbox" checked={optOutCompletion} onChange={handlePreferenceToggle} disabled={updatingPrefs} className="peer sr-only" />
-                  <div className="h-6 w-11 rounded-full bg-surface-2 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-border after:bg-muted after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-checked:after:bg-surface"></div>
-                </label>
+          {/* course progress strip */}
+          <section aria-label="Course progress" className="space-y-3">
+            <div className="flex items-baseline justify-between">
+              <h2 className="font-display text-2xl font-bold text-content">Courses</h2>
+              <Link to="/courses" className="text-xs font-black text-primary hover:underline">Browse all courses →</Link>
+            </div>
+            {courses === null ? (
+              <Skeleton className="h-20 w-full rounded-xl" />
+            ) : courses.length === 0 ? (
+              <Card className="flex items-center justify-between gap-4 p-5">
+                <p className="text-sm font-medium text-muted">No structured paths yet — a guided study plan beats random labs.</p>
+                <Link to="/courses"><Button variant="primary" size="sm">Browse learning paths →</Button></Link>
+              </Card>
+            ) : (
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+                {courses.map((course) => <CourseProgressPill key={course.id} course={course} />)}
               </div>
-              {updatingPrefs && <p className="animate-pulse text-xs font-bold text-primary">Saving settings…</p>}
-            </Card>
+            )}
+          </section>
+
+          {/* certification tracks */}
+          <section id="tracks" aria-label="Learning tracks" className="space-y-6">
+            <h2 className="font-display text-2xl font-bold text-content">Learning tracks</h2>
+            {ckaTrack && <WeekStepper track={ckaTrack} />}
+
+            {pathTrack && (
+              <Card className="p-6">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-4">
+                    <ProgressRing value={pathTrack.completion} size={72} label={`${pathTrack.title} completion`}>
+                      <span className="text-sm font-black text-content">{pathTrack.completion}%</span>
+                    </ProgressRing>
+                    <div>
+                      <h3 className="font-display text-lg font-bold text-content">{pathTrack.title}</h3>
+                      <p className="mt-1 max-w-md text-sm font-medium text-muted">{pathTrack.tagline}</p>
+                      <p className="mt-2 text-xs font-bold uppercase tracking-wider text-muted">
+                        {pathTrack.completed_labs} / {pathTrack.total_labs} labs complete
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {pathTrack && (
+              <ModuleGrid
+                track={pathTrack}
+                locked={lockedFor}
+                onLocked={() => setShowUpgrade(true)}
+              />
+            )}
+          </section>
+
+          {/* sidebar row: heatmap + leaderboard + settings */}
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <div className="space-y-8">
+              <Heatmap activity={activity} />
+              <Card className="space-y-4 p-6">
+                <h3 className="text-lg font-bold text-content">Email notifications</h3>
+                <p className="text-sm font-medium text-muted">
+                  Customize which transactional onboarding or grading messages you receive in your inbox.
+                </p>
+                <div className="flex items-center justify-between pt-2">
+                  <span className="text-sm font-semibold text-content">Opt out of lab completion emails</span>
+                  <label className="relative inline-flex cursor-pointer items-center">
+                    <input type="checkbox" checked={optOutCompletion} onChange={handlePreferenceToggle} disabled={updatingPrefs} className="peer sr-only" />
+                    <div className="h-6 w-11 rounded-full bg-surface-2 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:border after:border-border after:bg-muted after:transition-all after:content-[''] peer-checked:bg-primary peer-checked:after:translate-x-full peer-checked:after:border-white peer-checked:after:bg-surface"></div>
+                  </label>
+                </div>
+                {updatingPrefs && <p className="animate-pulse text-xs font-bold text-primary">Saving settings…</p>}
+              </Card>
+            </div>
+            <LeaderboardWidget board={leaderboard} />
           </div>
-          <LeaderboardWidget board={leaderboard} />
-        </div>
+        </main>
       </div>
+
+      {/* free-tier upgrade modal */}
+      <Modal open={showUpgrade} onClose={() => setShowUpgrade(false)} title="This module is part of Pro" className="max-w-md text-center">
+        <p className="text-sm font-medium text-muted">
+          Free tier covers Module 01 only. Upgrade to Pro to unlock every lab, all CKA weeks and unlimited sessions.
+        </p>
+        <div className="mt-6 flex justify-center gap-3">
+          <Button variant="accent" onClick={() => navigate('/billing')}>See plans →</Button>
+          <Button variant="ghost" onClick={() => setShowUpgrade(false)}>Not now</Button>
+        </div>
+      </Modal>
     </div>
   );
+}
+
+/* ------------------------------- page helpers -------------------------------- */
+
+function summary0(data: dashboardData | null): { subscription_tier: string } | undefined {
+  return data ? { subscription_tier: data.summary.subscription_tier } : undefined;
+}
+
+/** % into the current level (100 XP per level). */
+function nextLevelPct(xp: number): number {
+  return Math.round(((xp % 100) / 100) * 100);
 }

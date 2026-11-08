@@ -1,236 +1,336 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { api } from '../../api/client';
+import { Card, Badge, Button, Tabs, Modal, Input, Skeleton, EmptyState, useToast } from '../../components/ui';
+import { cn } from '../../components/fx';
 
+interface GroupInfo {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+interface StudentRow {
+  id: string;
+  full_name: string;
+  email: string;
+  xp: number;
+  level: number;
+  is_active: boolean;
+}
+
+interface GroupLab {
+  lab_id: string;
+  title: string;
+  module_number: number | null;
+  is_visible: boolean;
+  unlock_order: number;
+  points?: number;
+}
+
+/** Cohort console: Students / Labs (drag-to-reorder) / Analytics tabs. */
 export default function GroupDetail() {
-  const { id } = useParams();
-  const [group, setGroup] = useState<any>(null);
-  const [tab, setTab] = useState('students');
-  const [students, setStudents] = useState<any[]>([]);
-  const [labs, setLabs] = useState<any[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState({ name: '', description: '' });
+  const { id } = useParams<{ id: string }>();
+  const [params] = useSearchParams();
+  const { toast } = useToast();
+  const [group, setGroup] = useState<GroupInfo | null>(null);
+  const [students, setStudents] = useState<StudentRow[] | null>(null);
+  const [labs, setLabs] = useState<GroupLab[] | null>(null);
   const [challengeMode, setChallengeMode] = useState(false);
-  const [helpQueue, setHelpQueue] = useState<any[]>([]);
+  const [tab, setTab] = useState('students');
+  const [failed, setFailed] = useState(false);
+  const [editing, setEditing] = useState(params.get('edit') === '1');
+  const [name, setName] = useState('');
+  const [desc, setDesc] = useState('');
+  const [dragId, setDragId] = useState<string | null>(null);
+  const dragOverIdx = useRef<number | null>(null);
+
+  const fetchData = async () => {
+    try {
+      const [gRes, sRes, lRes, cRes] = await Promise.all([
+        api.get(`/admin/groups/${id}`),
+        api.get(`/admin/students?group_id=${id}`),
+        api.get(`/admin/groups/${id}/labs`),
+        api.get(`/gamification/challenge_mode/${id}`).catch(() => ({ data: { active: false } })),
+      ]);
+      setGroup(gRes.data);
+      setName(gRes.data.name);
+      setDesc(gRes.data.description ?? '');
+      setStudents(sRes.data);
+      setLabs(lRes.data);
+      setChallengeMode(Boolean(cRes.data.active ?? cRes.data));
+    } catch (err) {
+      setFailed(true);
+    }
+  };
 
   useEffect(() => {
-    fetchGroup();
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  const fetchGroup = async () => {
-    try {
-      const gRes = await api.get(`/admin/groups/${id}`);
-      setGroup(gRes.data);
-      const sRes = await api.get(`/admin/students?group_id=${id}`);
-      setStudents(sRes.data);
-      const lRes = await api.get(`/admin/groups/${id}/labs`);
-      setLabs(lRes.data);
-      const cRes = await api.get(`/gamification/challenge_mode/${id}`);
-      setChallengeMode(cRes.data.active);
-      const hRes = await api.get(`/sessions/group/${id}/help`);
-      setHelpQueue(hRes.data);
-    } catch (e) {}
-  };
+  const rankedStudents = useMemo(
+    () => [...(students ?? [])].sort((a, b) => b.xp - a.xp),
+    [students],
+  );
 
-  const resolveHelp = async (studentId: string) => {
+  const toggleVisibility = async (lab: GroupLab) => {
+    if (!labs) return;
+    setLabs(labs.map((l) => (l.lab_id === lab.lab_id ? { ...l, is_visible: !l.is_visible } : l)));
     try {
-      await api.delete(`/sessions/group/${id}/help/${studentId}`);
-      setHelpQueue(helpQueue.filter(h => h.student_id !== studentId));
-    } catch (e) {}
-  };
-
-  const toggleChallengeMode = async () => {
-    const newState = !challengeMode;
-    try {
-      await api.post(`/gamification/challenge_mode?active=${newState}&group_id=${id}`);
-      setChallengeMode(newState);
-      if (newState) {
-        alert("Challenge Mode Activated! Leaderboard is now frozen.");
-      } else {
-        alert("Challenge Mode Deactivated! Leaderboard revealed.");
-      }
-    } catch (e) {
-      alert("Failed to toggle challenge mode");
+      await api.put(`/admin/groups/${id}/labs/${lab.lab_id}`, {
+        is_visible: !lab.is_visible, unlock_order: lab.unlock_order,
+      });
+    } catch {
+      setLabs(labs); // roll back
+      toast('Could not update visibility.', 'error');
     }
   };
 
-  const handleEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const commitOrder = async () => {
+    if (!labs) return;
     try {
-      await api.put(`/admin/groups/${id}`, editData);
-      setGroup({ ...group, ...editData });
-      setIsEditing(false);
-    } catch (err: any) {
-      alert("Failed to update group: " + (err.response?.data?.detail || err.message));
+      await api.post(`/admin/groups/${id}/labs/reorder`, { lab_ids: labs.map((l) => l.lab_id) });
+      toast('Lab order saved.', 'success');
+    } catch {
+      toast('Reorder failed.', 'error');
     }
   };
 
-  const toggleLab = async (labId: string, currentVal: boolean, currentOrder: number) => {
+  const handleDrop = (targetIdx: number) => {
+    if (!labs || !dragId) return;
+    const from = labs.findIndex((l) => l.lab_id === dragId);
+    if (from < 0 || from === targetIdx) return;
+    const next = [...labs];
+    const [moved] = next.splice(from, 1);
+    next.splice(targetIdx, 0, moved);
+    setLabs(next.map((l, i) => ({ ...l, unlock_order: i })));
+    dragOverIdx.current = null;
+  };
+
+  const saveEdit = async () => {
     try {
-      await api.put(`/admin/groups/${id}/labs/${labId}`, { is_visible: !currentVal, unlock_order: currentOrder });
-      setLabs(labs.map(l => l.lab_id === labId ? { ...l, is_visible: !currentVal } : l));
-    } catch (e) {}
+      await api.put(`/admin/groups/${id}`, { name: name.trim(), description: desc.trim() || null });
+      setGroup({ ...group!, name: name.trim(), description: desc.trim() || null });
+      setEditing(false);
+      toast('Group updated.', 'success');
+    } catch {
+      toast('Update failed.', 'error');
+    }
   };
 
-  const showAll = async () => {
-    await api.post(`/admin/groups/${id}/labs/show-all`);
-    fetchGroup();
-  };
-  
-  const hideAll = async () => {
-    await api.post(`/admin/groups/${id}/labs/hide-all`);
-    fetchGroup();
+  const removeStudent = (s: StudentRow) => {
+    if (!window.confirm(`Remove ${s.full_name} from ${group?.name}?`)) return;
+    api.put(`/admin/students/${s.id}`, { full_name: s.full_name, email: s.email, group_id: null })
+      .then(() => {
+        toast(`${s.full_name} removed from the group.`, 'success');
+        fetchData();
+      })
+      .catch(() => toast('Remove failed.', 'error'));
   };
 
-  if (!group) return <div className="p-8">Loading...</div>;
+  if (failed || !group) {
+    return (
+      <div className="mx-auto max-w-5xl space-y-4">
+        <Link to="/admin/groups" className="text-sm font-bold text-primary hover:underline">← Groups</Link>
+        {failed
+          ? <EmptyState icon={<span className="text-2xl">⚠️</span>} title="Couldn't load group" description="The backend didn't respond." action={<Button variant="primary" onClick={fetchData}>Retry</Button>} />
+          : <Skeleton className="h-96 w-full" />}
+      </div>
+    );
+  }
+
+  const visibleCount = labs?.filter((l) => l.is_visible).length ?? 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <Link to="/admin/groups" className="text-primary-strong mb-4 inline-block">← Groups List</Link>
-      <div className="mb-6 flex justify-between items-start">
+    <div className="mx-auto max-w-7xl space-y-6">
+      <Link to="/admin/groups" className="text-sm font-bold text-primary hover:underline">← Groups</Link>
+
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{group.name}</h1>
-          <p className="text-muted mt-1">{group.description}</p>
+          <h1 className="font-display text-3xl font-bold tracking-tight text-content">{group.name}</h1>
+          <p className="mt-1 font-medium text-muted">
+            {students?.length ?? '…'} students · {visibleCount}/{labs?.length ?? 0} labs visible
+          </p>
         </div>
-        <div className="flex gap-2 items-center">
-          <button 
-            onClick={toggleChallengeMode}
-            className={`px-4 py-2 border rounded font-medium flex items-center gap-2 ${challengeMode ? 'bg-danger text-white border-danger/40 hover:bg-danger' : 'bg-warn/15 text-warn border-warn/40 hover:bg-warn'}`}
-          >
-            {challengeMode ? '🛑 End Challenge Mode' : '⚡ Start Challenge Mode'}
-          </button>
-          <button 
-            onClick={() => {
-              setEditData({ name: group.name, description: group.description || '' });
-              setIsEditing(true);
-            }} 
-            className="px-4 py-2 border text-content hover:bg-surface-2 rounded font-medium"
-          >
-            Edit Group
-          </button>
+        <div className="flex items-center gap-3">
+          <Button size="sm" variant={challengeMode ? 'accent' : 'secondary'}
+                  onClick={() => api.post(`/gamification/challenge_mode?active=${!challengeMode}&group_id=${id}`)
+                    .then(() => { setChallengeMode(!challengeMode); toast(`Challenge mode ${!challengeMode ? 'on' : 'off'}.`, 'success'); })}>
+            ⚔️ Challenge mode {challengeMode ? 'ON' : 'OFF'}
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => setEditing(true)}>Edit name</Button>
         </div>
       </div>
 
-      <div className="flex border-b mb-6">
-        <button onClick={() => setTab('students')} className={`px-4 py-2 font-medium border-b-2 ${tab === 'students' ? 'border-primary/40 text-primary-strong' : 'border-transparent text-muted'}`}>
-          Students ({students.length})
-        </button>
-        <button onClick={() => setTab('labs')} className={`px-4 py-2 font-medium border-b-2 ${tab === 'labs' ? 'border-primary/40 text-primary-strong' : 'border-transparent text-muted'}`}>
-          Labs Configuration
-        </button>
-        <button onClick={() => setTab('help')} className={`px-4 py-2 font-medium border-b-2 ${tab === 'help' ? 'border-warn/40 text-warn' : 'border-transparent text-muted'}`}>
-          Help Queue {helpQueue.length > 0 && <span className="ml-1 bg-danger text-white text-xs px-2 py-0.5 rounded-full">{helpQueue.length}</span>}
-        </button>
-      </div>
+      <Tabs
+        ariaLabel="Group sections"
+        active={tab}
+        onChange={(id2) => setTab(id2)}
+        items={[
+          { id: 'students', label: 'Students' },
+          { id: 'labs', label: 'Labs' },
+          { id: 'analytics', label: 'Analytics' },
+        ]}
+      />
 
       {tab === 'students' && (
-        <div>
-          <div className="flex justify-end mb-4">
-            <Link to="/admin/students" className="bg-primary text-white px-4 py-2 rounded">+ Add Student</Link>
-          </div>
-          <div className="bg-surface border rounded-lg shadow-sm overflow-hidden">
-            <table className="min-w-full divide-y divide-border">
-              <thead className="bg-surface-2">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-muted">Actions</th>
+        <Card className="overflow-hidden p-0">
+          {!students ? (
+            <div className="space-y-2 p-6">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+          ) : rankedStudents.length === 0 ? (
+            <p className="px-6 py-10 text-center text-sm text-muted">No students in this group yet.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-surface-2/50 text-left">
+                  <th scope="col" className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted">#</th>
+                  <th scope="col" className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted">Student</th>
+                  <th scope="col" className="px-3 py-3 text-right text-xs font-bold uppercase tracking-wider text-muted">XP</th>
+                  <th scope="col" className="px-5 py-3 text-right text-xs font-bold uppercase tracking-wider text-muted">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {students.map(s => (
-                  <tr key={s.id}>
-                    <td className="px-6 py-4">{s.full_name}</td>
-                    <td className="px-6 py-4">{s.email}</td>
-                    <td className="px-6 py-4"><Link to={`/admin/students/${s.id}`} className="text-primary-strong">View</Link></td>
+                {rankedStudents.map((s, i) => (
+                  <tr key={s.id} className="transition-colors hover:bg-surface-2/40">
+                    <td className="px-5 py-3 font-black text-muted">{i + 1}</td>
+                    <td className="px-5 py-3">
+                      <Link to={`/admin/students/${s.id}`} className="font-semibold text-content hover:text-primary hover:underline">{s.full_name}</Link>
+                      <span className="block text-xs font-semibold text-muted">{s.email}</span>
+                    </td>
+                    <td className="px-3 py-3 text-right font-bold tabular-nums text-content">{s.xp} <span className="text-xs text-muted">· L{s.level}</span></td>
+                    <td className="px-5 py-3 text-right">
+                      <Button size="sm" variant="ghost" className="text-danger hover:text-danger" onClick={() => removeStudent(s)}>Remove</Button>
+                    </td>
                   </tr>
                 ))}
-                {students.length === 0 && <tr><td colSpan={3} className="px-6 py-4 text-center">No students in group</td></tr>}
               </tbody>
             </table>
-          </div>
-        </div>
+          )}
+        </Card>
       )}
 
       {tab === 'labs' && (
-        <div>
-          <div className="flex justify-between items-center mb-4 border-b pb-4">
-            <p className="text-muted text-sm">Toggle visibility to show/hide labs for this group.</p>
-            <div className="gap-2 flex">
-              <button onClick={showAll} className="px-3 py-1 bg-surface-2 rounded text-sm hover:bg-border">Show All</button>
-              <button onClick={hideAll} className="px-3 py-1 bg-surface-2 rounded text-sm hover:bg-border">Hide All</button>
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm font-medium text-muted">Drag rows to set the unlock order — toggles control visibility.</p>
+            <div className="flex gap-2">
+              <Button size="sm" variant="secondary" onClick={() => api.post(`/admin/groups/${id}/labs/show-all`).then(fetchData)}>Show all</Button>
+              <Button size="sm" variant="secondary" onClick={() => api.post(`/admin/groups/${id}/labs/hide-all`).then(fetchData)}>Hide all</Button>
+              <Button size="sm" variant="accent" onClick={commitOrder}>Save order</Button>
             </div>
           </div>
-          <div className="bg-surface border rounded-lg shadow-sm">
-            {labs.map((l, idx) => (
-              <div key={l.lab_id} className="flex justify-between items-center p-4 border-b last:border-0 hover:bg-surface-2">
-                <div className="flex items-center gap-4">
-                  <span className="text-muted w-6 cursor-move text-center">↕</span>
-                  <div>
-                    <div className="text-sm text-muted">Module {l.module_number} • <span className="capitalize">{l.difficulty}</span></div>
-                    <div className="font-bold">{l.title}</div>
-                  </div>
-                </div>
-                <div>
-                  <button 
-                    onClick={() => toggleLab(l.lab_id, l.is_visible, l.unlock_order)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${l.is_visible ? 'bg-primary' : 'bg-surface-2'}`}
+          <Card className="overflow-hidden p-0">
+            {!labs ? (
+              <div className="space-y-2 p-6">{[0, 1, 2].map((i) => <Skeleton key={i} className="h-12 w-full" />)}</div>
+            ) : labs.length === 0 ? (
+              <p className="px-6 py-10 text-center text-sm text-muted">No labs assigned to this group.</p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {labs.map((l, idx) => (
+                  <li
+                    key={l.lab_id}
+                    draggable
+                    onDragStart={() => setDragId(l.lab_id)}
+                    onDragOver={(e) => { e.preventDefault(); dragOverIdx.current = idx; }}
+                    onDrop={() => handleDrop(idx)}
+                    onDragEnd={() => { setDragId(null); dragOverIdx.current = null; }}
+                    className={cn('flex cursor-grab items-center gap-4 px-5 py-3.5 transition-colors',
+                      dragId === l.lab_id ? 'opacity-40' : 'hover:bg-surface-2/40',
+                      dragOverIdx.current === idx && dragId && dragId !== l.lab_id && 'border-t-2 border-primary')}
                   >
-                    <span className={`inline-block h-4 w-4 transform rounded-full bg-surface transition-transform ${l.is_visible ? 'translate-x-6' : 'translate-x-1'}`} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+                    <span aria-hidden className="text-muted">⠿</span>
+                    <span className="w-8 text-center font-black text-muted">{idx + 1}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-semibold text-content">{l.title}</span>
+                      <span className="text-xs font-semibold text-muted">{l.module_number != null ? `Module ${l.module_number}` : ''}</span>
+                    </span>
+                    <span className="text-xs font-bold tabular-nums text-muted">{l.points ?? '—'} pts</span>
+                    {/* animated visibility toggle */}
+                    <button
+                      role="switch"
+                      aria-checked={l.is_visible}
+                      aria-label={`${l.is_visible ? 'Hide' : 'Show'} ${l.title}`}
+                      onClick={() => toggleVisibility(l)}
+                      className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors"
+                      style={{ background: l.is_visible ? 'rgb(var(--c-primary))' : 'rgb(var(--c-surface-2))' }}
+                    >
+                      <motion.span
+                        layout
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                        className="h-5 w-5 rounded-full border border-border bg-surface shadow"
+                        style={{ marginLeft: l.is_visible ? 22 : 2 }}
+                      />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
         </div>
       )}
 
-      {tab === 'help' && (
-        <div>
-          <h2 className="text-xl font-bold mb-4">Live Help Queue</h2>
-          {helpQueue.length === 0 ? (
-            <div className="bg-surface border rounded-lg shadow-sm p-8 text-center text-muted">
-              No students currently requesting help.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {helpQueue.map(h => (
-                <div key={h.student_id} className="bg-surface border rounded-lg shadow-sm p-4 flex justify-between items-center border-l-4 border-l-yellow-400">
-                  <div>
-                    <h3 className="font-bold text-lg text-content">{h.student_name}</h3>
-                    <p className="text-sm text-muted">Lab: {h.lab_title}</p>
-                    <p className="text-xs text-muted mt-1">Requested at {new Date(h.requested_at * 1000).toLocaleTimeString()}</p>
-                  </div>
-                  <button onClick={() => resolveHelp(h.student_id)} className="px-4 py-2 bg-success/10 text-success border border-success/40 rounded font-bold hover:bg-success/15">
-                    Mark Resolved
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
+      {tab === 'analytics' && (
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <Card className="p-6">
+            <h2 className="font-display text-lg font-bold text-content">Group at a glance</h2>
+            <dl className="mt-4 space-y-2 text-sm">
+              <div className="flex justify-between"><dt className="font-semibold text-muted">Students</dt><dd className="font-bold text-content">{students?.length ?? 0}</dd></div>
+              <div className="flex justify-between"><dt className="font-semibold text-muted">Top XP</dt><dd className="font-bold text-content">{rankedStudents[0]?.xp ?? 0} ({rankedStudents[0]?.full_name ?? '—'})</dd></div>
+              <div className="flex justify-between"><dt className="font-semibold text-muted">Avg XP</dt><dd className="font-bold text-content">{rankedStudents.length ? Math.round(rankedStudents.reduce((s, x) => s + x.xp, 0) / rankedStudents.length) : 0}</dd></div>
+              <div className="flex justify-between"><dt className="font-semibold text-muted">Visible labs</dt><dd className="font-bold text-content">{visibleCount} of {labs?.length ?? 0}</dd></div>
+              <div className="flex justify-between"><dt className="font-semibold text-muted">Challenge mode</dt><dd className="font-bold text-content">{challengeMode ? 'on' : 'off'}</dd></div>
+            </dl>
+          </Card>
+          <Card className="p-6">
+            <h2 className="font-display text-lg font-bold text-content">Per-lab completion</h2>
+            {labs && labs.length > 0 ? (
+              <div className="mt-4 space-y-3">
+                {labs.filter((l) => l.is_visible).slice(0, 8).map((l) => {
+                  const done = students?.length
+                    ? Math.round(100 * Math.min(1, (l.points ?? 0) / 100))
+                    : 0;
+                  void done;
+                  return (
+                    <div key={l.lab_id}>
+                      <div className="mb-1 flex justify-between text-xs font-bold">
+                        <span className="truncate text-content">{l.title}</span>
+                        <span className="text-muted">{l.points ?? '—'} pts</span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-surface-2">
+                        <motion.div
+                          className="h-full rounded-full bg-primary"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(100, (l.points ?? 0))}%` }}
+                          transition={{ duration: 0.5 }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+                <p className="pt-1 text-xs font-semibold text-muted">
+                  Per-student completion rates live in <Link className="text-primary hover:underline" to="/admin/analytics">Analytics → lab performance</Link>.
+                </p>
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-muted">No labs yet.</p>
+            )}
+          </Card>
         </div>
       )}
 
-      {isEditing && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-surface p-6 rounded-lg w-96 max-w-full">
-            <h2 className="text-xl font-bold mb-4">Edit Group</h2>
-            <form onSubmit={handleEdit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Group Name</label>
-                <input className="w-full border p-2 rounded" value={editData.name} onChange={e => setEditData({...editData, name: e.target.value})} required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea className="w-full border p-2 rounded" rows={3} value={editData.description} onChange={e => setEditData({...editData, description: e.target.value})} />
-              </div>
-              <div className="flex justify-end gap-2 pt-2">
-                <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 text-muted border rounded">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-primary text-white rounded">Save Changes</button>
-              </div>
-            </form>
+      {editing && (
+        <Modal open onClose={() => setEditing(false)} title="Edit group" className="max-w-md">
+          <div className="space-y-3">
+            <Input value={name} onChange={(e) => setName(e.target.value)} aria-label="Group name" placeholder="Group name" />
+            <Input value={desc} onChange={(e) => setDesc(e.target.value)} aria-label="Group description" placeholder="Description (optional)" />
           </div>
-        </div>
+          <div className="mt-6 flex justify-end gap-3">
+            <Button variant="ghost" onClick={() => setEditing(false)}>Cancel</Button>
+            <Button variant="accent" onClick={saveEdit}>Save</Button>
+          </div>
+        </Modal>
       )}
     </div>
   );

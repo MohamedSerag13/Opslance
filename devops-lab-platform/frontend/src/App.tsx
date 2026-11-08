@@ -16,11 +16,14 @@ const LabRunner = lazyPage(() => import('./pages/LabRunner'));
 const Progress = lazyPage(() => import('./pages/Progress'));
 const Achievements = lazyPage(() => import('./pages/Achievements'));
 const Leaderboard = lazyPage(() => import('./pages/Leaderboard'));
+const Courses = lazyPage(() => import('./pages/Courses'));
+const CourseDetail = lazyPage(() => import('./pages/CourseDetail'));
 const Billing = lazyPage(() => import('./pages/Billing'));
 const DesignSystem = lazyPage(() => import('./pages/DesignSystem'));
 const NotFound = lazyPage(() => import('./pages/NotFound'));
 const AdminDashboard = lazyPage(() => import('./pages/admin/AdminDashboard'));
 const AdminAnalytics = lazyPage(() => import('./pages/admin/AdminAnalytics'));
+const AdminLayout = lazyPage(() => import('./components/layout/AdminLayout'));
 const GroupsList = lazyPage(() => import('./pages/admin/GroupsList'));
 const GroupDetail = lazyPage(() => import('./pages/admin/GroupDetail'));
 const StudentsList = lazyPage(() => import('./pages/admin/StudentsList'));
@@ -78,6 +81,8 @@ function App() {
           <Route path="/reset-password" element={<ResetPasswordRoute />} />
           {/* design system showcase — internal reference, requires sign-in */}
           <Route path="/design" element={<ProtectedRoute><DesignSystem /></ProtectedRoute>} />
+          <Route path="/courses" element={<ProtectedRoute><Courses /></ProtectedRoute>} />
+          <Route path="/courses/:slug" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
 
           {/* Student Routes */}
           <Route path="/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
@@ -88,16 +93,18 @@ function App() {
           <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
           <Route path="/billing" element={<ProtectedRoute><Billing /></ProtectedRoute>} />
 
-          {/* Admin Routes */}
-          <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/analytics" element={<ProtectedRoute requireAdmin><AdminAnalytics /></ProtectedRoute>} />
-          <Route path="/admin/groups" element={<ProtectedRoute requireAdmin><GroupsList /></ProtectedRoute>} />
-          <Route path="/admin/groups/:id" element={<ProtectedRoute requireAdmin><GroupDetail /></ProtectedRoute>} />
-          <Route path="/admin/students" element={<ProtectedRoute requireAdmin><StudentsList /></ProtectedRoute>} />
-          <Route path="/admin/students/:id" element={<ProtectedRoute requireAdmin><StudentDetail /></ProtectedRoute>} />
-          <Route path="/admin/labs" element={<ProtectedRoute requireAdmin><LabCatalog /></ProtectedRoute>} />
-          <Route path="/admin/environments" element={<ProtectedRoute requireAdmin><Environments /></ProtectedRoute>} />
-          <Route path="/admin/leaderboard" element={<ProtectedRoute requireAdmin><AdminLeaderboard /></ProtectedRoute>} />
+          {/* Admin Routes — shared console shell (top bar + collapsible sidebar) */}
+          <Route path="/admin" element={<ProtectedRoute requireAdmin><AdminLayout /></ProtectedRoute>}>
+            <Route index element={<AdminDashboard />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
+            <Route path="groups" element={<GroupsList />} />
+            <Route path="groups/:id" element={<GroupDetail />} />
+            <Route path="students" element={<StudentsList />} />
+            <Route path="students/:id" element={<StudentDetail />} />
+            <Route path="labs" element={<LabCatalog />} />
+            <Route path="environments" element={<Environments />} />
+            <Route path="leaderboard" element={<AdminLeaderboard />} />
+          </Route>
 
           {/* 404 — unknown routes get a real not-found page, not a silent redirect */}
           <Route path="*" element={<NotFound />} />

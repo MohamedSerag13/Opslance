@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, fetchWsTicket } from '../api/client';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import AppNav from '../components/layout/AppNav';
-import { Card, Button, Tabs, Skeleton, EmptyState } from '../components/ui';
+import { Card, Button, Tabs, Skeleton, EmptyState, Badge, ProgressRing } from '../components/ui';
+import { BlurFade, CountUp, PulseBadge, ShineBorder, cn } from '../components/fx';
 
 interface boardRow {
   rank: number;
@@ -153,26 +155,42 @@ export default function Leaderboard() {
           />
         ) : (
           <>
-            {/* podium */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3" aria-label="Top three">
+            {/* podium — suspense build: 2nd → 3rd → 1st */}
+            <div className="relative grid grid-cols-1 gap-4 sm:grid-cols-3" aria-label="Top three">
               {top3.map((row, i) => {
                 const p = PODIUM[i];
+                const delay = i === 0 ? 0.2 : i === 1 ? 0 : 0.1; // 2nd, 3rd, then 1st
                 return (
-                  <Card
-                    key={row.student_id}
-                    glow={i === 0}
-                    className={`relative flex flex-col items-center border-2 p-6 text-center ${p.ring} ${i === 1 ? 'sm:mt-6' : ''} ${i === 2 ? 'sm:mt-10' : ''}`}
-                  >
-                    <span className={`absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${p.chip}`} aria-hidden>
-                      {row.rank}
-                    </span>
-                    <span className="text-3xl" aria-hidden>{p.medal}</span>
-                    <p className={`mt-2 max-w-full truncate font-display text-lg font-bold ${row.student_id === user?.id ? 'text-primary' : 'text-content'}`} title={row.name}>
-                      {row.name}{row.student_id === user?.id && ' (you)'}
-                    </p>
-                    <p className={`font-display text-3xl font-black tabular-nums ${p.label}`}>{row.score}</p>
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted">points</p>
-                  </Card>
+                  <BlurFade key={row.student_id} delay={delay} className={cn(i === 1 && 'sm:mt-6', i === 2 && 'sm:mt-10')}>
+                    <div className="relative h-full">
+                      {i === 0 && <ShineBorder shineColor={['rgb(var(--c-warn))', 'rgb(var(--c-accent))']} className="rounded-2xl" />}
+                      <Card
+                        glow={i === 0}
+                        className={`relative flex h-full flex-col items-center border-2 p-6 text-center ${p.ring}`}
+                      >
+                        <span className={`absolute left-3 top-3 flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${p.chip}`} aria-hidden>
+                          {row.rank}
+                        </span>
+                        {i === 0 && (
+                          <span className="absolute right-3 top-3" aria-hidden>
+                            <PulseBadge tone="warn">👑</PulseBadge>
+                          </span>
+                        )}
+                        <span className="text-3xl" aria-hidden>{p.medal}</span>
+                        <span
+                          aria-hidden
+                          className={`mt-2 flex h-12 w-12 items-center justify-center rounded-full font-display text-lg font-black text-white ${i === 0 ? 'bg-warn' : i === 1 ? 'bg-muted' : 'bg-accent'}`}
+                        >
+                          {row.name.charAt(0).toUpperCase()}
+                        </span>
+                        <p className={`mt-2 max-w-full truncate font-display text-lg font-bold ${row.student_id === user?.id ? 'text-primary' : 'text-content'}`} title={row.name}>
+                          {row.name}{row.student_id === user?.id && ' (you)'}
+                        </p>
+                        <CountUp value={row.score} className={`font-display text-3xl font-black tabular-nums ${p.label}`} />
+                        <p className="text-xs font-bold uppercase tracking-wider text-muted">points</p>
+                      </Card>
+                    </div>
+                  </BlurFade>
                 );
               })}
             </div>
@@ -189,10 +207,16 @@ export default function Leaderboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
+                  <AnimatePresence initial={false}>
                   {rest.map((row) => (
-                    <tr
+                    <motion.tr
                       key={row.student_id}
-                      className={row.student_id === user?.id ? 'bg-primary/10' : 'transition-colors hover:bg-surface-2/40'}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+                      className={row.student_id === user?.id ? 'border-l-2 border-primary bg-primary/10' : 'transition-colors hover:bg-surface-2/40'}
                     >
                       <td className="px-5 py-3">
                         <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-black ${rankChip(row.rank)}`}>
@@ -200,7 +224,8 @@ export default function Leaderboard() {
                         </span>
                       </td>
                       <td className={`max-w-[240px] truncate px-5 py-3 font-semibold ${row.student_id === user?.id ? 'text-primary' : 'text-content'}`}>
-                        {row.name}{row.student_id === user?.id && ' (you)'}
+                        {row.name}
+                        {row.student_id === user?.id && <Badge variant="primary" className="ml-2">YOU</Badge>}
                       </td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
@@ -220,8 +245,9 @@ export default function Leaderboard() {
                           <span className="w-14 text-right font-bold tabular-nums text-content">{row.score}</span>
                         </div>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
+                  </AnimatePresence>
                 </tbody>
               </table>
             </Card>
