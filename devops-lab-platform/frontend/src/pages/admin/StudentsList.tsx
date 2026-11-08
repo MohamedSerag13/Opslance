@@ -41,6 +41,9 @@ export default function StudentsList() {
   const [sortAsc, setSortAsc] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showImport, setShowImport] = useState(params.get('import') === '1');
+  const [showCreate, setShowCreate] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [form, setForm] = useState({ full_name: '', email: '', password: '', group_id: '', plan: 'free' });
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
   const [bulkBusy, setBulkBusy] = useState(false);
@@ -136,6 +139,39 @@ export default function StudentsList() {
     }
   };
 
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email);
+  const formValid = form.full_name.trim().length >= 2 && emailOk && form.password.length >= 8;
+
+  const createStudent = async () => {
+    if (!formValid) return;
+    setCreating(true);
+    try {
+      await api.post('/admin/students', {
+        full_name: form.full_name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        group_id: form.group_id || null,
+        is_active: true,
+      });
+      if (form.plan !== 'free') {
+        const created = (await api.get('/admin/students')).data.find(
+          (s2: StudentRow) => s2.email === form.email.trim());
+        if (created) {
+          await api.patch(`/admin/students/${created.id}/plan`, { plan: form.plan });
+        }
+      }
+      toast(`${form.full_name.trim()} added — they'll be asked to change the password at first login.`, 'success');
+      setShowCreate(false);
+      setForm({ full_name: '', email: '', password: '', group_id: '', plan: 'free' });
+      fetchData();
+    } catch (err) {
+      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+      toast(detail || 'Could not create the student — is the email already registered?', 'error');
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const runImport = async () => {
     if (!importFile) return;
     setImporting(true);
@@ -173,9 +209,12 @@ export default function StudentsList() {
           <h1 className="font-display text-3xl font-bold tracking-tight text-content">Students</h1>
           <p className="mt-1 font-medium text-muted">{students ? `${students.length} accounts` : 'Loading…'} — click a row for the full profile.</p>
         </div>
-        <Button variant="accent" size="sm" onClick={() => setShowImport(true)}>
-          <Upload size={14} className="mr-1.5 inline" aria-hidden /> Import XLSX
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="accent" size="sm" onClick={() => setShowCreate(true)}>+ Add Student</Button>
+          <Button variant="secondary" size="sm" onClick={() => setShowImport(true)}>
+            <Upload size={14} className="mr-1.5 inline" aria-hidden /> Import XLSX
+          </Button>
+        </div>
       </div>
 
       {/* filter bar */}
@@ -297,6 +336,49 @@ export default function StudentsList() {
               <Button variant="secondary" size="sm" onClick={() => bulkAction('export')}>Export</Button>
               <Button variant="ghost" size="sm" onClick={() => setSelected(new Set())}>Clear</Button>
             </span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* add-student modal */}
+      <AnimatePresence>
+        {showCreate && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }}
+                        className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-card">
+              <h2 className="font-display text-lg font-bold text-content">Add a student</h2>
+              <p className="mt-1 text-sm font-medium text-muted">
+                Creates the account immediately. The student must set a new password at first login.
+              </p>
+              <div className="mt-4 space-y-3">
+                <Input placeholder="Full name" value={form.full_name}
+                       onChange={(e) => setForm({ ...form, full_name: e.target.value })} aria-label="Full name" />
+                <Input placeholder="Email address" type="email" value={form.email}
+                       onChange={(e) => setForm({ ...form, email: e.target.value })} aria-label="Email address" />
+                <Input placeholder="Initial password (min 8 chars)" value={form.password}
+                       onChange={(e) => setForm({ ...form, password: e.target.value })} aria-label="Initial password" />
+                <div className="flex gap-3">
+                  <select value={form.group_id} onChange={(e) => setForm({ ...form, group_id: e.target.value })}
+                          aria-label="Group" className="flex-1 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-content">
+                    <option value="">No group</option>
+                    {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
+                  </select>
+                  <select value={form.plan} onChange={(e) => setForm({ ...form, plan: e.target.value })}
+                          aria-label="Subscription plan" className="flex-1 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-content">
+                    <option value="free">Free plan</option>
+                    <option value="pro">Pro plan</option>
+                    <option value="enterprise">Enterprise plan</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mt-6 flex justify-end gap-3">
+                <Button variant="ghost" onClick={() => setShowCreate(false)}>Cancel</Button>
+                <Button variant="accent" disabled={!formValid || creating} onClick={createStudent}>
+                  {creating ? 'Creating…' : 'Create student'}
+                </Button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

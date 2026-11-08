@@ -316,6 +316,7 @@ export default function StudentDashboard() {
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [announcement, setAnnouncement] = useState('');
   const prevXp = useRef<number | null>(null);
   const [xpFlash, setXpFlash] = useState(false);
 
@@ -333,6 +334,7 @@ export default function StudentDashboard() {
       setOptOutCompletion(meRes.data.opt_out_completion || false);
       // courses strip is auxiliary — a failure here never blanks the dashboard
       api.get('/courses').then((r) => setCourses(r.data)).catch(() => setCourses([]));
+      api.get('/settings/public').then((r) => setAnnouncement(r.data.announcement ?? '')).catch(() => {});
     } catch (err) {
       console.error('Failed to load dashboard data', err);
       setFailed(true);
@@ -433,6 +435,14 @@ export default function StudentDashboard() {
           <FloatingParticles count={28} className="fixed" />
         </div>
         <main className="relative mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+          {/* platform announcement */}
+          {announcement && (
+            <BlurFade className="flex items-center gap-3 rounded-2xl border border-primary/40 bg-primary/10 px-5 py-3.5">
+              <span aria-hidden className="text-lg">📢</span>
+              <p className="text-sm font-bold text-content">{announcement}</p>
+            </BlurFade>
+          )}
+
           {/* hero strip: greeting typewriter + live XP ring */}
           <BlurFade className="relative overflow-hidden rounded-2xl border border-border mesh-bg">
             <div className="relative flex min-h-[160px] flex-col justify-between gap-6 bg-gradient-to-r from-primary/15 via-transparent to-accent/10 p-8 lg:flex-row lg:items-center">

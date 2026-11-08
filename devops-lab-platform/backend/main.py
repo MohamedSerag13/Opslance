@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from routers import (
     auth, admin_groups, admin_students, admin_labs, admin_environments,
-    labs, sessions, runner, progress, websocket, gamification, billing, admin_analytics, courses
+    labs, sessions, runner, progress, websocket, gamification, billing, admin_analytics, courses, admin_settings
 )
 from security import SecurityHeadersMiddleware
 from logging_setup import setup_logging, get_logger, new_request_id, request_id_var
@@ -63,6 +63,8 @@ app.include_router(runner.router, prefix="/api/sessions", tags=["exam_runner"])
 app.include_router(progress.router, prefix="/api", tags=["progress"])
 app.include_router(gamification.router, prefix="/api/gamification", tags=["gamification"])
 app.include_router(courses.router, prefix="/api/courses", tags=["courses"])
+app.include_router(admin_settings.router, prefix="/api/admin/settings", tags=["admin_settings"])
+app.include_router(admin_settings.public_router, prefix="/api/settings", tags=["settings"])
 app.include_router(websocket.router, prefix="/api/ws", tags=["websocket"])
 
 

@@ -102,22 +102,21 @@ export default function AdminLeaderboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <Link to="/admin" className="text-primary-strong mb-4 inline-block">← Dashboard</Link>
-      
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Admin Leaderboard 🏆</h1>
+    <div className="mx-auto max-w-7xl space-y-6">
+      <Link to="/admin" className="text-sm font-bold text-primary hover:underline">← Dashboard</Link>
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-content">Admin Leaderboard 🏆</h1>
         <div className="flex gap-2">
           <button 
             onClick={fetchStudents} 
             disabled={loading}
-            className="bg-surface-2 hover:bg-surface-2 text-content px-4 py-2 rounded font-medium disabled:opacity-50"
+            className="rounded-xl bg-surface-2 px-4 py-2 font-medium text-content transition-colors hover:bg-surface-2/70 disabled:opacity-50"
           >
             {loading ? 'Refreshing...' : 'Refresh'}
           </button>
           <button 
             onClick={handleExport} 
-            className="bg-success hover:bg-success text-white px-4 py-2 rounded font-medium"
+            className="rounded-xl bg-success px-4 py-2 font-medium text-white transition-colors hover:bg-success-strong"
           >
             Export View
           </button>
@@ -125,30 +124,30 @@ export default function AdminLeaderboard() {
       </div>
 
       {/* Stats Bar */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-surface p-6 rounded-xl shadow border">
-          <p className="text-sm text-muted font-medium">Total Students</p>
-          <p className="text-3xl font-bold">{totalStudents}</p>
+      <div className="mb-2 grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div className="bg-surface p-6 rounded-xl shadow-card border border-border">
+          <p className="text-sm font-bold uppercase tracking-wider text-muted">Total Students</p>
+          <p className="font-display text-3xl font-bold text-content">{totalStudents}</p>
         </div>
-        <div className="bg-surface p-6 rounded-xl shadow border">
-          <p className="text-sm text-muted font-medium">Highest Score</p>
-          <p className="text-3xl font-bold">{highestScore} pts</p>
+        <div className="bg-surface p-6 rounded-xl shadow-card border border-border">
+          <p className="text-sm font-bold uppercase tracking-wider text-muted">Highest Score</p>
+          <p className="font-display text-3xl font-bold text-content">{highestScore} pts</p>
         </div>
-        <div className="bg-surface p-6 rounded-xl shadow border">
-          <p className="text-sm text-muted font-medium">Average Score</p>
-          <p className="text-3xl font-bold">{averageScore} pts</p>
+        <div className="bg-surface p-6 rounded-xl shadow-card border border-border">
+          <p className="text-sm font-bold uppercase tracking-wider text-muted">Average Score</p>
+          <p className="font-display text-3xl font-bold text-content">{averageScore} pts</p>
         </div>
       </div>
 
       {/* Filters and Table */}
-      <div className="bg-surface shadow rounded-lg border">
-        <div className="p-4 border-b flex justify-between items-center bg-surface-2">
+      <div className="bg-surface shadow-card rounded-2xl border border-border overflow-hidden">
+        <div className="p-4 border-b border-border flex justify-between items-center bg-surface-2">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-content">Filter by Group:</span>
+            <span className="text-sm font-bold text-content">Filter by group</span>
             <select 
               value={selectedGroup} 
               onChange={e => setSelectedGroup(e.target.value)} 
-              className="border p-1.5 rounded text-sm bg-surface"
+              className="border border-border rounded-xl bg-surface px-3 py-1.5 text-sm font-semibold text-content"
             >
               <option value="All">All Groups</option>
               {uniqueGroups.map(g => (
@@ -173,10 +172,10 @@ export default function AdminLeaderboard() {
             {filteredStudents.map(s => (
               <tr key={s.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold ${
-                    s.rank === 1 ? 'bg-warn text-warn' :
-                    s.rank === 2 ? 'bg-border text-content' :
-                    s.rank === 3 ? 'bg-orange-300 text-orange-900' : 'bg-surface-2 text-muted'
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-full font-bold ${
+                    s.rank === 1 ? 'bg-warn/20 text-warn ring-1 ring-warn/50' :
+                    s.rank === 2 ? 'bg-muted/25 text-muted ring-1 ring-muted/40' :
+                    s.rank === 3 ? 'bg-accent/20 text-accent ring-1 ring-accent/40' : 'bg-surface-2 text-muted'
                   }`}>
                     {s.rank}
                   </div>
@@ -200,7 +199,7 @@ export default function AdminLeaderboard() {
                       setNewXP(s.xp || 0);
                       setShowPointsModal(true);
                     }}
-                    className="text-primary-strong hover:text-primary-strong mr-4"
+                    className="mr-4 font-semibold text-primary hover:underline"
                   >
                     Edit Points
                   </button>
@@ -223,8 +222,8 @@ export default function AdminLeaderboard() {
 
       {/* Edit Points Modal */}
       {showPointsModal && editingStudent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-surface p-6 rounded-lg w-96 max-w-full">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="w-96 max-w-full rounded-2xl border border-border bg-surface p-6 shadow-card">
             <h2 className="text-xl font-bold mb-4 font-sans text-content">Edit Points</h2>
             <p className="text-sm text-muted mb-4">Editing points for <span className="font-semibold">{editingStudent.full_name}</span></p>
             <form onSubmit={handleSavePoints} className="space-y-4">
@@ -233,7 +232,7 @@ export default function AdminLeaderboard() {
                 <input 
                   type="number" 
                   min={0}
-                  className="w-full border p-2 rounded focus:ring-1 focus:ring-primary focus:outline-none" 
+                  className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-content focus:outline-none focus:ring-1 focus:ring-primary" 
                   value={newXP}
                   onChange={e => setNewXP(parseInt(e.target.value) || 0)}
                   required 
@@ -243,7 +242,7 @@ export default function AdminLeaderboard() {
                 <label className="block text-sm font-medium mb-1 text-content">Reason (Optional)</label>
                 <input 
                   type="text" 
-                  className="w-full border p-2 rounded focus:ring-1 focus:ring-primary focus:outline-none" 
+                  className="w-full rounded-xl border border-border bg-surface px-3 py-2 text-content focus:outline-none focus:ring-1 focus:ring-primary" 
                   placeholder="e.g. Activity bonus"
                   value={reason}
                   onChange={e => setReason(e.target.value)} 
@@ -256,14 +255,14 @@ export default function AdminLeaderboard() {
                     setShowPointsModal(false);
                     setEditingStudent(null);
                   }} 
-                  className="px-4 py-2 border rounded text-muted hover:bg-surface-2"
+                  className="rounded-xl border border-border px-4 py-2 text-muted transition-colors hover:bg-surface-2 hover:text-content"
                   disabled={pointsLoading}
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-strong disabled:opacity-50 font-medium"
+                  className="rounded-xl bg-primary px-4 py-2 font-medium text-white transition-colors hover:bg-primary-strong disabled:opacity-50"
                   disabled={pointsLoading}
                 >
                   {pointsLoading ? 'Saving...' : 'Save XP'}

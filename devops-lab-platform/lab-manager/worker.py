@@ -380,9 +380,15 @@ def _start_lab_impl(data):
         session.container_name = container_name
         session.status = "running"
         
-        # Hard expiry: based on subscription tier (30 min free, 2 hours pro) set at session creation
+        # Hard expiry: admin-configured TTL per tier, with the historic defaults
+        # (30 min free / 2 h pro) as fallback when settings can't be read.
         student_tier = (session.student.subscription_tier or "free") if (session.student and session.student.subscription_tier) else "free"
-        ttl_minutes = 120 if student_tier == "pro" else 30
+        try:
+            import settings_service
+            ttl_minutes = int(settings_service.get_setting(
+                db, "default_session_minutes_pro" if student_tier == "pro" else "default_session_minutes_free"))
+        except Exception:
+            ttl_minutes = 120 if student_tier == "pro" else 30
 
         print(f"[session] TTL set to {ttl_minutes} min for lab {lab_id} (tier: {student_tier})")
         session.expires_at = _utcnow() + timedelta(minutes=ttl_minutes)

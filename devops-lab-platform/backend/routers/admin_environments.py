@@ -41,4 +41,6 @@ def kill_environment(container_name: str, db: Session = Depends(get_db), admin=D
     
     db.query(models.LabSession).filter_by(container_name=container_name).update({"status": "killed"})
     db.commit()
+    import settings_service
+    settings_service.write_audit(db, admin.get("email", "admin"), "environment.kill", container_name, None)
     return {"status": "killed"}

@@ -50,7 +50,7 @@ def test_bulk_skips_duplicate_rows(client, admin_headers, make_student):
 def test_points_and_plan_updates(client, admin_headers, make_student):
     st = make_student()
     r = client.patch(f"/api/admin/students/{st.id}/points", headers=admin_headers, json={"xp": 1000})
-    assert r.json()["xp"] == 1000 and r.json()["level"] == 3
+    assert r.json()["xp"] == 1000 and r.json()["level"] == 11  # unified 100-XP/level curve
 
     r = client.patch(f"/api/admin/students/{st.id}/plan", headers=admin_headers, json={"plan": "pro"})
     assert r.json()["plan"] == "pro"

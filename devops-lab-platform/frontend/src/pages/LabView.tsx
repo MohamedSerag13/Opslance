@@ -24,6 +24,7 @@ export default function LabView() {
   const [showSolution, setShowSolution] = useState(false);
   const [feedback, setFeedback] = useState<{ passed: boolean, output: string, message: string } | null>(null);
   const [completion, setCompletion] = useState<{ score: number; nextLabId: string | null } | null>(null);
+  const [hintsAllowed, setHintsAllowed] = useState(true);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [isPro, setIsPro] = useState(false);
   const [extending, setExtending] = useState(false);
@@ -124,6 +125,7 @@ export default function LabView() {
         setLoading(false);
       }
     };
+    api.get('/settings/public').then((r) => setHintsAllowed(r.data.hints_allowed !== false)).catch(() => {});
     fetchLab();
   }, [id, navigate]);
 
@@ -349,7 +351,7 @@ export default function LabView() {
             )}
           </div>
 
-          {session && <HintPanel sessionId={session.id} />}
+          {session && <HintPanel sessionId={session.id} hintsAllowed={hintsAllowed} />}
         </div>
         
         {/* Footer Actions */}

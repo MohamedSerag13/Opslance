@@ -48,7 +48,11 @@ def create_session(data: SessionCreate, db: Session = Depends(get_db), student=D
         models.LabSession.status.in_(["running", "starting"])
     ).count()
 
-    max_active = 3 if tier == "pro" else 1
+    import settings_service
+    if tier == "pro":
+        max_active = int(settings_service.get_setting(db, "max_running_sessions_pro"))
+    else:
+        max_active = int(settings_service.get_setting(db, "max_running_sessions_free"))
     if active_sessions >= max_active:
         raise HTTPException(status_code=400, detail=f"Active lab session limit reached ({active_sessions}/{max_active}). Please stop your other active lab first.")
 
@@ -287,6 +291,9 @@ def get_revealed_hints(session_id: str, db: Session = Depends(get_db), student=D
 
 @router.post("/{session_id}/hints/{n}")
 def reveal_hint(session_id: str, n: int, db: Session = Depends(get_db), student=Depends(rate_limit_student)):
+    import settings_service
+    if not settings_service.get_setting(db, "hints_allowed"):
+        raise HTTPException(403, "Hints are disabled for this platform.")
     try:
         valid_id = uuid.UUID(session_id)
     except ValueError:
@@ -390,6 +397,11 @@ def resolve_help(group_id: str, student_id: str, admin=Depends(require_admin)):
     redis_client.hdel(queue_key, student_id)
     return {"message": "Resolved"}
 
+def _extend_minutes(db: Session) -> int:
+    import settings_service
+    return int(settings_service.get_setting(db, "session_extend_minutes"))
+
+
 @router.post("/{session_id}/extend")
 def extend_session(session_id: str, db: Session = Depends(get_db), student=Depends(rate_limit_student)):
     if (getattr(student, "subscription_tier", "free") or "free") != "pro":
@@ -405,9 +417,9 @@ def extend_session(session_id: str, db: Session = Depends(get_db), student=Depen
         raise HTTPException(status_code=404, detail="Active lab session not found")
 
     if sess.expires_at:
-        sess.expires_at = sess.expires_at + timedelta(minutes=30)
+        sess.expires_at = sess.expires_at + timedelta(minutes=_extend_minutes(db))
     else:
-        sess.expires_at = utcnow() + timedelta(minutes=30)
+        sess.expires_at = utcnow() + timedelta(minutes=_extend_minutes(db))
 
     db.commit()
     return {"message": "Session extended successfully", "expires_at": sess.expires_at}

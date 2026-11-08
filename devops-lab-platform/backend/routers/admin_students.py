@@ -86,18 +86,23 @@ def reset_password(student_id: str, data: ResetPassword, db: Session = Depends(g
     if not s: raise HTTPException(404)
     s.password_hash = get_password_hash(data.password)
     db.commit()
+    import settings_service
+    settings_service.write_audit(db, admin.get("email", "admin"), "student.reset_password", str(student_id), None)
     return {"message": "password reset"}
 
 @router.post("/{student_id}/points")
 def adjust_points(student_id: str, data: PointsUpdate, db: Session = Depends(get_db), admin=Depends(require_admin)):
     """Manual XP adjustment from the admin console (delta can be negative).
     Level is recomputed from the same 100-XP-per-level curve as grading."""
+    import settings_service
     s = db.query(models.Student).filter(models.Student.id == student_id).first()
     if not s:
         raise HTTPException(404)
     s.xp = max(0, (s.xp or 0) + data.xp)
     s.level = 1 + (s.xp // 100)
     db.commit()
+    settings_service.write_audit(db, admin.get("email", "admin"), "student.points",
+                                 str(student_id), {"delta": data.xp, "reason": data.reason, "xp": s.xp})
     return {"message": f"XP adjusted by {data.xp}", "xp": s.xp, "level": s.level, "reason": data.reason}
 
 
@@ -148,12 +153,15 @@ def update_student_points(student_id: str, data: PointsUpdate, db: Session = Dep
     s = db.query(models.Student).filter(models.Student.id == student_id).first()
     if not s:
         raise HTTPException(404, "Student not found")
+    import settings_service
     old_xp = s.xp
-    s.xp = data.xp
-    # Recalculate level: 1 level per 500 XP
-    s.level = max(1, data.xp // 500 + 1)
+    s.xp = max(0, data.xp)
+    # Recalculate level on the same 100-XP-per-level curve used everywhere else
+    s.level = max(1, s.xp // 100 + 1)
     db.commit()
     db.refresh(s)
+    settings_service.write_audit(db, admin.get("email", "admin"), "student.points",
+                                 str(student_id), {"set": s.xp, "old": old_xp})
     return {"student_id": student_id, "xp": s.xp, "level": s.level, "old_xp": old_xp}
 
 @router.patch("/{student_id}/plan")
@@ -161,9 +169,12 @@ def update_student_plan(student_id: str, data: PlanUpdate, db: Session = Depends
     valid_plans = ["free", "pro", "enterprise"]
     if data.plan not in valid_plans:
         raise HTTPException(400, f"Invalid plan. Must be one of: {valid_plans}")
+    import settings_service
     s = db.query(models.Student).filter(models.Student.id == student_id).first()
     if not s:
         raise HTTPException(404, "Student not found")
     s.subscription_tier = data.plan
     db.commit()
+    settings_service.write_audit(db, admin.get("email", "admin"), "student.plan",
+                                 str(student_id), {"plan": data.plan})
     return {"student_id": student_id, "plan": s.subscription_tier}

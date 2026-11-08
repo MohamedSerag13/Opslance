@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { api } from '../api/client';
 import { useLabStore } from '../store/labStore';
 
-export default function HintPanel({ sessionId }: { sessionId: string }) {
+export default function HintPanel({ sessionId, hintsAllowed = true }: { sessionId: string; hintsAllowed?: boolean }) {
   const { 
     hintsRevealed, 
     revealHint, 
@@ -163,7 +163,7 @@ export default function HintPanel({ sessionId }: { sessionId: string }) {
                   <div>{hints[i - 1] || 'Loading...'}</div>
                 </motion.div>
               </AnimatePresence>
-            ) : (
+            ) : hintsAllowed ? (
               <button 
                 disabled={i > hintsRevealed + 1 || (i === hintsRevealed + 1 && cooldown > 0)}
                 onClick={triggerConfirm}
@@ -186,6 +186,10 @@ export default function HintPanel({ sessionId }: { sessionId: string }) {
                     : `Costs 10 pts`}
                 </span>
               </button>
+            ) : (
+              <span className="w-full rounded-xl border border-border bg-surface-2/50 p-3.5 text-left text-sm font-semibold text-muted">
+                🔒 Hints are disabled on this platform
+              </span>
             )}
           </div>
         ))}

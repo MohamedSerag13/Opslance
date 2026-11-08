@@ -298,3 +298,27 @@ class StudentCourseProgress(Base):
         UniqueConstraint("student_id", "course_id", "week_number", "day_index",
                          name="uq_student_course_day"),
     )
+
+
+class PlatformSetting(Base):
+    """Admin-editable platform configuration (JSON-encoded values, typed defaults
+    live in settings_service.py)."""
+    __tablename__ = "platform_settings"
+
+    key = Column(String, primary_key=True)
+    value = Column(Text, nullable=True)                # JSON-encoded
+    updated_by = Column(String, nullable=True)         # admin email
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class AdminAuditLog(Base):
+    """Append-only trail of privileged actions (settings changes, XP/plan
+    edits, environment force-stops, student lifecycle)."""
+    __tablename__ = "admin_audit_log"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    actor_email = Column(String, nullable=False)
+    action = Column(String, nullable=False)            # "settings.update", "student.points", …
+    target = Column(String, nullable=True)             # student id/email, container, key
+    detail = Column(Text, nullable=True)               # JSON payload snapshot
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)

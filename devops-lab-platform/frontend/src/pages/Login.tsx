@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import { Link, useNavigate } from 'react-router-dom';
@@ -16,6 +16,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [supportEmail, setSupportEmail] = useState('');
   const { setTokens, setUser, setMustResetPassword } = useAuthStore();
   const navigate = useNavigate();
 
@@ -56,6 +57,11 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    // optional public settings: only the support email is shown pre-login
+    api.get('/settings/public').then((r) => setSupportEmail(r.data.support_email || '')).catch(() => {});
+  }, []);
 
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
@@ -130,6 +136,12 @@ export default function Login() {
                 First time here? Your admin creates your account — sign in above.{' '}
                 <Link to="/" className="font-semibold text-primary hover:underline">Back to home</Link>
               </p>
+
+              {supportEmail && (
+                <p className="mt-3 text-center text-xs font-semibold text-muted">
+                  Need help? Contact <a href={`mailto:${supportEmail}`} className="text-primary hover:underline">{supportEmail}</a>
+                </p>
+              )}
             </div>
           </BlurFade>
         </div>

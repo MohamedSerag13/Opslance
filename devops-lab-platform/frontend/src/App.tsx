@@ -24,6 +24,7 @@ const NotFound = lazyPage(() => import('./pages/NotFound'));
 const AdminDashboard = lazyPage(() => import('./pages/admin/AdminDashboard'));
 const AdminAnalytics = lazyPage(() => import('./pages/admin/AdminAnalytics'));
 const AdminLayout = lazyPage(() => import('./components/layout/AdminLayout'));
+const AdminSettings = lazyPage(() => import('./pages/admin/AdminSettings'));
 const GroupsList = lazyPage(() => import('./pages/admin/GroupsList'));
 const GroupDetail = lazyPage(() => import('./pages/admin/GroupDetail'));
 const StudentsList = lazyPage(() => import('./pages/admin/StudentsList'));
@@ -104,6 +105,7 @@ function App() {
             <Route path="labs" element={<LabCatalog />} />
             <Route path="environments" element={<Environments />} />
             <Route path="leaderboard" element={<AdminLeaderboard />} />
+            <Route path="settings" element={<AdminSettings />} />
           </Route>
 
           {/* 404 — unknown routes get a real not-found page, not a silent redirect */}

@@ -47,6 +47,13 @@ def _revoke_refresh_token(refresh_token: str) -> None:
 
 @router.post("/login", response_model=Token)
 def login(data: LoginData, request: Request, db: Session = Depends(get_db)):
+    import settings_service
+    if settings_service.get_setting(db, "maintenance_mode"):
+        # admins still get in to turn maintenance off
+        admin_email = (os.getenv("ADMIN_EMAIL") or "").lower()
+        if data.email.lower() != admin_email:
+            raise HTTPException(503, "Platform is under maintenance — check back shortly.")
+
     email_key = f"login_fail:email:{data.email.lower()}"
     ip_key = f"login_fail:ip:{_client_ip(request)}"
     for key in (email_key, ip_key):

@@ -3,12 +3,13 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, BarChart3, Users, GraduationCap, FlaskConical,
   MonitorSmartphone, Trophy, Settings, PanelLeftClose, PanelLeftOpen, LogOut,
+  type LucideIcon,
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { ThemeToggle } from '../ui';
 import { cn } from '../fx';
 
-const NAV_ITEMS = [
+const NAV_ITEMS: { to: string; label: string; icon: LucideIcon; placeholder?: boolean }[] = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
   { to: '/admin/groups', label: 'Groups', icon: Users },
@@ -16,7 +17,7 @@ const NAV_ITEMS = [
   { to: '/admin/labs', label: 'Labs', icon: FlaskConical },
   { to: '/admin/environments', label: 'Environments', icon: MonitorSmartphone },
   { to: '/admin/leaderboard', label: 'Leaderboard', icon: Trophy },
-  { to: '/admin/settings', label: 'Settings', icon: Settings, placeholder: true },
+  { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
 /**
