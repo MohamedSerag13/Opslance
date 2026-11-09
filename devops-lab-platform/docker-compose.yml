@@ -122,9 +122,9 @@ services:
       - REDIS_URL=${REDIS_URL:-}
       - DATABASE_URL=${DATABASE_URL:-}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-}
-            # Shared token for the internal exec/PTY API (empty: the entrypoint
-            # derives it from the generated SECRET_KEY, matching the backend)
-            - LAB_API_TOKEN=${LAB_API_TOKEN:-}
+      # Shared token for the internal exec/PTY API (empty: the entrypoint
+      # derives it from the generated SECRET_KEY, matching the backend)
+      - LAB_API_TOKEN=${LAB_API_TOKEN:-}
       - LOG_FORMAT=${LOG_FORMAT:-json}
       # Host-absolute path of the labs dir, used to rewrite bind mounts for
       # lab containers (resolved by the host Docker daemon). Leave empty to
