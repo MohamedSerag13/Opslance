@@ -10,7 +10,7 @@ import confetti from 'canvas-confetti';
  * Left: current question + hints + per-question Check. Right: live terminal.
  * Practice mode: hints allowed, no timer. Exam mode: server-side timer, no
  * hints, auto-finishes at expiry. All state lives on the server (resumes on
- * refresh). Classic LabView stays at /labs/:id.
+ * refresh). The classic LabView was removed — the runner is the only lab UI.
  */
 
 type Attempt = {
@@ -403,9 +403,6 @@ export default function LabRunner() {
                 <Button variant="outline" onClick={() => navigate('/dashboard')}>
                   Back to dashboard
                 </Button>
-                <Link to={`/labs/${id}?classic=1`} className="inline-flex items-center px-4 py-2 rounded-lg border border-border text-sm font-semibold hover:bg-surface-2 transition">
-                  Classic lab view
-                </Link>
               </div>
             </div>
           </section>
@@ -477,8 +474,8 @@ export default function LabRunner() {
               </div>
             )}
           </div>
-          <Link to={`/labs/${id}?classic=1`} className="inline-block mt-4 text-sm text-primary hover:underline">
-            Back to classic lab view
+          <Link to="/dashboard" className="inline-block mt-4 text-sm text-primary hover:underline">
+            Back to dashboard
           </Link>
         </div>
       </div>
@@ -491,8 +488,8 @@ export default function LabRunner() {
       {/* top bar */}
       <header className="shrink-0 border-b border-border bg-surface/90 backdrop-blur z-30">
         <div className="px-4 md:px-6 py-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-          <Link to={`/labs/${id}?classic=1`} className="text-sm text-muted hover:text-content transition whitespace-nowrap">
-            ← Classic view
+          <Link to="/dashboard" className="text-sm text-muted hover:text-content transition whitespace-nowrap">
+            ← Dashboard
           </Link>
           <div className="hidden md:block h-5 w-px bg-border" />
           <div className="min-w-0 flex-1 basis-40">

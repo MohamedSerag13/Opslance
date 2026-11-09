@@ -1,11 +1,40 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Badge, ProgressBar } from '../ui';
+import { Badge, Button, ProgressBar } from '../ui';
 import { cn } from '../fx';
 import DayRow from './DayRow';
-import { ticksFor, type CourseTickItem, type CourseWeek } from '../../pages/courses-types';
+import { ticksFor, type CourseTickItem, type CourseWeek, type WeekLab } from '../../pages/courses-types';
 
 const WEEK_PCT = (w: CourseWeek) => (w.items_total ? Math.round((w.items_done / w.items_total) * 100) : 0);
+
+/** One launchable lab of the week — links straight into the question runner. */
+const WeekLabCard: React.FC<{ lab: WeekLab }> = ({ lab }) => {
+  const passed = lab.best_score != null;
+  return (
+    <div
+      className={cn(
+        'flex flex-col gap-2 rounded-xl border p-3 transition-colors',
+        passed ? 'border-success/40 bg-success/5' : 'border-border bg-surface hover:border-warn/40',
+      )}
+    >
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-bold text-content" title={lab.title}>{lab.title}</p>
+          <p className="mt-0.5 text-xs font-semibold text-muted">
+            ⏱ {lab.estimated_minutes} min · ⭐ {lab.points} pts{passed && ` · best ${lab.best_score}/${lab.points}`}
+          </p>
+        </div>
+        <Badge variant={passed ? 'success' : 'default'}>{passed ? 'passed' : 'lab'}</Badge>
+      </div>
+      <Link to={`/labs/${lab.id}/run`} className="mt-auto">
+        <Button variant={passed ? 'ghost' : 'accent'} size="sm" className="w-full">
+          {passed ? 'Practice again →' : 'Launch lab →'}
+        </Button>
+      </Link>
+    </div>
+  );
+};
 
 /** One week: header (title/dates/progress), day rows, gate callout. */
 const WeekSection: React.FC<{
@@ -66,6 +95,19 @@ const WeekSection: React.FC<{
           );
         })}
       </div>
+
+      {/* hands-on labs of this week — launchable in place */}
+      {week.labs.length > 0 && (
+        <div className="mt-4 rounded-xl border border-warn/30 bg-warn/5 p-4">
+          <p className="text-sm font-bold text-content">
+            <span aria-hidden>🧪</span> Hands-on labs — week {week.week_number}
+            <span className="ml-2 text-xs font-semibold text-muted">graded, hints available, runs in the browser terminal</span>
+          </p>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {week.labs.map((lab) => <WeekLabCard key={lab.id} lab={lab} />)}
+          </div>
+        </div>
+      )}
 
       {/* gate */}
       {week.gate && (

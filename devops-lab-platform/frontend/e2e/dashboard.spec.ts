@@ -37,7 +37,7 @@ test.describe('dashboard', () => {
   test('module grid deep-links into a lab page', async ({ page }) => {
     const nextLink = page.locator('button', { hasText: /^Next: / }).first();
     await nextLink.click();
-    await expect(page).toHaveURL(/\/labs\/[a-z0-9-]+$/);
+    await expect(page).toHaveURL(/\/labs\/[a-z0-9-]+\/run$/);
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 

@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from typing import Literal
 
@@ -45,6 +46,30 @@ def _week_days(week: models.CourseWeek) -> list:
         return json.loads(week.days or "[]")
     except Exception:
         return []
+
+
+def _week_lab_prefix(course: models.Course, week_number: int) -> str:
+    """Labs are matched to course weeks by lab id prefix:
+    CKA labs are cka-w{N}-…, module-based courses (linux) use module-{NN}-…."""
+    if course.slug.startswith("cka"):
+        return f"cka-w{week_number}-"
+    return f"module-{week_number:02d}-"
+
+
+def _week_labs(course: models.Course, week_number: int, labs: list,
+               best_scores: dict) -> list:
+    prefix = _week_lab_prefix(course, week_number)
+    matched = sorted((lab for lab in labs if lab.id.startswith(prefix)),
+                     key=lambda l: l.id)
+    return [{
+        "id": lab.id,
+        "title": lab.title,
+        "difficulty": lab.difficulty,
+        "estimated_minutes": lab.estimated_minutes,
+        "points": lab.points,
+        "module_title": lab.module_title,
+        "best_score": best_scores.get(lab.id),
+    } for lab in matched]
 
 
 def _total_ticks(course: models.Course) -> int:
@@ -112,6 +137,16 @@ def list_courses(db: Session = Depends(get_db), student=Depends(get_current_stud
 def get_course(slug: str, db: Session = Depends(get_db), student=Depends(get_current_student)):
     course = _get_active_course_or_404(db, slug)
     ticks = _student_ticks(db, student.id, course.id)
+
+    # labs nested per week + the student's best passed score per lab, so the
+    # course page can launch every lab of the plan in place
+    labs = db.query(models.Lab).filter_by(is_globally_active=True).all()
+    best_scores = dict(db.query(
+        models.Submission.lab_id, func.max(models.Submission.score)).filter(
+        models.Submission.student_id == student.id,
+        models.Submission.passed == True,  # noqa: E712
+    ).group_by(models.Submission.lab_id).all())
+
     weeks = []
     for week in course.weeks:
         days = _week_days(week)
@@ -131,6 +166,7 @@ def get_course(slug: str, db: Session = Depends(get_db), student=Depends(get_cur
             "days": days,
             "items_total": day_items_total,
             "items_done": day_items_done,
+            "labs": _week_labs(course, week.week_number, labs, best_scores),
         })
     total = sum(w["items_total"] for w in weeks)
     done = sum(w["items_done"] for w in weeks)

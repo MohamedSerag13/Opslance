@@ -118,3 +118,33 @@ def test_tick_validates_week_and_day(client, student_headers, seeded_courses):
     assert client.post("/api/courses/cka-8-weeks/progress",
                        json={"week": 1, "day_index": 0, "tick": "bogus", "value": True},
                        headers=h).status_code == 422
+
+
+def test_course_weeks_embed_labs(client, db, make_student, make_lab, seeded_courses):
+    """The course detail nests each week's hands-on labs with the student's
+    best passed score, matched by lab id prefix (cka-w{N}- / module-{NN}-)."""
+    st = make_student()
+    h = login_headers(st.email, "Passw0rd!")
+    cka_lab = make_lab(lab_id="cka-w1-lab-01-kubectl-speed-drill", module_number=21)
+    linux_lab = make_lab(lab_id="module-01-lab-01-sample", module_number=1)
+    db.add(models.Submission(student_id=st.id, lab_id=cka_lab.id, passed=True, score=80))
+    db.commit()
+
+    body = client.get("/api/courses/cka-8-weeks", headers=h).json()
+    weeks = {w["week_number"]: w for w in body["weeks"]}
+    w1_ids = [l["id"] for l in weeks[1]["labs"]]
+    assert "cka-w1-lab-01-kubectl-speed-drill" in w1_ids
+    assert all(l["id"].startswith("cka-w1-") for l in weeks[1]["labs"])
+    assert all(not l["id"].startswith("module-") for l in weeks[1]["labs"])
+    entry = next(l for l in weeks[1]["labs"] if l["id"] == cka_lab.id)
+    assert entry["best_score"] == 80
+    assert entry["points"] == cka_lab.points
+    assert entry["title"] == cka_lab.title
+    # weeks without matching labs come back empty, not missing
+    assert weeks[2]["labs"] == []
+
+    # the linux course maps module-N labs to week N
+    linux = client.get("/api/courses/linux-fundamentals", headers=h).json()
+    lw1 = next(w for w in linux["weeks"] if w["week_number"] == 1)
+    assert "module-01-lab-01-sample" in [l["id"] for l in lw1["labs"]]
+    assert all(not l["id"].startswith("cka-") for l in lw1["labs"])

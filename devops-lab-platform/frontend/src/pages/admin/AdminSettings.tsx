@@ -238,7 +238,7 @@ export default function AdminSettings() {
 
       {tab === 'security' && (
         <Card className="px-6 py-2">
-          <Row label="Hints in classic labs" hint="When off, the hint panel is read-only — reveal buttons are hidden for students." meta={data.meta.hints_allowed}>
+          <Row label="Hints in labs" hint="When off, the hint panel is read-only — reveal buttons are hidden for students." meta={data.meta.hints_allowed}>
             <Toggle checked={Boolean(s.hints_allowed)} onChange={(v) => set('hints_allowed', v)}
                     label="Students can reveal hints" hint="Each hint still costs points when revealed." />
           </Row>

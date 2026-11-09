@@ -16,7 +16,7 @@ test.describe('command palette', () => {
     await expect(option).toContainText('Lost in the Filesystem', { ignoreCase: true });
 
     await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(/\/labs\/[a-z0-9-]+$/);
+    await expect(page).toHaveURL(/\/labs\/[a-z0-9-]+\/run$/);
   });
 
   test('Escape closes the palette', async ({ page }) => {

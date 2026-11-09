@@ -66,7 +66,7 @@ export const CommandPalette: React.FC<{ open: boolean; onClose: () => void }> = 
       hint: `Module ${String(l.module_number).padStart(2, '0')} · ${l.points} pts${l.status === 'done' ? ' · passed' : ''}`,
       group: 'Labs',
       keywords: `${l.module_title} ${l.id}`,
-      run: go(`/labs/${l.id}`),
+      run: go(`/labs/${l.id}/run`),
     }));
     const actions: PaletteItem[] = [
       {

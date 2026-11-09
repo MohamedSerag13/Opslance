@@ -67,7 +67,7 @@ const ContinueCard: React.FC<{ item: continueItem }> = ({ item }) => {
     next: { icon: '➡️', label: 'Next up in your path' },
   }[item.kind];
 
-  const target = item.kind === 'attempt' ? `/labs/${item.lab_id}/run` : `/labs/${item.lab_id}`;
+  const target = `/labs/${item.lab_id}/run`;
   const cta = item.kind === 'attempt' ? 'Resume' : item.kind === 'session' ? 'Open' : item.kind === 'retry' ? 'Retry' : 'Start';
 
   return (
@@ -125,7 +125,7 @@ const WeekStepper: React.FC<{ track: Track }> = ({ track }) => {
           </div>
         </div>
         {currentLab && (
-          <Button variant="accent" size="sm" onClick={() => navigate(`/labs/${currentLab.lab_id}`)} className="shrink-0">
+          <Button variant="accent" size="sm" onClick={() => navigate(`/labs/${currentLab.lab_id}/run`)} className="shrink-0">
             {currentWeek && track.completed_labs > 0 ? `Continue Week ${currentWeek.module_number - 20}` : 'Start Week 1'} →
           </Button>
         )}
@@ -139,7 +139,7 @@ const WeekStepper: React.FC<{ track: Track }> = ({ track }) => {
           return (
             <li key={w.module_number} className="flex flex-1 items-center gap-1.5 sm:gap-2">
               <button
-                onClick={() => lab && navigate(`/labs/${lab.lab_id}`)}
+                onClick={() => lab && navigate(`/labs/${lab.lab_id}/run`)}
                 disabled={!lab}
                 title={`Week ${i + 1}: ${lab?.title ?? w.module_title}${done ? ` — passed (${lab?.best_score}/${w.points})` : ''}`}
                 aria-label={`Week ${i + 1}: ${lab?.title ?? w.module_title}${done ? ', completed' : ''}`}
@@ -231,7 +231,7 @@ const ModuleGrid: React.FC<{ track: Track; locked: (m: Track['modules'][number])
               </div>
               {m.next_lab ? (
                 <button
-                  onClick={() => navigate(`/labs/${m.next_lab!.lab_id}`)}
+                  onClick={() => navigate(`/labs/${m.next_lab!.lab_id}/run`)}
                   className="truncate text-left text-xs font-black text-primary hover:underline"
                   title={`Next: ${m.next_lab.title}`}
                 >

@@ -1,5 +1,5 @@
 import { Suspense, lazy, LazyExoticComponent, ReactElement } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import { ToastProvider } from './components/ui';
 import ResetPassword from './pages/ResetPassword';
@@ -11,7 +11,6 @@ const lazyPage = (factory: () => Promise<{ default: React.ComponentType }>): Laz
 const Landing = lazyPage(() => import('./pages/landing/Landing'));
 const Login = lazyPage(() => import('./pages/Login'));
 const StudentDashboard = lazyPage(() => import('./pages/StudentDashboard'));
-const LabView = lazyPage(() => import('./pages/LabView'));
 const LabRunner = lazyPage(() => import('./pages/LabRunner'));
 const Progress = lazyPage(() => import('./pages/Progress'));
 const Achievements = lazyPage(() => import('./pages/Achievements'));
@@ -72,6 +71,12 @@ const ResetPasswordRoute = () => {
   return <ResetPassword />;
 };
 
+/** The classic lab view was removed — every lab opens in the question runner. */
+const LabRedirect = () => {
+  const { id } = useParams<{ id: string }>();
+  return <Navigate to={`/labs/${id}/run`} replace />;
+};
+
 function App() {
   return (
     <ToastProvider>
@@ -87,7 +92,8 @@ function App() {
 
           {/* Student Routes */}
           <Route path="/dashboard" element={<ProtectedRoute><StudentDashboard /></ProtectedRoute>} />
-          <Route path="/labs/:id" element={<ProtectedRoute><LabView /></ProtectedRoute>} />
+          {/* classic view removed: old links land straight in the runner */}
+          <Route path="/labs/:id" element={<ProtectedRoute><LabRedirect /></ProtectedRoute>} />
           <Route path="/labs/:id/run" element={<ProtectedRoute><LabRunner /></ProtectedRoute>} />
           <Route path="/progress" element={<ProtectedRoute><Progress /></ProtectedRoute>} />
           <Route path="/achievements" element={<ProtectedRoute><Achievements /></ProtectedRoute>} />

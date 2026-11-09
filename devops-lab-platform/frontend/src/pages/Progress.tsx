@@ -231,7 +231,7 @@ export default function Progress() {
                           : <Badge variant="danger" dot>Failed</Badge>}
                       </td>
                       <td className="max-w-[280px] px-5 py-3.5">
-                        <Link to={`/labs/${h.lab_id}`} className="block truncate font-semibold text-content hover:text-primary hover:underline" title={h.title}>
+                        <Link to={`/labs/${h.lab_id}/run`} className="block truncate font-semibold text-content hover:text-primary hover:underline" title={h.title}>
                           {h.title}
                         </Link>
                       </td>

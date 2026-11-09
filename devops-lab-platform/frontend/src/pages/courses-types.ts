@@ -39,6 +39,19 @@ export interface CourseWeek {
   days: CourseDay[];
   items_total: number;
   items_done: number;
+  /** Hands-on labs belonging to this week (matched server-side by lab id). */
+  labs: WeekLab[];
+}
+
+export interface WeekLab {
+  id: string;
+  title: string;
+  difficulty: string;
+  estimated_minutes: number;
+  points: number;
+  module_title: string;
+  /** Best passed score for the current student (null = not passed yet). */
+  best_score: number | null;
 }
 
 export interface CourseDetail {

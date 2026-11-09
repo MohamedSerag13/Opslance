@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { marked } from 'marked';
 import confetti from 'canvas-confetti';
 import { api } from '../api/client';
 import AppNav from '../components/layout/AppNav';
-import { Badge, Button, Card, Modal, ProgressBar, ProgressRing, Skeleton } from '../components/ui';
+import { Badge, Button, Card, ProgressBar, ProgressRing, Skeleton } from '../components/ui';
 import { AnimatedGradientText, PulseBadge, cn } from '../components/fx';
 import WeekSection from '../components/courses/WeekSection';
 import { ticksFor, type CourseDetail as CourseDetailT, type CourseTickItem, type ProgressMap } from './courses-types';
@@ -65,6 +66,15 @@ export default function CourseDetail() {
   }, [slug]);
 
   const todayKey = useMemo(() => (course ? todayKeyFor(course.weeks) : null), [course]);
+
+  // week-complete toast auto-dismisses; it must never steal focus or scroll —
+  // a focus-stealing modal here turned the next keypress into a page jump
+  useEffect(() => {
+    if (!celebration) return;
+    const t = setTimeout(() => setCelebration(null), 6000);
+    return () => clearTimeout(t);
+  }, [celebration]);
+
   const renderedDescription = useMemo(
     () => (course?.description ? marked.parse(course.description, { async: false }) as string : ''),
     [course?.description],
@@ -297,28 +307,27 @@ export default function CourseDetail() {
         </div>
       </div>
 
-      {/* week-complete celebration */}
-      <Modal
-        open={celebration !== null}
-        onClose={() => setCelebration(null)}
-        title={`🎉 Week ${celebration?.week ?? ''} complete!`}
-        className="max-w-md text-center"
-      >
-        <p className="text-sm font-medium text-muted">
-          {celebration?.next
-            ? `Every tick in week ${celebration.week} is checked and the gate passed. On to week ${celebration.next}.`
-            : `Every tick in week ${celebration?.week} is checked. That's a wrap — keep the momentum going.`}
-        </p>
-        <div className="mt-6 flex justify-center gap-3">
-          <Button variant="accent" onClick={() => {
-            setCelebration(null);
-            if (celebration?.next) document.getElementById(`week-${celebration.next}`)?.scrollIntoView({ behavior: 'smooth' });
-          }}>
-            {celebration?.next ? `Go to week ${celebration.next} →` : 'Keep going'}
-          </Button>
-          <Button variant="ghost" onClick={() => setCelebration(null)}>Close</Button>
-        </div>
-      </Modal>
+      {/* week-complete toast — passive on purpose: no focus move, no scroll,
+          no body lock; the student keeps their place in the plan */}
+      <AnimatePresence>
+        {celebration && (
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.25 }}
+            role="status"
+            className="fixed left-1/2 top-20 z-[90] -translate-x-1/2 rounded-xl border border-success/40 bg-surface px-5 py-3 shadow-card"
+          >
+            <p className="text-sm font-bold text-success">🎉 Week {celebration.week} complete!</p>
+            <p className="mt-0.5 text-xs font-medium text-muted">
+              {celebration.next
+                ? `Every tick checked and the gate passed — week ${celebration.next} is up next.`
+                : 'Every tick checked — keep the momentum going.'}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

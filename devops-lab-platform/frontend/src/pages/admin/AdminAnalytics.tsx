@@ -414,7 +414,7 @@ export default function AdminAnalytics() {
                       <tr key={`${r.lab_id}-${r.student_name}-${r.submitted_at ?? i}`} className="transition-colors hover:bg-surface-2/40">
                         <td className="px-5 py-3 font-semibold text-content">{r.student_name}</td>
                         <td className="max-w-[260px] px-3 py-3">
-                          <Link to={`/labs/${r.lab_id}`} className="block truncate text-content hover:text-primary hover:underline" title={r.lab_title}>
+                          <Link to={`/labs/${r.lab_id}/run`} className="block truncate text-content hover:text-primary hover:underline" title={r.lab_title}>
                             {r.lab_title}
                           </Link>
                         </td>

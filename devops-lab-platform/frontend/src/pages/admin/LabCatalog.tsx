@@ -182,7 +182,7 @@ export default function LabCatalog() {
                         <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-xs font-bold text-muted">
                           <span className="tabular-nums">⭐ {l.points} pts</span>
                           <span className="tabular-nums">⏱ {l.estimated_minutes ?? '—'} min</span>
-                          <Link to={`/labs/${l.id}`} className="text-primary opacity-0 transition-opacity group-hover:opacity-100 hover:underline">
+                          <Link to={`/labs/${l.id}/run`} className="text-primary opacity-0 transition-opacity group-hover:opacity-100 hover:underline">
                             open →
                           </Link>
                         </div>
