@@ -9,7 +9,7 @@ import asyncio
 import json
 import os
 import docker
-from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 
 LAB_API_TOKEN = os.getenv("LAB_API_TOKEN") or os.getenv("SECRET_KEY") or ""
 
@@ -31,8 +31,11 @@ def internal_health():
 
 
 @app.post("/internal/exec")
-def internal_exec(body: dict, token: str = ""):
-    if not _authorized(token or ""):
+def internal_exec(body: dict, request: Request, token: str = ""):
+    # The backend sends the token in the X-Lab-Token header (verification.py);
+    # accept the query param too for direct calls.
+    supplied = token or request.headers.get("x-lab-token", "")
+    if not _authorized(supplied):
         raise HTTPException(status_code=403, detail="Forbidden")
     container_name = body.get("container") or ""
     cmd = body.get("cmd") or ""
@@ -59,49 +62,66 @@ async def internal_pty(websocket: WebSocket, container: str = "", token: str = "
         return
     await websocket.accept()
 
+    if docker_client is None:
+        await websocket.send_text("Docker is unavailable on the lab host — the terminal cannot start.\r\n")
+        await websocket.close()
+        return
+
     try:
         exec_id = docker_client.api.exec_create(
             container, cmd=["/bin/bash"], stdin=True, tty=True)
         sock = docker_client.api.exec_start(
             exec_id["Id"], detach=False, tty=True, stream=True, socket=True)
+    except docker.errors.NotFound:
+        await websocket.send_text("Lab container not found — please restart the lab and reopen the terminal.\r\n")
+        await websocket.close()
+        return
+    except WebSocketDisconnect:
+        raise
+    except Exception as e:
+        print(f"[lab-manager] pty setup failed for {container}: {e}", flush=True)
+        await websocket.send_text("The terminal could not attach to the lab container.\r\n")
+        await websocket.close()
+        return
 
-        loop = asyncio.get_running_loop()
+    loop = asyncio.get_running_loop()
 
-        def blocking_read():
-            try:
-                return sock._sock.recv(4096)
-            except AttributeError:
-                return sock.recv(4096)
+    def blocking_read():
+        try:
+            return sock._sock.recv(4096)
+        except AttributeError:
+            return sock.recv(4096)
 
-        def blocking_write(d):
-            try:
-                sock._sock.sendall(d)
-            except AttributeError:
-                sock.send(d)
+    def blocking_write(d):
+        try:
+            sock._sock.sendall(d)
+        except AttributeError:
+            sock.send(d)
 
-        async def sock_to_ws():
-            while True:
-                data = await loop.run_in_executor(None, blocking_read)
-                if not data:
-                    break
-                await websocket.send_text(data.decode("utf-8", errors="replace"))
+    async def sock_to_ws():
+        while True:
+            data = await loop.run_in_executor(None, blocking_read)
+            if not data:
+                break
+            await websocket.send_text(data.decode("utf-8", errors="replace"))
 
-        async def ws_to_sock():
-            while True:
-                data = await websocket.receive_text()
-                await loop.run_in_executor(None, blocking_write, data.encode("utf-8"))
+    async def ws_to_sock():
+        while True:
+            data = await websocket.receive_text()
+            await loop.run_in_executor(None, blocking_write, data.encode("utf-8"))
 
+    try:
         done, pending = await asyncio.wait(
             [asyncio.create_task(sock_to_ws()),
              asyncio.create_task(ws_to_sock())],
-            return_when=asyncio.FIRST_EXCEPTION,
+            return_when=asyncio.FIRST_COMPLETED,
         )
         for task in pending:
             task.cancel()
     except WebSocketDisconnect:
         pass
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[lab-manager] pty stream error for {container}: {e}", flush=True)
     finally:
         try:
             await websocket.close()

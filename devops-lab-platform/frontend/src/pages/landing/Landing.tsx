@@ -1,13 +1,44 @@
-import React, { Suspense, lazy, useEffect, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { Button, ThemeToggle, Logo } from '../../components/ui';
-import { AnimatedGradientText, BlurFade, Marquee, ShineBorder } from '../../components/fx';
+import { AnimatedGradientText, BlurFade, Marquee, ShineBorder, cn, useReducedMotion } from '../../components/fx';
 import Cluster3D from './Cluster3D';
 import { Reveal, SectionHead } from './Reveal';
 import { Paths, ExamShowcase } from './Paths';
 import { Pricing, FAQ } from './Pricing';
 import { LandingFooter } from './Footer';
+
+/* Subtle 3D tilt that follows the pointer — desktop nicety, inert under
+ * reduced motion or touch (no mousemove, no transform). */
+const Tilt: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+
+  const onMove = (e: React.MouseEvent) => {
+    if (reduce) return;
+    const el = ref.current;
+    if (!el || !window.matchMedia('(hover: hover)').matches) return;
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    el.style.transform = `perspective(900px) rotateX(${(-py * 3.2).toFixed(2)}deg) rotateY(${(px * 4.2).toFixed(2)}deg) translateY(-2px)`;
+  };
+  const onLeave = () => {
+    if (ref.current) ref.current.style.transform = '';
+  };
+
+  return (
+    <div
+      ref={ref}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      className={cn('transition-transform duration-200 ease-out will-change-transform', className)}
+    >
+      {children}
+    </div>
+  );
+};
 
 /* The terminal is below the fold on small screens and pulls in xterm —
  * load it as its own chunk after first paint. */
@@ -99,8 +130,8 @@ const LandingNav: React.FC = () => {
 const Hero: React.FC = () => (
   <section className="relative overflow-hidden pb-20 pt-32 sm:pt-36">
     <div className="grid-bg absolute inset-0" aria-hidden="true" />
-    <div className="glow-orb left-1/2 top-[-220px] h-[480px] w-[720px] -translate-x-1/2 bg-primary/25" aria-hidden="true" />
-    <div className="glow-orb right-[-160px] top-[220px] h-[380px] w-[380px] bg-accent/15" aria-hidden="true" />
+    <div className="glow-orb orb-drift-1 left-1/2 top-[-220px] h-[480px] w-[720px] -translate-x-1/2 bg-primary/25" aria-hidden="true" />
+    <div className="glow-orb orb-drift-2 right-[-160px] top-[220px] h-[380px] w-[380px] bg-accent/15" aria-hidden="true" />
 
     <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="grid items-center gap-14 lg:grid-cols-2">
@@ -216,6 +247,72 @@ const StatsStrip: React.FC = () => (
   </section>
 );
 
+/* Step artwork loops: the spawn terminal and the grading readout type/emit
+ * their lines on a cycle so the whole section feels live. Reduced motion
+ * renders the finished frame statically. */
+const PathArt: React.FC = () => {
+  const active = useLoopIndex(4, 1100) % 4;
+  return (
+    <div className="flex gap-2" aria-hidden="true">
+      {['01', '02', '03', '04'].map((m, i) => (
+        <span
+          key={m}
+          className={`flex h-9 w-9 items-center justify-center rounded-lg border font-mono text-xs transition-all duration-300 ${
+            i === active
+              ? 'scale-105 border-accent/60 bg-accent/20 text-accent-soft shadow-glow-accent'
+              : 'border-border bg-surface-2 text-muted'
+          }`}
+        >
+          {m}
+        </span>
+      ))}
+    </div>
+  );
+};
+
+const useLoopIndex = (length: number, periodMs: number) => {
+  const reduce = useReducedMotion();
+  const [i, setI] = useState(reduce ? length : 0);
+  useEffect(() => {
+    if (reduce) { setI(length); return; }
+    const id = setInterval(() => setI((v) => (v + 1) % (length + 1)), periodMs);
+    return () => clearInterval(id);
+  }, [length, periodMs, reduce]);
+  return i;
+};
+
+const SpawnArt: React.FC = () => {
+  const shown = useLoopIndex(2, 1400);
+  return (
+    <div className="rounded-xl border border-border bg-[#0B1120] px-4 py-3 font-mono text-xs leading-5" aria-hidden="true">
+      <p className="text-success">$ starting lab environment…</p>
+      {shown >= 1 && <p className="text-success">✓ container ready · terminal connected</p>}
+      {shown < 2 && <span className="inline-block h-3.5 w-1.5 animate-blink bg-surface-2 align-middle" />}
+    </div>
+  );
+};
+
+const GRADING_LINES = [
+  { text: '✅ PASS [35%]: user service is running', pass: true },
+  { text: '✅ PASS [35%]: /etc/cron.d exists', pass: true },
+  { text: '❌ FAIL [30%]: log rotation not configured', pass: false },
+  { text: 'SCORE: 70/100', pass: null },
+];
+
+const GradingArt: React.FC = () => {
+  const shown = useLoopIndex(GRADING_LINES.length, 900);
+  return (
+    <div className="min-h-24 rounded-xl border border-border bg-[#0B1120] px-4 py-3 font-mono text-xs leading-5" aria-hidden="true">
+      {GRADING_LINES.slice(0, shown).map((l) => (
+        <p key={l.text} className={l.pass === null ? 'mt-1 font-bold text-slate-200' : l.pass ? 'text-success' : 'text-danger'}>
+          {l.text}
+        </p>
+      ))}
+      {shown < GRADING_LINES.length && <span className="inline-block h-3.5 w-1.5 animate-blink bg-surface-2 align-middle" />}
+    </div>
+  );
+};
+
 const HowItWorks: React.FC = () => (
   <section id="how" className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
     <SectionHead
@@ -229,46 +326,37 @@ const HowItWorks: React.FC = () => (
           n: '01',
           title: 'Pick a lab from your path',
           body: 'Follow a structured track — Linux fundamentals through Kubernetes troubleshooting — or jump straight to a CKA mock week. Admins assign labs per group.',
-          art: (
-            <div className="flex gap-2" aria-hidden="true">
-              {['01', '02', '03', '04'].map((m, i) => (
-                <span key={m} className={`flex h-9 w-9 items-center justify-center rounded-lg border font-mono text-xs ${i === 0 ? 'border-accent/50 bg-accent/15 text-accent-soft' : 'border-border bg-surface-2 text-muted'}`}>{m}</span>
-              ))}
-            </div>
-          ),
+          art: <PathArt />,
         },
         {
           n: '02',
           title: 'Your environment spawns instantly',
           body: 'A dedicated Docker environment boots for you alone — isolated network, fresh state, real tools. For CKA labs you get your own k3s control plane with kubectl preinstalled.',
-          art: (
-            <div className="rounded-xl border border-border bg-[#0B1120] px-4 py-3 font-mono text-xs text-success" aria-hidden="true">
-              $ starting lab environment…<br />
-              ✓ container ready · terminal connected
-            </div>
-          ),
+          art: <SpawnArt />,
         },
         {
           n: '03',
           title: 'Solve, check, get graded',
           body: 'Type real commands in the browser terminal. Run checks anytime: every task is verified against the live state of your machine or cluster, with per-task scoring and explanations.',
-          art: (
-            <div className="font-mono text-xs" aria-hidden="true">
-              <p className="text-success">✅ PASS [35%]: user service is running</p>
-              <p className="text-success">✅ PASS [35%]: /etc/cron.d exists</p>
-              <p className="text-danger">❌ FAIL [30%]: log rotation not configured</p>
-              <p className="mt-1 text-muted">SCORE: 70/100</p>
-            </div>
-          ),
+          art: <GradingArt />,
         },
       ].map((s, i) => (
-        <Reveal key={s.n} delay={i * 0.08}>
-          <div className="relative h-full rounded-2xl border border-border bg-surface p-7 shadow-card">
-            <span className="absolute right-6 top-5 font-display text-4xl font-bold text-border" aria-hidden="true">{s.n}</span>
-            {s.art}
-            <h3 className="mt-5 font-display text-lg font-bold text-content">{s.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
-          </div>
+        <Reveal key={s.n} delay={i * 0.08} className="h-full">
+          <Tilt className="h-full">
+            {/* step header: number lives IN the flow — nothing overlaps the art */}
+            <div className="relative flex h-full flex-col rounded-2xl border border-border bg-surface p-7 shadow-card transition-colors duration-200 hover:border-primary/40">
+              <div className="flex items-center gap-3.5">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary/40 bg-primary/10 font-display text-sm font-bold tabular-nums text-primary">
+                  {s.n}
+                </span>
+                <span className="h-px flex-1 bg-gradient-to-r from-primary/40 via-border to-transparent" aria-hidden="true" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-muted">step {i + 1}</span>
+              </div>
+              <div className="mt-5">{s.art}</div>
+              <h3 className="mt-5 font-display text-lg font-bold text-content">{s.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
+            </div>
+          </Tilt>
         </Reveal>
       ))}
     </div>

@@ -141,15 +141,28 @@ async def websocket_terminal(websocket: WebSocket, session_id: str, ticket: str 
     loop = asyncio.get_running_loop()
 
     if not LAB_MANAGER_URL:
-        await websocket.send_text("Terminal service not available on server.\r\n")
+        await websocket.send_text("Terminal service is not configured on this server.\r\n")
         await websocket.close()
         return
 
     try:
         import websockets
+    except ImportError:
+        logger.error("terminal_proxy_websockets_missing", session_id=session_id)
+        await websocket.send_text("Terminal proxy is misconfigured on this server.\r\n")
+        await websocket.close()
+        return
 
-        lm_url = (f"{LAB_MANAGER_URL.replace('http', 'ws', 1)}"
-                  f"/internal/pty?container={container_name}&token={LAB_API_TOKEN}")
+    lm_url = (f"{LAB_MANAGER_URL.replace('http', 'ws', 1)}"
+              f"/internal/pty?container={container_name}&token={LAB_API_TOKEN}")
+
+    # Human-readable reason for a failed proxy session, written into the
+    # student's terminal before the socket closes (None = clean exit, e.g.
+    # the student typed `exit` or closed the page).
+    failure: str | None = None
+    client_gone = False
+    lm_close_code = None
+    try:
         async with websockets.connect(lm_url, open_timeout=10, max_size=None) as lm_ws:
             last_flush = 0.0
 
@@ -168,26 +181,50 @@ async def websocket_terminal(websocket: WebSocket, session_id: str, ticket: str 
                 async for data in lm_ws:
                     await websocket.send_text(data if isinstance(data, str) else data.decode("utf-8", errors="replace"))
 
+            # FIRST_COMPLETED: when the lab-manager side ends (shell exited,
+            # container gone, auth rejected) the proxy must close promptly —
+            # FIRST_EXCEPTION hung because a normal close raises nothing.
             done, pending = await asyncio.wait(
                 [asyncio.create_task(client_to_lab()),
                  asyncio.create_task(lab_to_client())],
-                return_when=asyncio.FIRST_EXCEPTION,
+                return_when=asyncio.FIRST_COMPLETED,
             )
             for task in pending:
                 task.cancel()
-            # flush activity on disconnect so idle cleanup sees fresh data
-            now = utcnow().timestamp()
-            redis_client.set(f"session_activity:{session_id}", now)
-            loop.run_in_executor(None, flush_activity, session_id, now)
-    except WebSocketDisconnect:
-        now = utcnow().timestamp()
-        redis_client.set(f"session_activity:{session_id}", now)
-        loop.run_in_executor(None, flush_activity, session_id, now)
+            for task in done:
+                if task.cancelled():
+                    continue
+                if isinstance(task.exception(), WebSocketDisconnect):
+                    client_gone = True
+        lm_close_code = getattr(lm_ws, "close_code", None)
+    except asyncio.TimeoutError:
+        failure = "Terminal backend did not respond in time — please retry in a moment."
+        logger.error("terminal_proxy_timeout", session_id=session_id)
+    except OSError as e:
+        failure = "Terminal backend is unreachable — please retry in a moment."
+        logger.error("terminal_proxy_unreachable", error=str(e), session_id=session_id)
     except Exception as e:
+        failure = "The terminal could not be started — please retry in a moment."
         logger.error("terminal_proxy_error", error=str(e), session_id=session_id)
-        now = utcnow().timestamp()
-        redis_client.set(f"session_activity:{session_id}", now)
-        loop.run_in_executor(None, flush_activity, session_id, now)
+
+    if not client_gone:
+        if failure is None and lm_close_code == 1008:
+            failure = ("Terminal service authorization failed — please contact "
+                       "an administrator (token mismatch between backend and lab-manager).")
+            logger.error("terminal_proxy_auth_rejected", session_id=session_id)
+        elif failure is None and lm_close_code not in (None, 1000):
+            failure = "The terminal connection was lost — please reopen this lab."
+            logger.warning("terminal_proxy_lost", close_code=lm_close_code, session_id=session_id)
+        if failure:
+            try:
+                await websocket.send_text(f"\r\n{failure}\r\n")
+            except Exception:
+                pass
+
+    # flush activity on disconnect so idle cleanup sees fresh data
+    now = utcnow().timestamp()
+    redis_client.set(f"session_activity:{session_id}", now)
+    loop.run_in_executor(None, flush_activity, session_id, now)
 
 
 class EventManager:

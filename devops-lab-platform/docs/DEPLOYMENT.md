@@ -39,7 +39,10 @@ redirect. Renewals run twice daily in the certbot sidecar; nginx reloads every
   the CSP headers and rate limiting cannot be bypassed from outside.
 - **backend has no Docker socket** — verification execs and the terminal PTY
   are proxied to the lab-manager internal API (`lab-manager/api.py`, port 8100,
-  compose-network only, shared `LAB_API_TOKEN`).
+  compose-network only, shared `LAB_API_TOKEN`). The token is derived
+  automatically from the generated `SECRET_KEY` by the shared entrypoint; set
+  `LAB_API_TOKEN` in `.env` to override it (the same value must reach both the
+  backend and lab-manager, which the compose file guarantees).
 - **Redis requires a password** (generated secret) and runs with AOF
   persistence (`redis_data` volume) so leaderboard/rate-limit state survives
   restarts.

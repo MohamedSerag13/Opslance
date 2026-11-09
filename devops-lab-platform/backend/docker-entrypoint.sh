@@ -24,6 +24,16 @@ if [ -z "${SECRET_KEY:-}" ] && [ -s "$SECRETS_DIR/secret_key" ]; then
     export SECRET_KEY
 fi
 
+# The backend and lab-manager must share the internal exec/PTY API token.
+# Derive it from the generated SECRET_KEY unless it is provided explicitly
+# (.env / shell overrides win). Without this the backend authenticated to
+# lab-manager with an empty token and every terminal disconnected right
+# after connecting.
+if [ -z "${LAB_API_TOKEN:-}" ] && [ -n "${SECRET_KEY:-}" ]; then
+    LAB_API_TOKEN="$SECRET_KEY"
+    export LAB_API_TOKEN
+fi
+
 if [ -z "${POSTGRES_PASSWORD:-}" ] && [ -s "$SECRETS_DIR/postgres_password" ]; then
     POSTGRES_PASSWORD="$(cat "$SECRETS_DIR/postgres_password")"
 fi

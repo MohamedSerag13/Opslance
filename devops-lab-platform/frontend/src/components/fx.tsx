@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, animate, useInView, useMotionValue, useReducedMotion, useTransform, type Variants, type HTMLMotionProps, type UseInViewOptions } from 'framer-motion';
 
+export { useReducedMotion };
+
 /**
  * Motion & surface effects — adapted from 21st.dev (Magic UI registry, MIT):
  *   Marquee (dillionverma/marquee), ShineBorder (magicui/shine-border),

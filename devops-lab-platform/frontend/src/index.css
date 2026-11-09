@@ -240,6 +240,23 @@
 }
 
 /* PulseBadge living glow */
+/* Hero glow-orb drift — animates the standalone `translate`/`scale`
+   properties so it composes with Tailwind transforms instead of clobbering
+   them. */
+@keyframes orb-drift-1 {
+  0%, 100% { translate: 0 0; scale: 1; }
+  50%      { translate: 0 34px; scale: 1.06; }
+}
+@keyframes orb-drift-2 {
+  0%, 100% { translate: 0 0; scale: 1; }
+  50%      { translate: -26px 20px; scale: 0.94; }
+}
+.orb-drift-1 { animation: orb-drift-1 13s ease-in-out infinite; }
+.orb-drift-2 { animation: orb-drift-2 17s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .orb-drift-1, .orb-drift-2 { animation: none; }
+}
+
 @keyframes pulse-badge {
   0%, 100% { box-shadow: 0 0 0 0 rgb(var(--pulse-rgb)/0.45); }
   50%      { box-shadow: 0 0 14px 3px rgb(var(--pulse-rgb)/0.35); }

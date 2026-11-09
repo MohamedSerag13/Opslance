@@ -12,6 +12,7 @@ interface Node {
   kind: 'cp' | 'worker' | 'pod' | 'ambient';
   label?: string;
   twinkle?: number;     // ambient twinkle phase
+  phase?: number;       // per-node bob phase
 }
 
 const rot = (p: Vec3, ax: number, ay: number): Vec3 => {
@@ -29,7 +30,7 @@ const buildNodes = (): { nodes: Node[]; edges: [number, number][] } => {
   const nodes: Node[] = [];
   const edges: [number, number][] = [];
 
-  nodes.push({ pos: { x: 0, y: 0.85, z: 0 }, r: 26, kind: 'cp', label: 'k3s' });
+  nodes.push({ pos: { x: 0, y: 0.85, z: 0 }, r: 26, kind: 'cp', label: 'k3s', phase: 0 });
   const cpIdx = 0;
 
   const workerIdx: number[] = [];
@@ -37,7 +38,7 @@ const buildNodes = (): { nodes: Node[]; edges: [number, number][] } => {
     const a = (i / 3) * Math.PI * 2 + 0.5;
     const pos = { x: Math.cos(a) * 0.82, y: -0.08, z: Math.sin(a) * 0.82 };
     workerIdx.push(nodes.length);
-    nodes.push({ pos, r: 15, kind: 'worker', label: `worker-${i + 1}` });
+    nodes.push({ pos, r: 16, kind: 'worker', label: `worker-${i + 1}`, phase: i * 1.1 });
     edges.push([cpIdx, nodes.length - 1]);
   }
 
@@ -50,7 +51,7 @@ const buildNodes = (): { nodes: Node[]; edges: [number, number][] } => {
         y: base.y - 0.62 - (j % 2) * 0.12,
         z: base.z * 1.18 + Math.sin(a) * 0.22,
       };
-      nodes.push({ pos, r: 5, kind: 'pod' });
+      nodes.push({ pos, r: 5, kind: 'pod', phase: j * 0.9 + wi });
       edges.push([wi, nodes.length - 1]);
     }
   });
@@ -71,6 +72,21 @@ const buildNodes = (): { nodes: Node[]; edges: [number, number][] } => {
   return { nodes, edges };
 };
 
+/** Pulses = data flowing control-plane → workers → pods. Each edge carries a
+ *  packet whose phase advances with time; drawn as a small glowing dot. */
+const PULSES: { edge: number; phase: number; speed: number }[] = [];
+const seedPulses = (edgeCount: number) => {
+  if (PULSES.length) return;
+  let seed = 13;
+  const rnd = () => { seed = (seed * 48271) % 2147483647; return seed / 2147483647; };
+  for (let e = 0; e < edgeCount; e++) {
+    const count = 1 + Math.floor(rnd() * 2);
+    for (let k = 0; k < count; k++) {
+      PULSES.push({ edge: e, phase: rnd(), speed: 0.14 + rnd() * 0.12 });
+    }
+  }
+};
+
 const Cluster3D: React.FC<{ className?: string; interactive?: boolean }> = ({
   className = '',
   interactive = true,
@@ -84,6 +100,7 @@ const Cluster3D: React.FC<{ className?: string; interactive?: boolean }> = ({
     if (!ctx) return;
 
     const { nodes, edges } = buildNodes();
+    seedPulses(edges.length);
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let css = getComputedStyle(document.documentElement);
@@ -119,18 +136,24 @@ const Cluster3D: React.FC<{ className?: string; interactive?: boolean }> = ({
 
       ctx.clearRect(0, 0, w, h);
       const wob = reduced ? 0 : Math.sin(t) * 0.05;
-      const bob = reduced ? 0 : Math.sin(t * 0.8) * 0.03;
+
+      // per-node vertical drift: pods bob quickest, workers gently, cp barely
+      const lifted = (n: Node): Vec3 => {
+        if (reduced) return n.pos;
+        const amp = n.kind === 'pod' ? 0.05 : n.kind === 'worker' ? 0.022 : 0.012;
+        return { ...n.pos, y: n.pos.y + Math.sin(t * (n.kind === 'pod' ? 2.1 : 1.2) + (n.phase ?? 0)) * amp };
+      };
 
       const project = (p: Vec3) => {
-        const q = rot({ x: p.x, y: p.y + bob, z: p.z }, rotX + wob * 0.4, rotY);
+        const q = rot(p, rotX + wob * 0.4, rotY);
         const persp = fov / (fov + q.z);
         return { sx: cx + q.x * persp * R, sy: cy - q.y * persp * R, persp, front: q.z < 0.15 };
       };
 
-      // edges first
-      edges.forEach(([a, b]) => {
-        const pa = project(nodes[a].pos);
-        const pb = project(nodes[b].pos);
+      // edges first — endpoints kept so packets can travel along them
+      const projected = nodes.map((n) => project(lifted(n)));
+      edges.forEach(([a, b], ei) => {
+        const pa = projected[a], pb = projected[b];
         const grad = ctx.createLinearGradient(pa.sx, pa.sy, pb.sx, pb.sy);
         grad.addColorStop(0, color('--c-primary', 0.5 * pa.persp));
         grad.addColorStop(1, color('--c-accent', 0.35 * pb.persp));
@@ -142,15 +165,31 @@ const Cluster3D: React.FC<{ className?: string; interactive?: boolean }> = ({
         ctx.stroke();
       });
 
+      // data packets riding the edges (deploys rolling out to pods)
+      if (!reduced) {
+        for (const pulse of PULSES) {
+          const [a, b] = edges[pulse.edge];
+          const pa = projected[a], pb = projected[b];
+          const k = (t * pulse.speed + pulse.phase) % 1;
+          const px = pa.sx + (pb.sx - pa.sx) * k;
+          const py = pa.sy + (pb.sy - pa.sy) * k;
+          const pk = pa.persp + (pb.persp - pa.persp) * k;
+          ctx.fillStyle = color('--c-accent', 0.85 * pk);
+          ctx.beginPath();
+          ctx.arc(px, py, Math.max(1.2, 2.1 * pk), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
       // back-to-front for nodes
       const order = nodes
-        .map((n, i) => ({ n, i, q: rot({ x: n.pos.x, y: n.pos.y + bob, z: n.pos.z }, rotX + wob * 0.4, rotY) }))
+        .map((n, i) => ({ n, i, q: rot(lifted(n), rotX + wob * 0.4, rotY) }))
         .sort((a, b) => b.q.z - a.q.z);
 
-      order.forEach(({ n, q }) => {
+      order.forEach(({ n, i, q }) => {
         const persp = fov / (fov + q.z);
-        const sx = cx + q.x * persp * R;
-        const sy = cy - q.y * persp * R;
+        const sx = projected[i].sx;
+        const sy = projected[i].sy;
         const r = n.r * persp;
 
         if (n.kind === 'ambient') {
@@ -171,17 +210,29 @@ const Cluster3D: React.FC<{ className?: string; interactive?: boolean }> = ({
           return;
         }
 
-        // cp / worker: rounded card with border + label
-        const wRect = r * (n.kind === 'cp' ? 2.4 : 2.9);
-        const hRect = r * (n.kind === 'cp' ? 1.5 : 1.1);
+        // cp / worker: rounded card whose size is measured from its label so
+        // the text always sits centered inside the element (no overflow)
         const alpha = 0.35 + 0.65 * persp;
 
         if (n.kind === 'cp') {
-          ctx.fillStyle = color('--c-primary', 0.16 * alpha);
+          const glow = ctx.createRadialGradient(sx, sy, 0, sx, sy, r * 2.2);
+          glow.addColorStop(0, color('--c-primary', (reduced ? 0.14 : 0.1 + 0.06 * Math.sin(t * 1.4)) * alpha));
+          glow.addColorStop(1, color('--c-primary', 0));
+          ctx.fillStyle = glow;
           ctx.beginPath();
-          ctx.arc(sx, sy, r * 1.5, 0, Math.PI * 2);
+          ctx.arc(sx, sy, r * 2.2, 0, Math.PI * 2);
           ctx.fill();
         }
+
+        const fontPx = Math.max(8, (n.kind === 'cp' ? 10.5 : 9.5) * persp);
+        ctx.font = `700 ${fontPx}px "JetBrains Mono", monospace`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const label = n.label ?? '';
+        const textW = label ? ctx.measureText(label).width : 0;
+        const wRect = Math.max(r * 1.7, textW + r * 0.95);
+        const hRect = Math.max(r * 1.15, fontPx * 1.9);
+
         ctx.fillStyle = color('--c-surface-2', Math.min(1, 0.9 * persp), '30 41 59');
         const rad = Math.min(10, r * 0.5);
         ctx.beginPath();
@@ -191,12 +242,9 @@ const Cluster3D: React.FC<{ className?: string; interactive?: boolean }> = ({
         ctx.lineWidth = 1.4;
         ctx.stroke();
 
-        if (n.label && q.z < 0.9) {
+        if (label && q.z < 0.9) {
           ctx.fillStyle = color(n.kind === 'cp' ? '--c-primary-strong' : '--c-muted', alpha, '165 180 252');
-          ctx.font = `700 ${Math.max(8, 10 * persp)}px "JetBrains Mono", monospace`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(n.label, sx, sy);
+          ctx.fillText(label, sx, sy);
         }
       });
     };

@@ -150,7 +150,7 @@ def test_terminal_ticket_is_session_pinned(client, db, student, make_lab, studen
     # the lab-manager PTY service isn't configured in this environment
     with client.websocket_connect(f"/api/ws/terminal/{sid}?ticket={ticket}") as ws:
         msg = ws.receive_text()
-    assert "Terminal service not available" in msg
+    assert "Terminal service is not configured" in msg
 
 
 def test_terminal_ws_rejects_raw_jwt(client, db, student, make_lab, student_headers):
